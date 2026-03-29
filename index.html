@@ -745,9 +745,12 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
   <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem">
     <div class="page-sub" style="margin:0">Seleccioná una obra o creá una nueva</div>
     <select class="obra-sel" id="obraSort" onchange="renderObrasGrid()" style="font-size:.68rem;padding:3px 8px;min-width:auto">
-      <option value="num">Orden numérico</option>
-      <option value="fecha">Última edición</option>
-      <option value="nombre">Alfabético</option>
+      <option value="num-asc">Nº ascendente</option>
+      <option value="num-desc">Nº descendente</option>
+      <option value="fecha-desc">Última edición ↓</option>
+      <option value="fecha-asc">Edición más antigua ↑</option>
+      <option value="nombre-asc">A → Z</option>
+      <option value="nombre-desc">Z → A</option>
     </select>
   </div>
   <div class="obras-grid" id="obrasGrid"><div style="color:var(--muted);font-size:.8rem">Cargando...</div></div>
@@ -1035,6 +1038,11 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
     <div class="row-btns"><button class="btn btn-secondary" onclick="exportJSON()">📤 Exportar JSON</button></div>
   </div>
   <div class="card">
+    <div class="card-title">📡 Conexiones</div>
+    <div style="font-size:.68rem;color:var(--muted);margin-bottom:.5rem">Última conexión de cada usuario</div>
+    <div id="loginHistory" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border)"></div>
+  </div>
+  <div class="card">
     <div class="card-title">👥 Usuarios</div>
     <div style="font-size:.68rem;color:var(--muted);margin-bottom:.7rem">Usuarios que pueden acceder al sistema. Los <b>operadores</b> solo ven gastos y certificados.</div>
     <div id="userList" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:.8rem"></div>
@@ -1292,6 +1300,7 @@ function renderUserList(){
     h+='</div>';
   }
   list.innerHTML=h;
+  renderLoginHistory();
 }
 
 window.adminAddUser=async function(){
@@ -1348,6 +1357,63 @@ document.addEventListener('keydown',e=>{
     if(a&&(a.id==='login-user'||a.id==='login-pass'))doLogin();
   }
 });
+
+// ── Login tracking ──
+async function trackLogin(user){
+  try{
+    const log=await fbGetDoc('logins/history')||{};
+    if(!log[user])log[user]=[];
+    log[user].unshift({time:Date.now(),date:new Date().toLocaleString('es-PY')});
+    if(log[user].length>10)log[user]=log[user].slice(0,10);
+    await fbSet('logins/history',log);
+  }catch(e){
+    // Fallback localStorage
+    const log=JSON.parse(localStorage.getItem('th_logins')||'{}');
+    if(!log[user])log[user]=[];
+    log[user].unshift({time:Date.now(),date:new Date().toLocaleString('es-PY')});
+    if(log[user].length>10)log[user]=log[user].slice(0,10);
+    localStorage.setItem('th_logins',JSON.stringify(log));
+  }
+}
+async function getLogins(){
+  try{
+    const log=await fbGetDoc('logins/history');
+    if(log)return log;
+  }catch(e){}
+  try{return JSON.parse(localStorage.getItem('th_logins')||'{}');}catch{return{};}
+}
+async function renderLoginHistory(){
+  const el=document.getElementById('loginHistory');
+  if(!el)return;
+  const log=await getLogins();
+  const users=getUsers();
+  let h='';
+  for(const[name]of Object.entries(users)){
+    const entries=log[name]||[];
+    const last=entries[0];
+    const isSelf=name===_currentUser;
+    const dot=last?'🟢':'⚪';
+    const ago=last?timeAgo(last.time):'Nunca se conectó';
+    h+='<div class="user-row">';
+    h+='<span style="font-size:.9rem;margin-right:2px">'+dot+'</span>';
+    h+='<span class="u-name" style="flex:1">'+(isSelf?'<b>'+name+'</b> (vos)':name)+'</span>';
+    h+='<span style="font-size:.66rem;color:var(--dim)">'+ago+'</span>';
+    if(last)h+='<span style="font-size:.58rem;color:var(--muted);margin-left:6px">'+last.date+'</span>';
+    h+='</div>';
+  }
+  el.innerHTML=h;
+}
+function timeAgo(ts){
+  const diff=Date.now()-ts;
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return'Ahora mismo';
+  if(mins<60)return'Hace '+mins+' min';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return'Hace '+hrs+'h';
+  const days=Math.floor(hrs/24);
+  if(days===1)return'Ayer';
+  return'Hace '+days+' días';
+}
 
 // ═══════════════════════════════════════
 // STATE
@@ -1477,7 +1543,10 @@ window.initApp = async function(){
 
   const raw=await fbGetAll('obras');
   obras={};
-  for(const [id,d] of Object.entries(raw||{})) obras[id]={...d,id};
+  for(const [id,d] of Object.entries(raw||{})){
+    obras[id]={...d,id};
+    if(!obras[id].lastModified) obras[id].lastModified=Date.now()-(Object.keys(raw).length*1000);
+  }
   for(const id of Object.keys(obras)){
     const gr=await fbGetAll('obras/'+id+'/gastos');
     gastos[id]=Object.entries(gr||{}).map(([gid,gd])=>({...gd,id:gd.id||gid}));
@@ -1487,9 +1556,14 @@ window.initApp = async function(){
   const rd=await fbGetDoc('retiros/socios');
   if(rd) retiros={fernando:rd.fernando||[],wuilian:rd.wuilian||[]};
 
+  // Track login
+  await trackLogin(_currentUser);
+
   populateSel(); navTo('obras');
   applyRole(); renderUserList();
-  toast('Bienvenido, '+_currentUser+' ✓','ok');
+  // Welcome message
+  if(_currentUser==='fernando') toast('BIENVENIDO MI QUERIDO BRO 🤜🤛','ok');
+  else toast('Bienvenido, '+_currentUser+' ✓','ok');
 };
 
 window.saveAndConnect=async function(){
@@ -1507,18 +1581,18 @@ window.saveAndConnect=async function(){
 // ═══════════════════════════════════════
 function obraAy(id){const o=obras[id];return o?.ayuda!=null?parseFloat(o.ayuda):cfg.ayuda}
 function obraHe(id){const o=obras[id];return o?.heri!=null?parseFloat(o.heri):cfg.heri}
-function calcCon(id){const o=obras[id]||{};return(o.contrato||0)+(o.adenda||0)}
-function costoG(g){return(g.saldoCheque||0)}
+function calcCon(id){const o=obras[id]||{};return(parseFloat(o.contrato)||0)+(parseFloat(o.adenda)||0)}
+function costoG(g){return(parseFloat(g.saldoCheque)||0)}
 function calcAy(id){return calcCon(id)*(obraAy(id)/100)}
 function calcHe(id){return calcCon(id)*(obraHe(id)/100)}
-function calcTE(id){return(gastos[id]||[]).reduce((s,g)=>s+(g.monto||0),0)+calcAy(id)+calcHe(id)}
+function calcTE(id){return(gastos[id]||[]).reduce((s,g)=>s+(parseFloat(g.monto)||0),0)+calcAy(id)+calcHe(id)}
 function calcTK(id){return(gastos[id]||[]).reduce((s,g)=>s+costoG(g),0)+calcAy(id)+calcHe(id)}
 function calcCertsT(id){
   const cs=certificados[id]||[];
   return{
-    br:cs.reduce((s,c)=>s+(c.bruto||0),0),
-    ne:cs.reduce((s,c)=>s+(c.neto||0),0),
-    re:cs.reduce((s,c)=>s+((c.bruto||0)-(c.neto||0)),0)
+    br:cs.reduce((s,c)=>s+(parseFloat(c.bruto)||0),0),
+    ne:cs.reduce((s,c)=>s+(parseFloat(c.neto)||0),0),
+    re:cs.reduce((s,c)=>s+((parseFloat(c.bruto)||0)-(parseFloat(c.neto)||0)),0)
   };
 }
 function calcRes(id){
@@ -1549,10 +1623,12 @@ function renderObrasGrid(){
   const list=Object.values(obras);
   const isOp=_currentRole==='operador';
   if(!list.length){g.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem">Sin obras. Presioná <b>+ Nueva obra</b>.</div>';return}
-  const sort=gs('obraSort')?.value||'num';
-  if(sort==='num') list.sort((a,b)=>(parseInt(a.num)||999)-(parseInt(b.num)||999));
-  else if(sort==='fecha') list.sort((a,b)=>(b.lastModified||0)-(a.lastModified||0));
-  else list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+  const sort=gs('obraSort')?.value||'num-asc';
+  const [key,dir]=sort.split('-');
+  const asc=dir==='asc'?1:-1;
+  if(key==='num') list.sort((a,b)=>asc*((parseInt(a.num)||999)-(parseInt(b.num)||999)));
+  else if(key==='fecha') list.sort((a,b)=>asc*((a.lastModified||0)-(b.lastModified||0)));
+  else list.sort((a,b)=>asc*(a.nombre||'').localeCompare(b.nombre||''));
   g.innerHTML=list.map(o=>{
     const r=calcRes(o.id);
     return`<div class="obra-card ${o.id===cur?'act':''}" onclick="selectObra('${o.id}')">
@@ -1812,9 +1888,9 @@ function renderGSaved(){
     <td><span class="tag tag-b">${g.tipo||'—'}</span></td>
     <td style="white-space:nowrap"><button class="btn btn-ghost btn-xs" onclick="editG('${g.id}',${i+1})" title="Editar">✏️</button><button class="btn btn-danger btn-xs" onclick="delG('${g.id}')">✕</button></td>
   </tr>`).join('');
-  gs('tf1').textContent=fGs(list.reduce((s,g)=>s+(g.monto||0),0));
-  gs('tf2').textContent=fGs(list.reduce((s,g)=>s+(g.montoCheque||0),0));
-  gs('tf3').textContent=fGs(list.reduce((s,g)=>s+(g.costoTotal||0),0)+calcAy(cur)+calcHe(cur));
+  gs('tf1').textContent=fGs(list.reduce((s,g)=>s+(parseFloat(g.monto)||0),0));
+  gs('tf2').textContent=fGs(list.reduce((s,g)=>s+(parseFloat(g.montoCheque)||0),0));
+  gs('tf3').textContent=fGs(list.reduce((s,g)=>s+(parseFloat(g.costoTotal)||0),0)+calcAy(cur)+calcHe(cur));
 }
 window.delG=async function(id){
   gastos[cur]=(gastos[cur]||[]).filter(g=>g.id!==id);
@@ -2026,8 +2102,8 @@ function renderResumen(){
     gtbody.innerHTML=gl.length
       ? gl.map(g=>`<tr><td>${g.fecha||'\u2014'}</td><td style="font-family:'Syne',sans-serif;color:var(--txt);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.concepto}</td><td>${fGs(g.monto)}</td><td>${fGs(g.montoCheque)}</td><td>${fGs(g.devuelto)}</td><td style="color:var(--gold)">${fGs(g.costoTotal)}</td></tr>`).join('')
       : '<tr class="empty-row"><td colspan="6">Sin gastos</td></tr>';
-    const tf1=gs('res-tf1'); if(tf1) tf1.textContent=fGs(gl.reduce((s,g)=>s+(g.monto||0),0));
-    const tf3=gs('res-tf3'); if(tf3) tf3.textContent=fGs(gl.reduce((s,g)=>s+(g.costoTotal||0),0)+calcAy(cur)+calcHe(cur));
+    const tf1=gs('res-tf1'); if(tf1) tf1.textContent=fGs(gl.reduce((s,g)=>s+(parseFloat(g.monto)||0),0));
+    const tf3=gs('res-tf3'); if(tf3) tf3.textContent=fGs(gl.reduce((s,g)=>s+(parseFloat(g.costoTotal)||0),0)+calcAy(cur)+calcHe(cur));
   }
   // Tabla certs
   const cl=certificados[cur]||[];
@@ -2569,6 +2645,7 @@ window.importPaste=async function(){
   closeM('mPaste');
   _pasteRows=[];
   _importing=false;
+  touchObra();
   toast(`✅ ${count} ${_pasteMode==='gastos'?'gastos':'certificados'} importados`,'ok');
 };
 
@@ -2862,9 +2939,9 @@ function _buildPDF(){
   const conTotal=r.con; const ayVal=conTotal*ayPct; const heVal=conTotal*hePct;
   gastosBody.push(['','',`GASTO FIJO-AYUDA SOCIAL ${Math.round(ayPct*100)}%`,'',fNum(ayVal),'','','','','',fNum(ayVal)]);
   gastosBody.push(['','',`GASTO FIJO-HERI ${Math.round(hePct*100)}%`,'',fNum(heVal),'','','','','',fNum(heVal)]);
-  const totalMP=gl.reduce((s,g)=>s+(g.monto||0),0)+ayVal+heVal;
-  const totalCh=gl.reduce((s,g)=>s+(g.montoCheque||0),0);
-  const totalCT=gl.reduce((s,g)=>s+(g.costoTotal||0),0)+ayVal+heVal;
+  const totalMP=gl.reduce((s,g)=>s+(parseFloat(g.monto)||0),0)+ayVal+heVal;
+  const totalCh=gl.reduce((s,g)=>s+(parseFloat(g.montoCheque)||0),0);
+  const totalCT=gl.reduce((s,g)=>s+(parseFloat(g.costoTotal)||0),0)+ayVal+heVal;
 
   doc.autoTable({startY:y,head:gastosHead,body:gastosBody,
     foot:[['','','TOTAL GASTOS','',fNum(totalMP),'',fNum(totalCh),'','','',fNum(totalCT)]],
