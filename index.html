@@ -49,59 +49,60 @@
   --shadow-glow: 0 0 0 1px rgba(201,168,76,.22), 0 4px 24px rgba(201,168,76,.08);
 }
 
-/* ─── LOGIN SCREEN ───────────────────────────────── */
+/* ─── LOGIN ──────────────────────────────────────── */
 .login-overlay {
-  position: fixed; inset: 0; z-index: 9999;
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity .4s, visibility .4s;
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .4s,visibility .4s;
 }
-.login-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-.login-box {
-  background: var(--surf2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
-  padding: 2.4rem 2rem 2rem;
-  width: 92%; max-width: 370px;
-  box-shadow: 0 8px 40px rgba(0,0,0,.5), var(--shadow-glow);
+.login-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.login-box{
+  background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r-lg);
+  padding:2.4rem 2rem 2rem;width:92%;max-width:360px;
+  box-shadow:0 8px 40px rgba(0,0,0,.5),var(--shadow-glow);
 }
-.login-logo { text-align: center; margin-bottom: 1.6rem; }
-.login-logo .logo-mark { width: 48px; height: 48px; font-size: 18px; margin: 0 auto 10px; border-radius: 12px; }
-.login-logo .logo-main { font-size: 1.1rem; }
-.login-logo .logo-sub { font-size: .5rem; }
-.login-field { margin-bottom: 1rem; }
-.login-field label { display: block; font-size: .7rem; font-weight: 600; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
-.login-field input {
-  width: 100%; padding: .6rem .75rem; font-size: .85rem;
-  background: var(--surf); border: 1px solid var(--border2); border-radius: var(--r-sm);
-  color: var(--txt); outline: none; font-family: 'JetBrains Mono', monospace;
+.login-logo{text-align:center;margin-bottom:1.6rem}
+.login-logo .logo-mark{width:48px;height:48px;font-size:18px;margin:0 auto 10px;border-radius:12px}
+.login-field{margin-bottom:1rem}
+.login-field label{display:block;font-size:.7rem;font-weight:600;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.login-field input{
+  width:100%;padding:.6rem .75rem;font-size:.85rem;
+  background:var(--surf);border:1px solid var(--border2);border-radius:var(--r-sm);
+  color:var(--txt);outline:none;font-family:'JetBrains Mono',monospace;
 }
-.login-field input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow); }
-.login-btn {
-  width: 100%; padding: .65rem; margin-top: .5rem;
-  background: linear-gradient(135deg, var(--gold), #7a5515); border: none; border-radius: var(--r-sm);
-  color: #000; font-weight: 700; font-size: .85rem; cursor: pointer;
-  letter-spacing: .04em; transition: filter .2s;
+.login-field input:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-glow)}
+.login-btn{
+  width:100%;padding:.65rem;margin-top:.5rem;
+  background:linear-gradient(135deg,var(--gold),#7a5515);border:none;border-radius:var(--r-sm);
+  color:#000;font-weight:700;font-size:.85rem;cursor:pointer;letter-spacing:.04em;transition:filter .2s;
 }
-.login-btn:hover { filter: brightness(1.15); }
-.login-error { color: var(--acc3); font-size: .72rem; text-align: center; margin-top: .6rem; min-height: 1rem; }
-.login-footer { text-align: center; margin-top: 1.2rem; font-size: .68rem; color: var(--muted); }
-.login-footer a { color: var(--gold); cursor: pointer; text-decoration: underline; }
+.login-btn:hover{filter:brightness(1.15)}
+.login-error{color:var(--acc3);font-size:.72rem;text-align:center;margin-top:.6rem;min-height:1rem}
+.btn-logout{background:none;border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--dim);font-size:.62rem;padding:3px 8px;cursor:pointer}
+.btn-logout:hover{border-color:var(--acc3);color:var(--acc3)}
+.user-logged{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--dim)}
+.user-logged .u-avatar{
+  width:26px;height:26px;border-radius:50%;background:var(--surf3);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--gold);
+}
+.user-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-bottom:1px solid var(--border)}
+.user-row:last-child{border-bottom:none}
+.user-row .u-name{flex:1;font-size:.82rem;color:var(--txt)}
+.user-row .u-role{font-size:.62rem;padding:2px 8px;border-radius:10px;font-weight:600;letter-spacing:.06em}
+.user-row .u-role.socio{background:rgba(201,168,76,.15);color:var(--gold)}
+.user-row .u-role.operador{background:rgba(63,184,216,.12);color:var(--acc2)}
+/* Restricted elements hidden for operador */
+.role-restricted{display:none!important}
 
-/* Admin: User management card */
-.user-row { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border); }
-.user-row:last-child { border-bottom: none; }
-.user-row .u-name { flex: 1; font-size: .82rem; color: var(--txt); }
-.user-row .u-role { font-size: .62rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; letter-spacing: .06em; }
-.user-row .u-role.admin { background: rgba(201,168,76,.15); color: var(--gold); }
-.user-row .u-role.user { background: rgba(63,184,216,.12); color: var(--acc2); }
-.user-logged { display: flex; align-items: center; gap: 6px; font-size: .7rem; color: var(--dim); }
-.user-logged .u-avatar {
-  width: 26px; height: 26px; border-radius: 50%; background: var(--surf3); border: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 700; color: var(--gold);
-}
-.btn-logout { background: none; border: 1px solid var(--border2); border-radius: var(--r-sm); color: var(--dim); font-size: .62rem; padding: 3px 8px; cursor: pointer; }
-.btn-logout:hover { border-color: var(--acc3); color: var(--acc3); }
+/* Paste modal */
+#pastePreview th{padding:4px 6px;background:var(--surf3);color:var(--gold);font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);position:sticky;top:0}
+#pastePreview td{padding:3px 6px;border-bottom:1px solid var(--border);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.68rem}
+#pastePreview tr:nth-child(even) td{background:var(--surf)}
+.paste-sel{background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--txt);font-size:.7rem;padding:3px 6px;min-width:0}
+.paste-sel:focus{border-color:var(--gold)}
+.paste-col-box{display:flex;flex-direction:column;gap:3px;align-items:center;min-width:90px}
+.paste-col-box .pcl{font-size:.58rem;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.paste-col-box .pcv{font-size:.64rem;color:var(--dim);font-style:italic;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ─── RESET & BASE ───────────────────────────────── */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -682,28 +683,17 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
+<!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <div class="login-logo">
       <div class="logo-mark">TF</div>
       <div class="logo-text" style="display:inline-block"><div class="logo-main">THALAMUS</div><div class="logo-sub">Finanzas</div></div>
     </div>
-    <div id="loginForm">
-      <div class="login-field"><label>Usuario</label><input type="text" id="login-user" placeholder="Ingresá tu usuario" autocomplete="username"></div>
-      <div class="login-field"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
-      <button class="login-btn" onclick="doLogin()">Ingresar</button>
-      <div class="login-error" id="login-err"></div>
-      <div class="login-footer">Primera vez? <a onclick="showRegister()">Crear cuenta</a></div>
-    </div>
-    <div id="registerForm" style="display:none">
-      <div class="login-field"><label>Nuevo usuario</label><input type="text" id="reg-user" placeholder="Elegí un nombre de usuario" autocomplete="off"></div>
-      <div class="login-field"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
-      <div class="login-field"><label>Repetir contraseña</label><input type="password" id="reg-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"></div>
-      <button class="login-btn" onclick="doRegister()">Crear cuenta</button>
-      <div class="login-error" id="reg-err"></div>
-      <div class="login-footer"><a onclick="showLogin()">← Volver al login</a></div>
-    </div>
+    <div class="login-field"><label>Usuario</label><input type="text" id="login-user" placeholder="Ingresá tu usuario" autocomplete="username"></div>
+    <div class="login-field"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="login-err"></div>
   </div>
 </div>
 
@@ -722,12 +712,9 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
     <button class="btn-new" onclick="openNuevaObra()">+ Nueva obra</button>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-    <div class="user-logged">
-      <div class="u-avatar" id="topAvatar">?</div>
-      <span id="topUser" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
-    </div>
+    <div class="user-logged"><div class="u-avatar" id="topAvatar">?</div><span id="topUser" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></div>
     <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbTxt">Conectando...</span></div>
-    <button class="btn btn-ghost btn-sm" onclick="navTo('config')">⚙️</button>
+    <button class="btn btn-ghost btn-sm socio-only" onclick="navTo('config')">⚙️</button>
     <button class="btn-logout" onclick="doLogout()">Salir</button>
   </div>
 </div>
@@ -736,18 +723,18 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
 <aside class="sidebar" id="sidebar">
   <div class="nav-sec">General</div>
   <div class="nav-item active" id="nav-obras" onclick="navTo('obras')"><span class="nav-icon">🏗️</span>Mis Obras</div>
-  <div class="nav-item" id="nav-global" onclick="navTo('global')"><span class="nav-icon">🌐</span>Dashboard Global</div>
+  <div class="nav-item socio-only" id="nav-global" onclick="navTo('global')"><span class="nav-icon">🌐</span>Dashboard Global</div>
   <div class="nav-sec">Obra Activa</div>
-  <div class="nav-item" id="nav-dashboard" onclick="navTo('dashboard')"><span class="nav-icon">📊</span>Dashboard Obra</div>
+  <div class="nav-item socio-only" id="nav-dashboard" onclick="navTo('dashboard')"><span class="nav-icon">📊</span>Dashboard Obra</div>
   <div class="nav-item" id="nav-gastos" onclick="navTo('gastos')"><span class="nav-icon">💸</span>Cargar Gastos</div>
   <div class="nav-item" id="nav-certificados" onclick="navTo('certificados')"><span class="nav-icon">📄</span>Certificados</div>
-  <div class="nav-item" id="nav-resumen" onclick="navTo('resumen')"><span class="nav-icon">📋</span>Resumen</div>
-  <div class="nav-sec">Socios</div>
-  <div class="nav-item" id="nav-utilidades" onclick="navTo('utilidades')"><span class="nav-icon">💰</span>Utilidades</div>
-  <div class="nav-sec">IA</div>
-  <div class="nav-item" id="nav-ai" onclick="navTo('ai')"><span class="nav-icon">🤖</span>Importar WhatsApp</div>
-  <div class="nav-sec">Sistema</div>
-  <div class="nav-item" id="nav-config" onclick="navTo('config')"><span class="nav-icon">⚙️</span>Configuración</div>
+  <div class="nav-item socio-only" id="nav-resumen" onclick="navTo('resumen')"><span class="nav-icon">📋</span>Resumen</div>
+  <div class="nav-sec socio-only">Socios</div>
+  <div class="nav-item socio-only" id="nav-utilidades" onclick="navTo('utilidades')"><span class="nav-icon">💰</span>Utilidades</div>
+  <div class="nav-sec socio-only">IA</div>
+  <div class="nav-item socio-only" id="nav-ai" onclick="navTo('ai')"><span class="nav-icon">🤖</span>Importar WhatsApp</div>
+  <div class="nav-sec socio-only">Sistema</div>
+  <div class="nav-item socio-only" id="nav-config" onclick="navTo('config')"><span class="nav-icon">⚙️</span>Configuración</div>
 </aside>
 
 <main class="main">
@@ -755,7 +742,14 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
 <!-- MIS OBRAS -->
 <div class="page active" id="page-obras">
   <div class="page-title">Mis Obras</div>
-  <div class="page-sub">Seleccioná una obra o creá una nueva</div>
+  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem">
+    <div class="page-sub" style="margin:0">Seleccioná una obra o creá una nueva</div>
+    <select class="obra-sel" id="obraSort" onchange="renderObrasGrid()" style="font-size:.68rem;padding:3px 8px;min-width:auto">
+      <option value="num">Orden numérico</option>
+      <option value="fecha">Última edición</option>
+      <option value="nombre">Alfabético</option>
+    </select>
+  </div>
   <div class="obras-grid" id="obrasGrid"><div style="color:var(--muted);font-size:.8rem">Cargando...</div></div>
 </div>
 
@@ -845,17 +839,19 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
     <div style="margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
       <button class="quick-add" onclick="addRow()">+ Fila</button>
       <button class="btn btn-primary" onclick="saveAllRows()">💾 Guardar todo</button>
-      <button class="btn btn-secondary" onclick="navTo('ai')">🤖 Importar WhatsApp</button>
+      <button class="btn btn-secondary" onclick="openPaste('gastos')">📋 Pegar desde Excel</button>
+      <button class="btn btn-secondary socio-only" onclick="navTo('ai')">🤖 Importar WhatsApp</button>
       <span style="font-size:.66rem;color:var(--green)" id="saveMsg"></span>
     </div>
   </div>
   <div class="card">
-    <div class="card-title">Gastos guardados</div>
+    <div class="card-title">Gastos guardados <span style="font-size:.68rem;color:var(--muted);font-weight:400" id="gSavedCount"></span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Fecha</th><th>Concepto</th><th>M.Pagado</th><th>M.Cheque</th><th>Devuelto</th><th>Saldo T.</th><th>Saldo Ch.</th><th>Costo Total</th><th>Tipo</th><th></th></tr></thead>
+      <thead><tr><th style="width:32px">Nº</th><th>Fecha</th><th>Concepto</th><th>M.Pagado</th><th>M.Cheque</th><th>Devuelto</th><th>Saldo T.</th><th>Saldo Ch.</th><th>Costo Total</th><th>Tipo</th><th></th></tr></thead>
       <tbody id="gtbody"></tbody>
-      <tfoot><tr class="sum-row"><td colspan="2">TOTAL</td><td id="tf1">₲ 0</td><td id="tf2">₲ 0</td><td></td><td></td><td></td><td id="tf3">₲ 0</td><td colspan="2"></td></tr></tfoot>
+      <tfoot><tr class="sum-row"><td colspan="3">TOTAL</td><td id="tf1">₲ 0</td><td id="tf2">₲ 0</td><td></td><td></td><td></td><td id="tf3">₲ 0</td><td colspan="2"></td></tr></tfoot>
     </table></div>
+    <div style="margin-top:.5rem;display:flex;justify-content:flex-end"><button class="btn btn-danger btn-xs" onclick="borrarTodosGastos()" style="font-size:.62rem;opacity:.7">🗑️ Borrar todos los gastos</button></div>
   </div>
 </div>
 
@@ -878,15 +874,16 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
       <div class="fg"><label>Neto Cobrado (₲)</label><input type="number" id="c-n" placeholder="0" oninput="updCert()"></div>
       <div class="fg"><label>Retención = Bruto − Neto</label><div style="padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:.76rem;color:var(--acc3)" id="c-rc">₲ 0</div></div>
     </div>
-    <div class="row-btns"><button class="btn btn-primary" onclick="saveCert()">✅ Registrar</button><button class="btn btn-ghost" onclick="clrCert()">Limpiar</button></div>
+    <div class="row-btns"><button class="btn btn-primary" onclick="saveCert()">✅ Registrar</button><button class="btn btn-ghost" onclick="clrCert()">Limpiar</button><button class="btn btn-secondary" onclick="openPaste('certificados')">📋 Pegar desde Excel</button></div>
   </div>
   <div class="card">
-    <div class="card-title">Historial de cobros</div>
+    <div class="card-title">Historial de cobros <span style="font-size:.68rem;color:var(--muted);font-weight:400" id="cSavedCount"></span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Fecha</th><th>Certificado</th><th>Bruto</th><th>Neto</th><th>Retención</th><th></th></tr></thead>
+      <thead><tr><th style="width:32px">Nº</th><th>Fecha</th><th>Certificado</th><th>Bruto</th><th>Neto</th><th>Retención</th><th></th></tr></thead>
       <tbody id="ctbody"></tbody>
-      <tfoot><tr class="sum-row"><td colspan="2">TOTAL</td><td id="ctb">₲ 0</td><td id="ctn">₲ 0</td><td id="ctr">₲ 0</td><td></td></tr></tfoot>
+      <tfoot><tr class="sum-row"><td colspan="3">TOTAL</td><td id="ctb">₲ 0</td><td id="ctn">₲ 0</td><td id="ctr">₲ 0</td><td></td></tr></tfoot>
     </table></div>
+    <div style="margin-top:.5rem;display:flex;justify-content:flex-end"><button class="btn btn-danger btn-xs" onclick="borrarTodosCerts()" style="font-size:.62rem;opacity:.7">🗑️ Borrar todos los certificados</button></div>
   </div>
 </div>
 
@@ -921,6 +918,10 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
 <div class="page" id="page-utilidades">
   <div class="page-title">Control de Utilidades</div>
   <div class="page-sub">Distribución de ganancias — cada socio recibe el 50% de la ganancia neta de cada obra</div>
+  <div class="row-btns" style="margin-top:0;margin-bottom:.9rem">
+    <button class="btn btn-primary" onclick="exportUtilidadesExcel()">📊 Exportar Excel</button>
+    <button class="btn btn-secondary" onclick="exportUtilidadesPDF()">📄 Exportar PDF</button>
+  </div>
   <div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(138px,1fr))">
     <div class="metric green"><div class="m-label">Ganancia Total Global</div><div class="m-val g" id="ut-gan">₲ 0</div></div>
     <div class="metric" style="border-top:2px solid var(--gold)"><div class="m-label">Fernando — Le corresponde</div><div class="m-val y" id="ut-cf">₲ 0</div></div>
@@ -1033,15 +1034,14 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
     <div class="card-title">Datos</div>
     <div class="row-btns"><button class="btn btn-secondary" onclick="exportJSON()">📤 Exportar JSON</button></div>
   </div>
-  <div class="card" id="userAdminCard">
-    <div class="card-title">👥 Gestión de Usuarios</div>
-    <div style="font-size:.68rem;color:var(--muted);margin-bottom:.7rem">Administrá los usuarios del sistema. Solo los administradores pueden crear y eliminar usuarios.</div>
-    <div id="userList" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:.8rem">
-    </div>
-    <div class="form-grid" style="max-width:420px" id="addUserForm">
-      <div class="fg"><label>Nuevo usuario</label><input type="text" id="adm-user" placeholder="nombre"></div>
+  <div class="card">
+    <div class="card-title">👥 Usuarios</div>
+    <div style="font-size:.68rem;color:var(--muted);margin-bottom:.7rem">Usuarios que pueden acceder al sistema. Los <b>operadores</b> solo ven gastos y certificados.</div>
+    <div id="userList" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:.8rem"></div>
+    <div class="form-grid" style="max-width:480px">
+      <div class="fg"><label>Usuario</label><input type="text" id="adm-user" placeholder="nombre"></div>
       <div class="fg"><label>Contraseña</label><input type="password" id="adm-pass" placeholder="contraseña"></div>
-      <div class="fg"><label>Rol</label><select id="adm-role"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+      <div class="fg"><label>Rol</label><select id="adm-role"><option value="socio">Socio (acceso total)</option><option value="operador">Operador (solo gastos/certificados)</option></select></div>
     </div>
     <div class="row-btns"><button class="btn btn-primary" onclick="adminAddUser()">➕ Agregar Usuario</button></div>
   </div>
@@ -1054,11 +1054,11 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
 <nav class="bottom-nav">
   <div class="bn-items">
     <div class="bn-item active" id="bn-obras" onclick="navTo('obras')"><span class="bn-icon">🏗️</span><span class="bn-label">Obras</span></div>
-    <div class="bn-item" id="bn-global" onclick="navTo('global')"><span class="bn-icon">🌐</span><span class="bn-label">Global</span></div>
+    <div class="bn-item socio-only" id="bn-global" onclick="navTo('global')"><span class="bn-icon">🌐</span><span class="bn-label">Global</span></div>
     <div class="bn-item" id="bn-gastos" onclick="navTo('gastos')"><span class="bn-icon">💸</span><span class="bn-label">Gastos</span></div>
     <div class="bn-item" id="bn-certificados" onclick="navTo('certificados')"><span class="bn-icon">📄</span><span class="bn-label">Cobros</span></div>
-    <div class="bn-item" id="bn-utilidades" onclick="navTo('utilidades')"><span class="bn-icon">💰</span><span class="bn-label">Socios</span></div>
-    <div class="bn-item" id="bn-config" onclick="navTo('config')"><span class="bn-icon">⚙️</span><span class="bn-label">Config</span></div>
+    <div class="bn-item socio-only" id="bn-utilidades" onclick="navTo('utilidades')"><span class="bn-icon">💰</span><span class="bn-label">Socios</span></div>
+    <div class="bn-item socio-only" id="bn-config" onclick="navTo('config')"><span class="bn-icon">⚙️</span><span class="bn-label">Config</span></div>
   </div>
 </nav>
 
@@ -1071,8 +1071,8 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
       <div class="fg"><label>Número</label><input type="text" id="o-num" placeholder="1"></div>
       <div class="fg span2"><label>Nombre de la Obra</label><input type="text" id="o-nom" placeholder="Edificio Municipal..."></div>
       <div class="fg"><label>Fecha Inicio</label><input type="date" id="o-fi"></div>
-      <div class="fg"><label>Monto Contrato (₲)</label><input type="number" id="o-mc" placeholder="0"></div>
-      <div class="fg"><label>Adenda (₲)</label><input type="number" id="o-ad" placeholder="0"></div>
+      <div class="fg socio-only"><label>Monto Contrato (₲)</label><input type="number" id="o-mc" placeholder="0"></div>
+      <div class="fg socio-only"><label>Adenda (₲)</label><input type="number" id="o-ad" placeholder="0"></div>
       <div class="fg"><label>Estado</label><select id="o-es"><option>EN EJECUCIÓN</option><option>FINALIZADA</option><option>PARALIZADA</option><option>EN LICITACIÓN</option></select></div>
       <div class="fg"><label>% Ayuda Social</label><input type="number" id="o-ay" step=".1"></div>
       <div class="fg"><label>% HERI</label><input type="number" id="o-he" step=".1"></div>
@@ -1099,6 +1099,74 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
     <div class="modal-title" id="mCTitle">¿Confirmar?</div>
     <p style="color:var(--muted);font-size:.78rem;margin-bottom:.9rem" id="mCMsg"></p>
     <div class="row-btns"><button class="btn btn-danger" id="mCOk">Confirmar</button><button class="btn btn-ghost" onclick="closeM('mConfirm')">Cancelar</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="mPaste">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-title" id="mPasteTitle">📋 Pegar desde Excel</div>
+    <div id="pasteStep1">
+      <p style="color:var(--dim);font-size:.76rem;margin-bottom:.6rem">
+        <b>Paso 1:</b> En Excel, seleccioná las columnas que querés importar y copialas (Ctrl+C).<br>
+        <b>Paso 2:</b> Hacé clic en el área de abajo y pegá (Ctrl+V).
+      </p>
+      <textarea id="pasteArea" style="width:100%;height:160px;background:var(--surf);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.6rem;resize:vertical" placeholder="Pegá acá los datos copiados de Excel...&#10;&#10;Ejemplo:&#10;2025-03-15&#9;Cemento Portland&#9;5000000&#10;2025-03-16&#9;Arena lavada&#9;3200000"></textarea>
+      <div class="row-btns" style="margin-top:.6rem">
+        <button class="btn btn-primary" onclick="parsePaste()">Procesar →</button>
+        <button class="btn btn-ghost" onclick="closeM('mPaste')">Cancelar</button>
+      </div>
+    </div>
+    <div id="pasteStep2" style="display:none">
+      <p style="color:var(--dim);font-size:.76rem;margin-bottom:.6rem">
+        <b>Detecté <span id="pasteRowCount">0</span> filas y <span id="pasteColCount">0</span> columnas.</b> Asigná cada columna al campo correspondiente:
+      </p>
+      <div id="pasteMapRow" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem"></div>
+      <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:.6rem">
+        <table style="width:100%;font-size:.7rem;border-collapse:collapse" id="pastePreview">
+          <thead id="pastePreviewHead"></thead>
+          <tbody id="pastePreviewBody"></tbody>
+        </table>
+      </div>
+      <div class="row-btns">
+        <button class="btn btn-primary" onclick="importPaste()">📥 Importar <span id="pasteImportCount">0</span> filas</button>
+        <button class="btn btn-ghost" onclick="backToPasteStep1()">← Volver</button>
+        <button class="btn btn-ghost" onclick="closeM('mPaste')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="mEditG">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">✏️ Editar Gasto <span style="font-size:.7rem;color:var(--muted)" id="editGNum"></span></div>
+    <input type="hidden" id="eg-id">
+    <div class="form-grid">
+      <div class="fg"><label>Fecha</label><input type="date" id="eg-fecha"></div>
+      <div class="fg span2"><label>Concepto</label><input type="text" id="eg-concepto"></div>
+      <div class="fg"><label>Cantidad</label><input type="number" id="eg-cantidad"></div>
+      <div class="fg"><label>Monto Pagado (₲)</label><input type="number" id="eg-monto"></div>
+      <div class="fg"><label>Registro</label><input type="text" id="eg-registro"></div>
+      <div class="fg"><label>Monto Cheque (₲)</label><input type="number" id="eg-montoCheque"></div>
+      <div class="fg"><label>Devuelto (₲)</label><input type="number" id="eg-devuelto"></div>
+      <div class="fg"><label>Saldo Total (₲)</label><input type="number" id="eg-saldoTotal"></div>
+      <div class="fg"><label>Saldo Cheque (₲)</label><input type="number" id="eg-saldoCheque"></div>
+    </div>
+    <div class="row-btns"><button class="btn btn-primary" onclick="saveEditG()">💾 Guardar</button><button class="btn btn-ghost" onclick="closeM('mEditG')">Cancelar</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="mEditC">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">✏️ Editar Certificado <span style="font-size:.7rem;color:var(--muted)" id="editCNum"></span></div>
+    <input type="hidden" id="ec-id">
+    <div class="form-grid">
+      <div class="fg"><label>Fecha</label><input type="date" id="ec-fecha"></div>
+      <div class="fg span2"><label>Concepto / Certificado</label><input type="text" id="ec-concepto"></div>
+      <div class="fg"><label>Total Bruto (₲)</label><input type="number" id="ec-bruto"></div>
+      <div class="fg"><label>Neto Cobrado (₲)</label><input type="number" id="ec-neto"></div>
+      <div class="fg"><label>Retención (auto)</label><div style="padding:.4rem .6rem;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--acc3)" id="ec-ret">₲ 0</div></div>
+    </div>
+    <div class="row-btns"><button class="btn btn-primary" onclick="saveEditC()">💾 Guardar</button><button class="btn btn-ghost" onclick="closeM('mEditC')">Cancelar</button></div>
   </div>
 </div>
 
@@ -1144,188 +1212,140 @@ window.connectFB(FB).then(() => { if(_currentUser) window.initApp && window.init
 
 <script>
 // ═══════════════════════════════════════
-// USER AUTH SYSTEM
+// AUTH & ROLES
 // ═══════════════════════════════════════
-let _currentUser = null;
+let _currentUser=null, _currentRole='socio';
 
-// Simple hash for passwords (not crypto-grade but enough for client-side separation)
-async function hashPass(pass){
-  const enc = new TextEncoder().encode(pass+'_thalamus_salt_2024');
-  const buf = await crypto.subtle.digest('SHA-256', enc);
+async function hashPass(p){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p+'_thalamus2024'));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
+function getUsers(){try{return JSON.parse(localStorage.getItem('th_users'))||{};}catch{return {};}}
+function saveUsersDB(u){localStorage.setItem('th_users',JSON.stringify(u));}
 
-function getUsers(){
-  try{ return JSON.parse(localStorage.getItem('thalamus_users'))||{}; }catch{ return {}; }
-}
-function saveUsers(u){ localStorage.setItem('thalamus_users', JSON.stringify(u)); }
-
-// Create default admin if no users exist
-function ensureDefaultAdmin(){
-  const users = getUsers();
-  if(Object.keys(users).length === 0){
-    // Will be set async on first load
-    hashPass('admin').then(h=>{
-      users['admin'] = { hash: h, role: 'admin', created: new Date().toISOString() };
-      saveUsers(users);
-    });
+// Seed default users if none exist
+(async function seedUsers(){
+  const u=getUsers();
+  if(Object.keys(u).length===0){
+    u['fernando']={hash:await hashPass('fernando'),role:'socio',pass:'fernando'};
+    u['wuilian']={hash:await hashPass('wuilian'),role:'socio',pass:'wuilian'};
+    saveUsersDB(u);
   }
-}
-ensureDefaultAdmin();
+})();
 
-function userPrefix(){
-  return _currentUser ? 'u/'+_currentUser+'/' : 'oc/';
-}
-
-// UI helpers for login
-window.showRegister = function(){ gs('loginForm').style.display='none'; gs('registerForm').style.display=''; gs('reg-err').textContent=''; gs('reg-user').focus(); }
-window.showLogin = function(){ gs('registerForm').style.display='none'; gs('loginForm').style.display=''; gs('login-err').textContent=''; gs('login-user').focus(); }
-
-window.doLogin = async function(){
-  const user = gs('login-user').value.trim().toLowerCase();
-  const pass = gs('login-pass').value;
-  if(!user||!pass){ gs('login-err').textContent='Completá usuario y contraseña'; return; }
-  const users = getUsers();
-  if(!users[user]){ gs('login-err').textContent='Usuario no encontrado'; return; }
-  const h = await hashPass(pass);
-  if(users[user].hash !== h){ gs('login-err').textContent='Contraseña incorrecta'; return; }
-  _currentUser = user;
-  sessionStorage.setItem('thalamus_session', user);
-  gs('loginOverlay').classList.add('hidden');
-  updateTopUser();
-  updateUserAdmin();
-  await window.initApp();
+window.doLogin=async function(){
+  const el=id=>document.getElementById(id);
+  const user=el('login-user').value.trim().toLowerCase();
+  const pass=el('login-pass').value;
+  if(!user||!pass){el('login-err').textContent='Completá usuario y contraseña';return}
+  const users=getUsers();
+  if(!users[user]){el('login-err').textContent='Usuario no encontrado';return}
+  if(users[user].hash!==await hashPass(pass)){el('login-err').textContent='Contraseña incorrecta';return}
+  _currentUser=user; _currentRole=users[user].role||'socio';
+  sessionStorage.setItem('th_session',JSON.stringify({user,role:_currentRole}));
+  el('loginOverlay').classList.add('hidden');
+  applyRole();
+  window.initApp&&window.initApp();
 };
 
-window.doRegister = async function(){
-  const users = getUsers();
-  // Only allow register if no users exist (first time) or if self-registration
-  const user = gs('reg-user').value.trim().toLowerCase();
-  const pass = gs('reg-pass').value;
-  const pass2 = gs('reg-pass2').value;
-  if(!user||!pass){ gs('reg-err').textContent='Completá todos los campos'; return; }
-  if(user.length<2){ gs('reg-err').textContent='El usuario debe tener al menos 2 caracteres'; return; }
-  if(pass.length<4){ gs('reg-err').textContent='La contraseña debe tener al menos 4 caracteres'; return; }
-  if(pass!==pass2){ gs('reg-err').textContent='Las contraseñas no coinciden'; return; }
-  if(users[user]){ gs('reg-err').textContent='Ese usuario ya existe'; return; }
-  const isFirst = Object.keys(users).length === 0;
-  const h = await hashPass(pass);
-  users[user] = { hash: h, role: isFirst ? 'admin' : 'user', created: new Date().toISOString() };
-  saveUsers(users);
-  _currentUser = user;
-  sessionStorage.setItem('thalamus_session', user);
-  gs('loginOverlay').classList.add('hidden');
-  updateTopUser();
-  updateUserAdmin();
-  toast('Cuenta creada ✓ '+(isFirst?'(Administrador)':''),'ok');
-  await window.initApp();
+window.doLogout=function(){
+  _currentUser=null; _currentRole='socio';
+  sessionStorage.removeItem('th_session');
+  location.reload();
 };
 
-window.doLogout = function(){
-  _currentUser = null;
-  sessionStorage.removeItem('thalamus_session');
-  obras={}; gastos={}; certificados={}; retiros={fernando:[],wuilian:[]};
-  cur=null;
-  gs('loginOverlay').classList.remove('hidden');
-  gs('login-user').value=''; gs('login-pass').value=''; gs('login-err').textContent='';
-  showLogin();
-  gs('login-user').focus();
-};
+function applyRole(){
+  const el=id=>document.getElementById(id);
+  // Update topbar
+  el('topAvatar').textContent=_currentUser?_currentUser.charAt(0).toUpperCase():'?';
+  el('topUser').textContent=_currentUser||'';
 
-function updateTopUser(){
-  if(!_currentUser) return;
-  const avatar = _currentUser.charAt(0).toUpperCase();
-  gs('topAvatar').textContent = avatar;
-  gs('topUser').textContent = _currentUser;
+  // Show/hide elements based on role
+  const isOp=_currentRole==='operador';
+  document.querySelectorAll('.socio-only').forEach(e=>{
+    if(isOp) e.classList.add('role-restricted');
+    else e.classList.remove('role-restricted');
+  });
+
+  // For "Nueva obra" button: operador can't create new obras
+  const newBtn=document.querySelector('.btn-new');
+  if(newBtn){if(isOp)newBtn.classList.add('role-restricted');else newBtn.classList.remove('role-restricted');}
+
+  // User admin panel
+  renderUserList();
 }
 
-function updateUserAdmin(){
-  const users = getUsers();
-  const isAdmin = users[_currentUser]?.role === 'admin';
-  const card = gs('userAdminCard');
-  const form = gs('addUserForm');
-  if(!card) return;
-  // Show admin card to all, but only admins can add/delete
-  const list = gs('userList');
-  let html = '';
-  for(const [name,data] of Object.entries(users)){
-    const isSelf = name === _currentUser;
-    html += '<div class="user-row">';
-    html += '<span class="u-name">'+(isSelf?'<b>'+name+'</b> (vos)':name)+'</span>';
-    html += '<span class="u-role '+(data.role||'user')+'">'+(data.role==='admin'?'Admin':'Usuario')+'</span>';
-    if(isAdmin && !isSelf) html += ' <button class="btn-logout" style="margin-left:6px" onclick="adminDelUser(\''+name+'\')">✕</button>';
-    if(isAdmin && !isSelf) html += ' <button class="btn-logout" style="margin-left:4px;border-color:var(--gold);color:var(--gold)" onclick="adminResetPass(\''+name+'\')">🔑</button>';
-    html += '</div>';
+function renderUserList(){
+  const list=document.getElementById('userList');
+  if(!list)return;
+  const users=getUsers();
+  let h='';
+  for(const[name,data]of Object.entries(users)){
+    const self=name===_currentUser;
+    const pw=data.pass||'••••';
+    h+='<div class="user-row">';
+    h+='<span class="u-name">'+(self?'<b>'+name+'</b> (vos)':name)+'</span>';
+    h+='<span style="font-size:.64rem;color:var(--muted);font-family:\'JetBrains Mono\',monospace;cursor:pointer" title="Click para ver/ocultar" onclick="this.textContent=this.textContent===\'••••\'?\''+pw+'\':\'••••\'">'+'••••'+'</span>';
+    h+='<span class="u-role '+(data.role||'socio')+'">'+(data.role==='operador'?'Operador':'Socio')+'</span>';
+    if(!self)h+=' <button class="btn-logout" style="margin-left:6px" onclick="adminDelUser(\''+name+'\')">✕</button>';
+    if(!self)h+=' <button class="btn-logout" style="margin-left:4px;border-color:var(--gold);color:var(--gold)" onclick="adminResetPass(\''+name+'\')">🔑</button>';
+    h+='</div>';
   }
-  list.innerHTML = html;
-  if(form) form.style.display = isAdmin ? '' : 'none';
-  // Hide the add button for non-admins
-  const addBtn = card.querySelector('.row-btns');
-  if(addBtn) addBtn.style.display = isAdmin ? '' : 'none';
+  list.innerHTML=h;
 }
 
-window.adminAddUser = async function(){
-  const users = getUsers();
-  if(users[_currentUser]?.role !== 'admin'){ toast('Solo administradores pueden agregar usuarios','err'); return; }
-  const name = gs('adm-user').value.trim().toLowerCase();
-  const pass = gs('adm-pass').value;
-  const role = gs('adm-role').value;
-  if(!name||!pass){ toast('Completá usuario y contraseña','err'); return; }
-  if(name.length<2){ toast('El usuario debe tener al menos 2 caracteres','err'); return; }
-  if(pass.length<4){ toast('La contraseña debe tener al menos 4 caracteres','err'); return; }
-  if(users[name]){ toast('Ese usuario ya existe','err'); return; }
-  users[name] = { hash: await hashPass(pass), role, created: new Date().toISOString() };
-  saveUsers(users);
-  gs('adm-user').value=''; gs('adm-pass').value='';
-  updateUserAdmin();
-  toast('Usuario "'+name+'" creado ✓','ok');
+window.adminAddUser=async function(){
+  const name=document.getElementById('adm-user').value.trim().toLowerCase();
+  const pass=document.getElementById('adm-pass').value;
+  const role=document.getElementById('adm-role').value;
+  if(!name||!pass){toast('Completá usuario y contraseña','err');return}
+  if(name.length<2){toast('Usuario: mínimo 2 caracteres','err');return}
+  if(pass.length<4){toast('Contraseña: mínimo 4 caracteres','err');return}
+  const users=getUsers();
+  if(users[name]){toast('Ese usuario ya existe','err');return}
+  users[name]={hash:await hashPass(pass),role,pass};
+  saveUsersDB(users);
+  document.getElementById('adm-user').value='';document.getElementById('adm-pass').value='';
+  renderUserList();
+  toast('Usuario "'+name+'" creado como '+role+' ✓','ok');
 };
 
-window.adminDelUser = function(name){
-  const users = getUsers();
-  if(users[_currentUser]?.role !== 'admin') return;
-  if(!confirm('¿Eliminar usuario "'+name+'"? Sus datos NO se borrarán.')) return;
-  delete users[name];
-  saveUsers(users);
-  updateUserAdmin();
-  toast('Usuario eliminado','ok');
+window.adminDelUser=function(name){
+  if(!confirm('¿Eliminar usuario "'+name+'"?'))return;
+  const users=getUsers();delete users[name];saveUsersDB(users);
+  renderUserList();toast('Usuario eliminado','ok');
 };
 
-window.adminResetPass = async function(name){
-  const newPass = prompt('Nueva contraseña para "'+name+'" (mínimo 4 caracteres):');
-  if(!newPass||newPass.length<4){ toast('Contraseña muy corta','err'); return; }
-  const users = getUsers();
-  users[name].hash = await hashPass(newPass);
-  saveUsers(users);
+window.adminResetPass=async function(name){
+  const np=prompt('Nueva contraseña para "'+name+'" (mínimo 4):');
+  if(!np||np.length<4){toast('Contraseña muy corta','err');return}
+  const users=getUsers();users[name].hash=await hashPass(np);users[name].pass=np;saveUsersDB(users);
   toast('Contraseña de "'+name+'" actualizada ✓','ok');
 };
 
 // Auto-login from session
-function tryAutoLogin(){
-  const sess = sessionStorage.getItem('thalamus_session');
-  if(sess){
-    const users = getUsers();
-    if(users[sess]){
-      _currentUser = sess;
-      gs('loginOverlay').classList.add('hidden');
-      updateTopUser();
-      updateUserAdmin();
-      return true;
+(function trySession(){
+  try{
+    const s=JSON.parse(sessionStorage.getItem('th_session'));
+    if(s&&s.user){
+      const users=getUsers();
+      if(users[s.user]){
+        _currentUser=s.user;_currentRole=users[s.user].role||'socio';
+        document.addEventListener('DOMContentLoaded',()=>{
+          document.getElementById('loginOverlay').classList.add('hidden');
+          applyRole();
+        });
+        return;
+      }
     }
-  }
-  // Check if there are no users at all — show register
-  const users = getUsers();
-  if(Object.keys(users).length === 0){
-    showRegister();
-  }
-  return false;
-}
+  }catch{}
+})();
 
-// Enter key handlers
-document.addEventListener('keydown', function(e){
+// Enter key on login
+document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
-    if(document.activeElement===gs('login-pass')||document.activeElement===gs('login-user')) doLogin();
-    if(document.activeElement===gs('reg-pass2')) doRegister();
+    const a=document.activeElement;
+    if(a&&(a.id==='login-user'||a.id==='login-pass'))doLogin();
   }
 });
 
@@ -1334,7 +1354,7 @@ document.addEventListener('keydown', function(e){
 // ═══════════════════════════════════════
 let obras={}, gastos={}, certificados={}, retiros={fernando:[],wuilian:[]};
 let cfg={ayuda:10,heri:1,socios:50};
-let cur=null, qrows=[], pendAI=[];
+let cur=null, qrows=[], pendAI=[], _importing=false;
 
 // ═══════════════════════════════════════
 // UTILS
@@ -1363,6 +1383,9 @@ function doConfirm(title,msg,cb){
 // NAVEGACIÓN — UNA SOLA FUNCIÓN
 // ═══════════════════════════════════════
 function navTo(name){
+  // Operador restrictions
+  const restricted=['global','dashboard','resumen','utilidades','ai','config'];
+  if(_currentRole==='operador'&&restricted.includes(name)){name='obras';}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
@@ -1410,13 +1433,13 @@ async function fbSet(path,data){
       return;
     }catch(e){console.warn('fbSet error:',e)}
   }
-  localStorage.setItem(userPrefix()+path,JSON.stringify(data));
+  localStorage.setItem('oc/'+path,JSON.stringify(data));
 }
 async function fbDel(path){
   if(window._fbOk&&window._db){
     try{const p=path.split('/');await window._FBM.deleteDoc(window._FBM.doc(window._db,...p));return;}catch(e){}
   }
-  localStorage.removeItem(userPrefix()+path);
+  localStorage.removeItem('oc/'+path);
 }
 async function fbGetAll(col){
   if(window._fbOk&&window._db){
@@ -1425,7 +1448,7 @@ async function fbGetAll(col){
       const res={}; snap.forEach(d=>{res[d.id]=d.data()}); return res;
     }catch(e){console.warn('fbGetAll error:',e)}
   }
-  const res={},prefix=userPrefix()+col+'/';
+  const res={},prefix='oc/'+col+'/';
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k.startsWith(prefix)){try{res[k.slice(prefix.length)]=JSON.parse(localStorage.getItem(k));}catch{}}
@@ -1440,15 +1463,15 @@ async function fbGetDoc(path){
       return snap.exists()?snap.data():null;
     }catch(e){}
   }
-  try{return JSON.parse(localStorage.getItem(userPrefix()+path));}catch{return null}
+  try{return JSON.parse(localStorage.getItem('oc/'+path));}catch{return null}
 }
 
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
 window.initApp = async function(){
-  if(!_currentUser) return; // Wait for login
-  const p=localStorage.getItem(userPrefix()+'cfg');
+  if(!_currentUser){return;}
+  const p=localStorage.getItem('ocCfg');
   if(p) try{cfg=JSON.parse(p);}catch{}
   gs('p-ay').value=cfg.ayuda; gs('p-he').value=cfg.heri; gs('p-so').value=cfg.socios;
 
@@ -1457,15 +1480,15 @@ window.initApp = async function(){
   for(const [id,d] of Object.entries(raw||{})) obras[id]={...d,id};
   for(const id of Object.keys(obras)){
     const gr=await fbGetAll('obras/'+id+'/gastos');
-    gastos[id]=Object.values(gr||{});
+    gastos[id]=Object.entries(gr||{}).map(([gid,gd])=>({...gd,id:gd.id||gid}));
     const cr=await fbGetAll('obras/'+id+'/certificados');
-    certificados[id]=Object.values(cr||{});
+    certificados[id]=Object.entries(cr||{}).map(([cid,cd])=>({...cd,id:cd.id||cid}));
   }
   const rd=await fbGetDoc('retiros/socios');
   if(rd) retiros={fernando:rd.fernando||[],wuilian:rd.wuilian||[]};
 
   populateSel(); navTo('obras');
-  updateUserAdmin();
+  applyRole(); renderUserList();
   toast('Bienvenido, '+_currentUser+' ✓','ok');
 };
 
@@ -1485,7 +1508,7 @@ window.saveAndConnect=async function(){
 function obraAy(id){const o=obras[id];return o?.ayuda!=null?parseFloat(o.ayuda):cfg.ayuda}
 function obraHe(id){const o=obras[id];return o?.heri!=null?parseFloat(o.heri):cfg.heri}
 function calcCon(id){const o=obras[id]||{};return(o.contrato||0)+(o.adenda||0)}
-function costoG(g){return(g.monto||0)+(g.saldoTotal||0)+(g.saldoCheque||0)}
+function costoG(g){return(g.saldoCheque||0)}
 function calcAy(id){return calcCon(id)*(obraAy(id)/100)}
 function calcHe(id){return calcCon(id)*(obraHe(id)/100)}
 function calcTE(id){return(gastos[id]||[]).reduce((s,g)=>s+(g.monto||0),0)+calcAy(id)+calcHe(id)}
@@ -1506,6 +1529,7 @@ function calcRes(id){
   const corrCadaUno=gan*(cfg.socios/100);
   return{con,tg,tk,br,ne,re,gan,corrCadaUno,pct,scob:con-br,spag:tk};
 }
+async function touchObra(){if(cur&&obras[cur]){obras[cur].lastModified=Date.now();await fbSet('obras/'+cur,obras[cur]);}}
 
 // ═══════════════════════════════════════
 // OBRAS
@@ -1523,20 +1547,25 @@ function populateSel(){
 function renderObrasGrid(){
   const g=gs('obrasGrid');
   const list=Object.values(obras);
+  const isOp=_currentRole==='operador';
   if(!list.length){g.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem">Sin obras. Presioná <b>+ Nueva obra</b>.</div>';return}
-  g.innerHTML=list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'')).map(o=>{
+  const sort=gs('obraSort')?.value||'num';
+  if(sort==='num') list.sort((a,b)=>(parseInt(a.num)||999)-(parseInt(b.num)||999));
+  else if(sort==='fecha') list.sort((a,b)=>(b.lastModified||0)-(a.lastModified||0));
+  else list.sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+  g.innerHTML=list.map(o=>{
     const r=calcRes(o.id);
     return`<div class="obra-card ${o.id===cur?'act':''}" onclick="selectObra('${o.id}')">
       <div class="oc-num">${o.num?'Nº'+o.num+' ·':''} ${o.estado||'EN EJECUCIÓN'}</div>
       <div class="oc-nombre">${o.nombre||'Sin nombre'}</div>
       <div class="oc-stats">
-        <span class="oc-stat">Contrato: ${fGs(calcCon(o.id))}</span>
+        ${isOp?'':`<span class="oc-stat">Contrato: ${fGs(calcCon(o.id))}</span>`}
         <span class="oc-stat">Gastos: ${fGs(r.tg)}</span>
-        <span class="oc-stat">Cobrado: ${fGs(r.br)}</span>
+        ${isOp?'':`<span class="oc-stat">Cobrado: ${fGs(r.br)}</span>`}
       </div>
       <div style="margin-top:.46rem;display:flex;gap:.3rem">
-        <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editObra('${o.id}')">✏️ Editar</button>
-        <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delObra('${o.id}')">🗑️</button>
+        ${isOp?'':`<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();editObra('${o.id}')">✏️ Editar</button>`}
+        ${isOp?'':`<button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delObra('${o.id}')">🗑️</button>`}
         <button class="btn btn-secondary btn-xs" onclick="event.stopPropagation();selectObra('${o.id}')">Abrir →</button>
       </div>
     </div>`;
@@ -1545,7 +1574,7 @@ function renderObrasGrid(){
 function selectObra(id){
   cur=id; gs('obraSelect').value=id; renderObrasGrid();
   toast('Obra: '+(obras[id]?.nombre||id),'info');
-  navTo('dashboard');
+  navTo(_currentRole==='operador'?'gastos':'dashboard');
 }
 window.selectObra=selectObra;
 
@@ -1588,7 +1617,8 @@ window.saveObra=async function(){
     adenda:parseFloat(gs('o-ad').value)||0,
     estado:v('o-es'),
     ayuda:parseFloat(gs('o-ay').value),
-    heri:parseFloat(gs('o-he').value)
+    heri:parseFloat(gs('o-he').value),
+    lastModified:Date.now()
   };
   obras[id]=o;
   if(!gastos[id])gastos[id]=[];
@@ -1727,7 +1757,7 @@ function renderQRows(){
       </div>
     </div>`).join('');
 }
-function cRow(r){return(parseFloat(r.monto)||0)+(parseFloat(r.saldoTotal)||0)+(parseFloat(r.montoCheque)||0)}
+function cRow(r){return(parseFloat(r.saldoCheque)||0)}
 function uqr(id,f,v2){const r=qrows.find(r=>r._id===id);if(r)r[f]=v2}
 window.uqr=uqr;
 function updChip(id){const r=qrows.find(r=>r._id===id);const ch=gs('chip-'+id);if(r&&ch)ch.textContent=fGs(cRow(r))}
@@ -1742,9 +1772,11 @@ function qEnter(e,id){
 }
 window.qEnter=qEnter;
 window.saveAllRows=async function(){
+  if(_importing)return;
   if(!cur){toast('Sin obra activa','err');return}
   const toSave=qrows.filter(r=>r.concepto.trim());
   if(!toSave.length){toast('Ingresá al menos un concepto','err');return}
+  _importing=true;
   for(const r of toSave){
     const g={id:uid(),fecha:r.fecha,concepto:r.concepto,
       cantidad:parseFloat(r.cantidad)||0,monto:parseFloat(r.monto)||0,
@@ -1757,23 +1789,28 @@ window.saveAllRows=async function(){
   qrows=[]; addRow(); updGStrip(); renderGSaved();
   gs('saveMsg').textContent=toSave.length+' guardado(s) ✓';
   setTimeout(()=>gs('saveMsg').textContent='',4000);
+  _importing=false;
+  touchObra();
   toast(toSave.length+' gastos guardados','ok');
 };
 function renderGSaved(){
   const list=gastos[cur]||[];
   const tbody=gs('gtbody');
+  const cnt=gs('gSavedCount');
+  if(cnt) cnt.textContent=list.length?'('+list.length+')':'';
   if(!list.length){
-    tbody.innerHTML='<tr class="empty-row"><td colspan="10">Sin gastos registrados aún</td></tr>';
+    tbody.innerHTML='<tr class="empty-row"><td colspan="11">Sin gastos registrados aún</td></tr>';
     ['tf1','tf2','tf3'].forEach(id=>gs(id).textContent='₲ 0'); return;
   }
-  tbody.innerHTML=list.map(g=>`<tr>
+  tbody.innerHTML=list.map((g,i)=>`<tr>
+    <td style="color:var(--muted);font-size:.68rem;text-align:center;font-weight:600">${i+1}</td>
     <td>${g.fecha||'—'}</td>
     <td style="font-family:'Syne',sans-serif;color:var(--txt);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${g.concepto}">${g.concepto}</td>
     <td>${fGs(g.monto)}</td><td>${fGs(g.montoCheque)}</td>
     <td>${fGs(g.devuelto)}</td><td>${fGs(g.saldoTotal)}</td><td>${fGs(g.saldoCheque)}</td>
     <td style="color:var(--gold);font-weight:600">${fGs(g.costoTotal)}</td>
     <td><span class="tag tag-b">${g.tipo||'—'}</span></td>
-    <td><button class="btn btn-danger btn-xs" onclick="delG('${g.id}')">✕</button></td>
+    <td style="white-space:nowrap"><button class="btn btn-ghost btn-xs" onclick="editG('${g.id}',${i+1})" title="Editar">✏️</button><button class="btn btn-danger btn-xs" onclick="delG('${g.id}')">✕</button></td>
   </tr>`).join('');
   gs('tf1').textContent=fGs(list.reduce((s,g)=>s+(g.monto||0),0));
   gs('tf2').textContent=fGs(list.reduce((s,g)=>s+(g.montoCheque||0),0));
@@ -1781,8 +1818,36 @@ function renderGSaved(){
 }
 window.delG=async function(id){
   gastos[cur]=(gastos[cur]||[]).filter(g=>g.id!==id);
-  await fbDel('obras/'+cur+'/gastos/'+id);
-  updGStrip(); renderGSaved(); toast('Gasto eliminado','info');
+  updGStrip(); renderGSaved();
+  try{ await fbDel('obras/'+cur+'/gastos/'+id); }catch(e){}
+  try{ localStorage.removeItem('oc/obras/'+cur+'/gastos/'+id); }catch(e){}
+  toast('Gasto eliminado','info');
+};
+window.borrarTodosGastos=async function(){
+  if(!cur||!obras[cur])return;
+  const list=gastos[cur]||[];
+  if(!list.length){toast('No hay gastos para borrar','info');return}
+  const nombre=obras[cur].nombre||'';
+  const input=prompt('⚠️ Vas a borrar los '+list.length+' gastos de "'+nombre+'".\n\nEscribí BORRAR para confirmar:');
+  if(!input||input.trim().toUpperCase()!=='BORRAR'){
+    if(input!==null) toast('Operación cancelada','err');
+    return;
+  }
+  if(!confirm('🚨 ÚLTIMA CONFIRMACIÓN\n\n¿Borrar TODOS los '+list.length+' gastos de "'+nombre+'"?\n\nEsta acción NO se puede deshacer.'))return;
+  // Limpiar inmediatamente la UI
+  const toDelete=[...list];
+  gastos[cur]=[];
+  updGStrip(); renderGSaved();
+  toast('Borrando de la base de datos...','info');
+  // Borrar de Firebase y localStorage en background
+  for(const g of toDelete){
+    const gid=g.id;
+    if(!gid)continue;
+    try{ await fbDel('obras/'+cur+'/gastos/'+gid); }catch(e){ console.warn('fbDel error:',e); }
+    // Limpiar también de localStorage por si quedó ahí
+    try{ localStorage.removeItem('oc/obras/'+cur+'/gastos/'+gid); }catch(e){}
+  }
+  toast('Todos los gastos de "'+nombre+'" eliminados ✓','ok');
 };
 
 // ═══════════════════════════════════════
@@ -1801,13 +1866,111 @@ window.saveCert=async function(){
   c.retencion=c.bruto-c.neto;
   certificados[cur].push(c);
   await fbSet('obras/'+cur+'/certificados/'+c.id,c);
-  window.clrCert(); renderCerts(); toast('Certificado registrado','ok');
+  window.clrCert(); renderCerts(); touchObra(); toast('Certificado registrado','ok');
 };
 window.delC=async function(id){
   certificados[cur]=(certificados[cur]||[]).filter(c=>c.id!==id);
-  await fbDel('obras/'+cur+'/certificados/'+id);
-  renderCerts(); toast('Eliminado','info');
+  renderCerts();
+  try{ await fbDel('obras/'+cur+'/certificados/'+id); }catch(e){}
+  try{ localStorage.removeItem('oc/obras/'+cur+'/certificados/'+id); }catch(e){}
+  toast('Eliminado','info');
 };
+window.borrarTodosCerts=async function(){
+  if(!cur||!obras[cur])return;
+  const list=certificados[cur]||[];
+  if(!list.length){toast('No hay certificados para borrar','info');return}
+  const nombre=obras[cur].nombre||'';
+  const input=prompt('⚠️ Vas a borrar los '+list.length+' certificados de "'+nombre+'".\n\nEscribí BORRAR para confirmar:');
+  if(!input||input.trim().toUpperCase()!=='BORRAR'){
+    if(input!==null) toast('Operación cancelada','err');
+    return;
+  }
+  if(!confirm('🚨 ÚLTIMA CONFIRMACIÓN\n\n¿Borrar TODOS los '+list.length+' certificados de "'+nombre+'"?\n\nEsta acción NO se puede deshacer.'))return;
+  const toDelete=[...list];
+  certificados[cur]=[];
+  renderCerts();
+  toast('Borrando de la base de datos...','info');
+  for(const c of toDelete){
+    const cid=c.id;
+    if(!cid)continue;
+    try{ await fbDel('obras/'+cur+'/certificados/'+cid); }catch(e){ console.warn('fbDel error:',e); }
+    try{ localStorage.removeItem('oc/obras/'+cur+'/certificados/'+cid); }catch(e){}
+  }
+  toast('Todos los certificados de "'+nombre+'" eliminados ✓','ok');
+};
+
+// ── Editar gasto individual ──
+window.editG=function(id,num){
+  const g=(gastos[cur]||[]).find(g=>g.id===id);
+  if(!g){toast('Gasto no encontrado','err');return}
+  gs('eg-id').value=id;
+  gs('editGNum').textContent='#'+num;
+  gs('eg-fecha').value=g.fecha||'';
+  gs('eg-concepto').value=g.concepto||'';
+  gs('eg-cantidad').value=g.cantidad||'';
+  gs('eg-monto').value=g.monto||0;
+  gs('eg-registro').value=g.registro||'';
+  gs('eg-montoCheque').value=g.montoCheque||0;
+  gs('eg-devuelto').value=g.devuelto||0;
+  gs('eg-saldoTotal').value=g.saldoTotal||0;
+  gs('eg-saldoCheque').value=g.saldoCheque||0;
+  openM('mEditG');
+};
+window.saveEditG=async function(){
+  const id=gs('eg-id').value;
+  const g=(gastos[cur]||[]).find(g=>g.id===id);
+  if(!g){toast('Gasto no encontrado','err');return}
+  g.fecha=gs('eg-fecha').value;
+  g.concepto=gs('eg-concepto').value;
+  g.cantidad=parseFloat(gs('eg-cantidad').value)||0;
+  g.monto=parseFloat(gs('eg-monto').value)||0;
+  g.registro=gs('eg-registro').value;
+  g.montoCheque=parseFloat(gs('eg-montoCheque').value)||0;
+  g.devuelto=parseFloat(gs('eg-devuelto').value)||0;
+  g.saldoTotal=parseFloat(gs('eg-saldoTotal').value)||0;
+  g.saldoCheque=parseFloat(gs('eg-saldoCheque').value)||0;
+  g.costoTotal=(g.saldoCheque||0);
+  await fbSet('obras/'+cur+'/gastos/'+id,g);
+  closeM('mEditG');
+  updGStrip(); renderGSaved();
+  touchObra();
+  toast('Gasto actualizado ✓','ok');
+};
+
+// ── Editar certificado individual ──
+window.editC=function(id,num){
+  const c=(certificados[cur]||[]).find(c=>c.id===id);
+  if(!c){toast('Certificado no encontrado','err');return}
+  gs('ec-id').value=id;
+  gs('editCNum').textContent='#'+num;
+  gs('ec-fecha').value=c.fecha||'';
+  gs('ec-concepto').value=c.concepto||'';
+  gs('ec-bruto').value=c.bruto||0;
+  gs('ec-neto').value=c.neto||0;
+  gs('ec-ret').textContent=fGs((c.bruto||0)-(c.neto||0));
+  // Live update retención
+  gs('ec-bruto').oninput=gs('ec-neto').oninput=function(){
+    const b=parseFloat(gs('ec-bruto').value)||0, n=parseFloat(gs('ec-neto').value)||0;
+    gs('ec-ret').textContent=fGs(b-n);
+  };
+  openM('mEditC');
+};
+window.saveEditC=async function(){
+  const id=gs('ec-id').value;
+  const c=(certificados[cur]||[]).find(c=>c.id===id);
+  if(!c){toast('Certificado no encontrado','err');return}
+  c.fecha=gs('ec-fecha').value;
+  c.concepto=gs('ec-concepto').value;
+  c.bruto=parseFloat(gs('ec-bruto').value)||0;
+  c.neto=parseFloat(gs('ec-neto').value)||0;
+  c.retencion=c.bruto-c.neto;
+  await fbSet('obras/'+cur+'/certificados/'+id,c);
+  closeM('mEditC');
+  renderCerts();
+  touchObra();
+  toast('Certificado actualizado ✓','ok');
+};
+
 function renderCerts(){
   if(!cur){toast('Seleccioná una obra','err');navTo('obras');return}
   const o=obras[cur];
@@ -1815,17 +1978,20 @@ function renderCerts(){
   const{br,ne,re}=calcCertsT(cur);
   gs('csb').textContent=fGs(br); gs('csr').textContent=fGs(re); gs('csne').textContent=fGs(ne);
   const list=certificados[cur]||[], tbody=gs('ctbody');
+  const cnt=gs('cSavedCount');
+  if(cnt) cnt.textContent=list.length?'('+list.length+')':'';
   if(!list.length){
-    tbody.innerHTML='<tr class="empty-row"><td colspan="6">Sin certificados</td></tr>';
+    tbody.innerHTML='<tr class="empty-row"><td colspan="7">Sin certificados</td></tr>';
     gs('ctb').textContent=gs('ctn').textContent=gs('ctr').textContent='₲ 0'; return;
   }
-  tbody.innerHTML=list.map(c=>`<tr>
+  tbody.innerHTML=list.map((c,i)=>`<tr>
+    <td style="color:var(--muted);font-size:.68rem;text-align:center;font-weight:600">${i+1}</td>
     <td>${c.fecha||'—'}</td>
     <td style="font-family:'Syne',sans-serif;color:var(--txt)">${c.concepto}</td>
     <td style="color:var(--acc2)">${fGs(c.bruto)}</td>
     <td style="color:var(--green)">${fGs(c.neto)}</td>
     <td style="color:var(--acc3)">${fGs(c.retencion)}</td>
-    <td><button class="btn btn-danger btn-xs" onclick="delC('${c.id}')">✕</button></td>
+    <td style="white-space:nowrap"><button class="btn btn-ghost btn-xs" onclick="editC('${c.id}',${i+1})" title="Editar">✏️</button><button class="btn btn-danger btn-xs" onclick="delC('${c.id}')">✕</button></td>
   </tr>`).join('');
   gs('ctb').textContent=fGs(br); gs('ctn').textContent=fGs(ne); gs('ctr').textContent=fGs(re);
 }
@@ -1986,7 +2152,7 @@ window.updateFijo=async function(id,campo,val){
 };
 window.saveCfgP=function(){
   cfg={ayuda:parseFloat(gs('p-ay').value)||10,heri:parseFloat(gs('p-he').value)||1,socios:parseFloat(gs('p-so').value)||50};
-  localStorage.setItem(userPrefix()+'cfg',JSON.stringify(cfg)); toast('Parámetros guardados','ok');
+  localStorage.setItem('ocCfg',JSON.stringify(cfg)); toast('Parámetros guardados','ok');
 };
 window.exportJSON=function(){
   const data=JSON.stringify({obras,gastos,certificados,retiros,cfg},null,2);
@@ -2074,13 +2240,15 @@ function renderAI(items){
 }
 window.remAI=function(i){pendAI.splice(i,1);if(!pendAI.length){window.clrAIRes();return}renderAI(pendAI)};
 window.importAll=async function(){
+  if(_importing)return;
   if(!cur){toast('Seleccioná una obra','err');return}
+  _importing=true;
   let ng=0,nc=0;
   for(const it of pendAI){
     if(it.tipo==='gasto'){
       const g={id:uid(),fecha:it.fecha||today(),concepto:it.concepto||'',cantidad:0,
         monto:it.monto||0,montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,
-        tipo:it.subTipo||'transferencia',costoTotal:it.monto||0,registro:it.registro||''};
+        tipo:it.subTipo||'transferencia',costoTotal:0,registro:it.registro||''};
       gastos[cur].push(g); await fbSet('obras/'+cur+'/gastos/'+g.id,g); ng++;
     } else {
       const c={id:uid(),fecha:it.fecha||today(),concepto:it.concepto||'',
@@ -2089,21 +2257,320 @@ window.importAll=async function(){
     }
   }
   window.clrAIRes(); updGStrip();
+  _importing=false;
   toast(`Importados: ${ng} gastos, ${nc} certificados ✓`,'ok');
 };
 
 // Init fechas por defecto
 document.addEventListener('DOMContentLoaded',()=>{
   ['c-f','ret-f'].forEach(id=>{const el=gs(id);if(el)el.value=today()});
-  const autoLogged = tryAutoLogin();
-  if(autoLogged && window._fbOk !== undefined && !window._appLoaded){
+  if(_currentUser && window._fbOk !== undefined && !window._appLoaded){
     window._appLoaded=true; window.initApp&&window.initApp();
-  } else if(!autoLogged){
-    // Show login, don't init app yet
-    gs('loginOverlay').classList.remove('hidden');
   }
 });
 setTimeout(()=>{if(!window._appLoaded && _currentUser){window._appLoaded=true;window.initApp&&window.initApp();}},5000);
+
+// ═══════════════════════════════════════
+// PEGAR DESDE EXCEL
+// ═══════════════════════════════════════
+let _pasteMode='', _pasteRows=[], _pasteCols=0;
+
+const GASTO_FIELDS=[
+  {key:'ignorar',label:'— Ignorar —'},
+  {key:'fecha',label:'Fecha'},
+  {key:'concepto',label:'Concepto'},
+  {key:'cantidad',label:'Cantidad'},
+  {key:'monto',label:'Monto Pagado'},
+  {key:'registro',label:'Registro'},
+  {key:'montoCheque',label:'Monto Cheque'},
+  {key:'devuelto',label:'Devuelto'},
+  {key:'saldoTotal',label:'Saldo Total'},
+  {key:'saldoCheque',label:'Saldo Cheque'},
+];
+const CERT_FIELDS=[
+  {key:'ignorar',label:'— Ignorar —'},
+  {key:'fecha',label:'Fecha'},
+  {key:'concepto',label:'Concepto / Certificado'},
+  {key:'bruto',label:'Total Bruto'},
+  {key:'neto',label:'Neto Cobrado'},
+];
+
+// Auto-detect column mapping based on content
+function guessField(colVals, fields, colIdx){
+  const sample=colVals.slice(0,5).join(' ').toLowerCase();
+  // Date patterns
+  if(colVals.some(v=>/^\d{1,4}[-\/]\d{1,2}[-\/]\d{1,4}$/.test(v.trim()))) return 'fecha';
+  // Mostly numbers?
+  const nums=colVals.filter(v=>/^[\d.,\s-]+$/.test(v.trim())&&v.trim().length>0);
+  const isNumeric=nums.length>colVals.length*0.6;
+  if(fields===GASTO_FIELDS){
+    if(!isNumeric&&colIdx===0) return 'fecha';
+    if(!isNumeric) return 'concepto';
+    // First numeric col → monto, second → montoCheque
+    return null; // let the numeric auto-assign handle it
+  }else{
+    if(!isNumeric&&colIdx===0) return 'fecha';
+    if(!isNumeric) return 'concepto';
+    return null;
+  }
+}
+
+window.openPaste=function(mode){
+  if(!cur||!obras[cur]){toast('Seleccioná una obra primero','err');return}
+  _pasteMode=mode;
+  gs('mPasteTitle').textContent='📋 Pegar desde Excel — '+(mode==='gastos'?'Gastos':'Certificados');
+  gs('pasteArea').value='';
+  gs('pasteStep1').style.display='';
+  gs('pasteStep2').style.display='none';
+  openM('mPaste');
+  setTimeout(()=>gs('pasteArea').focus(),200);
+};
+
+window.parsePaste=function(){
+  const raw=gs('pasteArea').value.trim();
+  if(!raw){toast('Pegá datos primero','err');return}
+
+  // Parse: split by newlines, then by tabs (Excel copies as TSV)
+  const lines=raw.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length){toast('No se detectaron filas','err');return}
+
+  // Detect separator: tab or semicolon or multiple spaces
+  let sep='\t';
+  if(lines[0].indexOf('\t')<0){
+    if(lines[0].indexOf(';')>=0) sep=';';
+    else if(lines[0].indexOf(',')>=0 && !/^\d+,\d+$/.test(lines[0].trim())) sep=',';
+  }
+
+  _pasteRows=lines.map(l=>l.split(sep).map(c=>c.trim()));
+  _pasteCols=Math.max(..._pasteRows.map(r=>r.length));
+
+  // Pad short rows
+  _pasteRows.forEach(r=>{while(r.length<_pasteCols)r.push('')});
+
+  // Detect if first row is header
+  const fields=_pasteMode==='gastos'?GASTO_FIELDS:CERT_FIELDS;
+  let hasHeader=false;
+  const firstRow=_pasteRows[0].map(c=>c.toLowerCase());
+  const headerKeywords=['fecha','concepto','monto','bruto','neto','certificado','pagado','cheque','retenc','cantidad','devuelto','saldo','registro'];
+  if(firstRow.some(c=>headerKeywords.some(k=>c.includes(k)))){
+    hasHeader=true;
+    _pasteRows.shift(); // remove header row
+  }
+
+  if(!_pasteRows.length){toast('No hay datos para importar','err');return}
+
+  gs('pasteRowCount').textContent=_pasteRows.length;
+  gs('pasteColCount').textContent=_pasteCols;
+  gs('pasteImportCount').textContent=_pasteRows.length;
+
+  // Build column mapping dropdowns
+  const mapRow=gs('pasteMapRow');
+  mapRow.innerHTML='';
+
+  // Auto-assign columns
+  const numericCols=[];
+  for(let c=0;c<_pasteCols;c++){
+    const colVals=_pasteRows.map(r=>r[c]||'');
+    const nums=colVals.filter(v=>/^[\d.,\s-]+$/.test(v.trim())&&v.trim().length>0);
+    if(nums.length>colVals.length*0.5) numericCols.push(c);
+  }
+
+  const assigned=new Set();
+  const autoMap=[];
+
+  for(let c=0;c<_pasteCols;c++){
+    const colVals=_pasteRows.map(r=>r[c]||'');
+    let guess=guessField(colVals, fields, c);
+
+    // For numeric columns, auto-assign in order
+    if(!guess&&numericCols.includes(c)){
+      if(_pasteMode==='gastos'){
+        const numFields=['monto','montoCheque','devuelto','saldoTotal','saldoCheque'];
+        guess=numFields.find(f=>!assigned.has(f))||null;
+      }else{
+        const numFields=['bruto','neto'];
+        guess=numFields.find(f=>!assigned.has(f))||null;
+      }
+    }
+
+    if(guess&&assigned.has(guess)) guess=null;
+    if(guess) assigned.add(guess);
+    autoMap.push(guess||'ignorar');
+
+    // Build UI
+    const box=document.createElement('div');
+    box.className='paste-col-box';
+
+    const label=document.createElement('div');
+    label.className='pcl';
+    label.textContent='Col '+(c+1);
+    box.appendChild(label);
+
+    const preview=document.createElement('div');
+    preview.className='pcv';
+    preview.textContent=colVals[0]||'(vacío)';
+    preview.title=colVals.slice(0,3).join(' | ');
+    box.appendChild(preview);
+
+    const sel=document.createElement('select');
+    sel.className='paste-sel';
+    sel.id='pmap-'+c;
+    fields.forEach(f=>{
+      const opt=document.createElement('option');
+      opt.value=f.key; opt.textContent=f.label;
+      sel.appendChild(opt);
+    });
+    sel.value=autoMap[c];
+    sel.onchange=()=>renderPastePreview();
+    box.appendChild(sel);
+    mapRow.appendChild(box);
+  }
+
+  renderPastePreview();
+  gs('pasteStep1').style.display='none';
+  gs('pasteStep2').style.display='';
+};
+
+function renderPastePreview(){
+  const fields=_pasteMode==='gastos'?GASTO_FIELDS:CERT_FIELDS;
+  const mapping=[];
+  for(let c=0;c<_pasteCols;c++){
+    const sel=gs('pmap-'+c);
+    mapping.push(sel?sel.value:'ignorar');
+  }
+
+  // Build header
+  const thead=gs('pastePreviewHead');
+  let hh='<tr>';
+  mapping.forEach((m,i)=>{
+    const f=fields.find(f=>f.key===m);
+    hh+=`<th style="${m==='ignorar'?'opacity:.4':''}">${f?f.label:'Col '+(i+1)}</th>`;
+  });
+  hh+='</tr>';
+  thead.innerHTML=hh;
+
+  // Build body (max 20 rows preview)
+  const tbody=gs('pastePreviewBody');
+  let bh='';
+  const showRows=_pasteRows.slice(0,20);
+  showRows.forEach(row=>{
+    bh+='<tr>';
+    row.forEach((val,i)=>{
+      const dim=mapping[i]==='ignorar'?'opacity:.35;text-decoration:line-through':'';
+      bh+=`<td style="${dim}">${val||'—'}</td>`;
+    });
+    bh+='</tr>';
+  });
+  if(_pasteRows.length>20) bh+=`<tr><td colspan="${_pasteCols}" style="text-align:center;color:var(--muted);font-style:italic">...y ${_pasteRows.length-20} filas más</td></tr>`;
+  tbody.innerHTML=bh;
+}
+
+window.backToPasteStep1=function(){
+  gs('pasteStep1').style.display='';
+  gs('pasteStep2').style.display='none';
+};
+
+function parseNum(v){
+  if(!v) return 0;
+  // Remove dots used as thousand separators, replace comma with dot for decimals
+  let s=String(v).replace(/\s/g,'');
+  // If has dot and comma: 1.234.567,89 or 1,234,567.89
+  if(s.includes('.')&&s.includes(',')){
+    if(s.lastIndexOf(',')>s.lastIndexOf('.')){ // 1.234,56 format
+      s=s.replace(/\./g,'').replace(',','.');
+    } else { // 1,234.56 format
+      s=s.replace(/,/g,'');
+    }
+  } else if(s.includes(',')){
+    // Could be 1,234 (thousands) or 1,5 (decimal)
+    // If there's more than one comma or digits after comma > 2, it's thousands
+    const parts=s.split(',');
+    if(parts.length>2||parts[parts.length-1].length===3){
+      s=s.replace(/,/g,'');
+    }else{
+      s=s.replace(',','.');
+    }
+  } else {
+    // Only dots: could be 1.234.567 (thousands) or 1.5
+    const parts=s.split('.');
+    if(parts.length>2){
+      s=s.replace(/\./g,'');
+    }
+    // If single dot with 3 digits after, likely thousands: 5.000
+    else if(parts.length===2&&parts[1].length===3&&parts[0].length>=1){
+      s=s.replace(/\./g,'');
+    }
+  }
+  return parseFloat(s)||0;
+}
+
+window.importPaste=async function(){
+  if(_importing)return;
+  if(!cur||!obras[cur]){toast('Seleccioná una obra','err');return}
+  _importing=true;
+
+  const mapping=[];
+  for(let c=0;c<_pasteCols;c++){
+    const sel=gs('pmap-'+c);
+    mapping.push(sel?sel.value:'ignorar');
+  }
+
+  // Check at least one meaningful field mapped
+  const hasField=mapping.some(m=>m!=='ignorar');
+  if(!hasField){toast('Asigná al menos una columna','err');return}
+
+  let count=0;
+  if(_pasteMode==='gastos'){
+    for(const row of _pasteRows){
+      const g={fecha:'',concepto:'',cantidad:'',monto:0,registro:'',montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,costoTotal:0};
+      row.forEach((val,i)=>{
+        const field=mapping[i];
+        if(field==='ignorar')return;
+        if(['monto','montoCheque','devuelto','saldoTotal','saldoCheque'].includes(field)){
+          g[field]=parseNum(val);
+        }else{
+          g[field]=val;
+        }
+      });
+      g.costoTotal=(g.saldoCheque||0);
+      if(!g.concepto&&!g.monto&&!g.montoCheque)continue; // skip empty
+      const gid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;
+      g.id=gid;
+      if(!gastos[cur])gastos[cur]=[];
+      gastos[cur].push({...g});
+      await fbSet('obras/'+cur+'/gastos/'+gid,g);
+      count++;
+    }
+    renderGastosPage();
+  }else{
+    for(const row of _pasteRows){
+      const c={fecha:'',concepto:'',bruto:0,neto:0,retencion:0};
+      row.forEach((val,i)=>{
+        const field=mapping[i];
+        if(field==='ignorar')return;
+        if(['bruto','neto'].includes(field)){
+          c[field]=parseNum(val);
+        }else{
+          c[field]=val;
+        }
+      });
+      c.retencion=(c.bruto||0)-(c.neto||0);
+      if(!c.concepto&&!c.bruto&&!c.neto)continue;
+      const cid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;
+      c.id=cid;
+      if(!certificados[cur])certificados[cur]=[];
+      certificados[cur].push({...c});
+      await fbSet('obras/'+cur+'/certificados/'+cid,c);
+      count++;
+    }
+    renderCerts();
+  }
+
+  closeM('mPaste');
+  _pasteRows=[];
+  _importing=false;
+  toast(`✅ ${count} ${_pasteMode==='gastos'?'gastos':'certificados'} importados`,'ok');
+};
 
 // ═══════════════════════════════════════
 // EXPORTAR EXCEL
@@ -2213,7 +2680,7 @@ window.exportExcel = function(){
         setCell(`I${row}`,parseFloat(g?.saldoTotal)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
         setCell(`J${row}`,parseFloat(g?.saldoCheque)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
         // Fórmula Costo Total = E + I + J
-        ws.getCell(`K${row}`).value={formula:`E${row}+I${row}+J${row}`};
+        ws.getCell(`K${row}`).value={formula:`J${row}`};
         ws.getCell(`K${row}`).fill=fill(AZUL_CL);
         ws.getCell(`K${row}`).numFmt=FMT_NUM;
         ws.getCell(`K${row}`).alignment=aln('right');
@@ -2352,228 +2819,327 @@ function _buildPDF(){
   const ayPct=obraAy(cur)/100;
   const hePct=obraHe(cur)/100;
 
-  // Landscape para que entren todas las columnas como el Excel
   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   const W=doc.internal.pageSize.getWidth();
   const H=doc.internal.pageSize.getHeight();
 
-  // Colores del Excel
   const AZUL_OSC=[31,56,100], AZUL_MED=[46,117,182], VERDE_OSC=[55,86,35];
   const VERDE_MED=[46,125,50], AZUL_CL=[214,228,240], VERDE_CL=[232,245,233];
   const GRIS=[217,217,217], AMARILLO=[244,185,66], AMAR_INP=[255,250,205];
   const WHITE=[255,255,255], BLACK=[0,0,0];
 
   const fNum=(x)=>{if(!x||isNaN(x))x=0;return Math.round(x).toLocaleString('es-PY')};
-  const M=8; // margen
+  const M=8;
 
-  // ══════════════════════════════════════════
-  // FILA 1: Título de la Obra (azul oscuro)
-  // ══════════════════════════════════════════
+  // Título
   doc.setFillColor(...AZUL_OSC); doc.rect(M,M,W-M*2,10,'F');
   doc.setTextColor(...WHITE); doc.setFontSize(12); doc.setFont('helvetica','bold');
   doc.text(nombre,W/2,M+7,{align:'center'});
 
-  // ══════════════════════════════════════════
-  // FILAS 2-5: Info de la Obra
-  // ══════════════════════════════════════════
+  // Info obra
   let y=M+12;
-  const infoRows=[
-    ['FECHA DE INICIO', o.fecha||''],
-    ['MONTO CONTRATO', fNum(parseFloat(o.contrato)||0)],
-    ['ADENDA', fNum(parseFloat(o.adenda)||0)],
-    ['ESTADO', o.estado||'EN EJECUCIÓN']
-  ];
+  const infoRows=[['FECHA DE INICIO',o.fecha||''],['MONTO CONTRATO',fNum(parseFloat(o.contrato)||0)],
+    ['ADENDA',fNum(parseFloat(o.adenda)||0)],['ESTADO',o.estado||'EN EJECUCIÓN']];
   infoRows.forEach(([label,val])=>{
-    doc.setFillColor(...GRIS); doc.rect(M,y,60,6,'F');
-    doc.setFillColor(...AMAR_INP); doc.rect(M+60,y,50,6,'F');
-    doc.setTextColor(...BLACK); doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.setFillColor(...GRIS);doc.rect(M,y,60,6,'F');
+    doc.setFillColor(...AMAR_INP);doc.rect(M+60,y,50,6,'F');
+    doc.setTextColor(...BLACK);doc.setFontSize(8);doc.setFont('helvetica','bold');
     doc.text(label,M+2,y+4.2);
-    doc.setFont('helvetica','normal');
-    doc.text(val,M+62,y+4.2);
+    doc.setFont('helvetica','normal');doc.text(val,M+62,y+4.2);
     y+=6;
   });
-
   y+=4;
 
-  // ══════════════════════════════════════════
-  // SECCIÓN: TOTAL DE GASTOS REALES
-  // ══════════════════════════════════════════
-  doc.setFillColor(...AZUL_MED); doc.rect(M,y,W-M*2,7,'F');
-  doc.setTextColor(...WHITE); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  // GASTOS
+  doc.setFillColor(...AZUL_MED);doc.rect(M,y,W-M*2,7,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(10);doc.setFont('helvetica','bold');
   doc.text('TOTAL DE GASTOS REALES',W/2,y+5.2,{align:'center'});
   y+=8;
 
-  // Tabla de gastos con TODAS las columnas del Excel
-  const gastosHead=[['Nº','Fecha','Concepto','Cant.','Monto Pagado','Registro','Monto Pagado (Cheque)','Devuelto','Saldo Total','Saldo Cheque','Costo Total']];
-  const gastosBody=gl.map((g,i)=>[
-    (i+1).toString(),
-    g.fecha||'',
-    g.concepto||'',
-    g.cantidad||'',
-    fNum(g.monto),
-    g.registro||'',
-    fNum(g.montoCheque),
-    fNum(g.devuelto),
-    fNum(g.saldoTotal),
-    fNum(g.saldoCheque),
-    fNum(g.costoTotal)
-  ]);
-
-  // Ayuda Social y HERI
-  const conTotal=r.con;
-  const ayVal=conTotal*ayPct;
-  const heVal=conTotal*hePct;
+  const gastosHead=[['Nº','Fecha','Concepto','Cant.','Monto Pagado','Registro','M.Cheque','Devuelto','Saldo Total','Saldo Cheque','Costo Total']];
+  const gastosBody=gl.map((g,i)=>[(i+1).toString(),g.fecha||'',g.concepto||'',g.cantidad||'',
+    fNum(g.monto),g.registro||'',fNum(g.montoCheque),fNum(g.devuelto),fNum(g.saldoTotal),fNum(g.saldoCheque),fNum(g.costoTotal)]);
+  const conTotal=r.con; const ayVal=conTotal*ayPct; const heVal=conTotal*hePct;
   gastosBody.push(['','',`GASTO FIJO-AYUDA SOCIAL ${Math.round(ayPct*100)}%`,'',fNum(ayVal),'','','','','',fNum(ayVal)]);
   gastosBody.push(['','',`GASTO FIJO-HERI ${Math.round(hePct*100)}%`,'',fNum(heVal),'','','','','',fNum(heVal)]);
+  const totalMP=gl.reduce((s,g)=>s+(g.monto||0),0)+ayVal+heVal;
+  const totalCh=gl.reduce((s,g)=>s+(g.montoCheque||0),0);
+  const totalCT=gl.reduce((s,g)=>s+(g.costoTotal||0),0)+ayVal+heVal;
 
-  // Total gastos
-  const totalMontoPag=gl.reduce((s,g)=>s+(g.monto||0),0)+ayVal+heVal;
-  const totalCheque=gl.reduce((s,g)=>s+(g.montoCheque||0),0);
-  const totalCosto=gl.reduce((s,g)=>s+(g.costoTotal||0),0)+ayVal+heVal;
-
-  doc.autoTable({
-    startY:y,
-    head:gastosHead,
-    body:gastosBody,
-    foot:[['','','TOTAL GASTOS','',fNum(totalMontoPag),'',fNum(totalCheque),'','','',fNum(totalCosto)]],
-    columnStyles:{
-      0:{cellWidth:8,halign:'center'},
-      1:{cellWidth:18},
-      2:{cellWidth:52},
-      3:{cellWidth:12,halign:'center'},
-      4:{cellWidth:24,halign:'right'},
-      5:{cellWidth:18},
-      6:{cellWidth:28,halign:'right'},
-      7:{cellWidth:20,halign:'right'},
-      8:{cellWidth:20,halign:'right'},
-      9:{cellWidth:20,halign:'right'},
-      10:{cellWidth:24,halign:'right'}
-    },
+  doc.autoTable({startY:y,head:gastosHead,body:gastosBody,
+    foot:[['','','TOTAL GASTOS','',fNum(totalMP),'',fNum(totalCh),'','','',fNum(totalCT)]],
+    columnStyles:{0:{cellWidth:8,halign:'center'},1:{cellWidth:18},2:{cellWidth:52},3:{cellWidth:12,halign:'center'},
+      4:{cellWidth:24,halign:'right'},5:{cellWidth:18},6:{cellWidth:24,halign:'right'},7:{cellWidth:20,halign:'right'},
+      8:{cellWidth:20,halign:'right'},9:{cellWidth:20,halign:'right'},10:{cellWidth:24,halign:'right'}},
     styles:{fontSize:6.5,cellPadding:1.8,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
     headStyles:{fillColor:AZUL_OSC,textColor:WHITE,fontStyle:'bold',fontSize:6.5,halign:'center'},
     footStyles:{fillColor:AMARILLO,textColor:BLACK,fontStyle:'bold',fontSize:7},
-    alternateRowStyles:{fillColor:AZUL_CL},
-    bodyStyles:{fillColor:WHITE},
-    margin:{left:M,right:M},
-    theme:'grid',
-    didParseCell:function(data){
-      // Resaltar filas de gastos fijos
-      if(data.section==='body'){
-        const rowIdx=data.row.index;
-        if(rowIdx>=gl.length){
-          data.cell.styles.fillColor=AZUL_CL;
-          data.cell.styles.fontStyle='italic';
-        }
-      }
-    }
+    alternateRowStyles:{fillColor:AZUL_CL},bodyStyles:{fillColor:WHITE},
+    margin:{left:M,right:M},theme:'grid',
+    didParseCell:function(data){if(data.section==='body'&&data.row.index>=gl.length){data.cell.styles.fillColor=AZUL_CL;data.cell.styles.fontStyle='italic';}}
   });
   y=doc.lastAutoTable.finalY+6;
 
-  // ══════════════════════════════════════════
-  // SECCIÓN: DETALLE DE PAGOS RECIBIDOS (CERTIFICADOS)
-  // ══════════════════════════════════════════
+  // CERTIFICADOS
   if(y>H-50){doc.addPage();y=M;}
-
-  doc.setFillColor(...VERDE_OSC); doc.rect(M,y,W-M*2,7,'F');
-  doc.setTextColor(...WHITE); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.setFillColor(...VERDE_OSC);doc.rect(M,y,W-M*2,7,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(10);doc.setFont('helvetica','bold');
   doc.text('DETALLE DE PAGOS RECIBIDOS (CERTIFICADOS)',W/2,y+5.2,{align:'center'});
   y+=8;
-
   const ct=calcCertsT(cur);
-  const certsHead=[['Nº','Fecha','Concepto / Certificado','Total Pagado (Bruto)','Retención Real','Neto Cobrado']];
-  const certsBody=cl.map((c,i)=>[
-    (i+1).toString(),
-    c.fecha||'',
-    c.concepto||'',
-    fNum(c.bruto),
-    fNum(c.retencion),
-    fNum(c.neto)
-  ]);
-
-  doc.autoTable({
-    startY:y,
-    head:certsHead,
-    body:certsBody,
+  doc.autoTable({startY:y,
+    head:[['Nº','Fecha','Concepto / Certificado','Total Pagado (Bruto)','Retención Real','Neto Cobrado']],
+    body:cl.map((c,i)=>[(i+1).toString(),c.fecha||'',c.concepto||'',fNum(c.bruto),fNum(c.retencion),fNum(c.neto)]),
     foot:[['','','TOTAL PAGOS RECIBIDOS',fNum(ct.br),fNum(ct.re),fNum(ct.ne)]],
-    columnStyles:{
-      0:{cellWidth:8,halign:'center'},
-      1:{cellWidth:22},
-      2:{cellWidth:70},
-      3:{cellWidth:35,halign:'right'},
-      4:{cellWidth:30,halign:'right'},
-      5:{cellWidth:35,halign:'right'}
-    },
+    columnStyles:{0:{cellWidth:8,halign:'center'},1:{cellWidth:22},2:{cellWidth:70},3:{cellWidth:35,halign:'right'},4:{cellWidth:30,halign:'right'},5:{cellWidth:35,halign:'right'}},
     styles:{fontSize:7,cellPadding:2,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
     headStyles:{fillColor:AZUL_OSC,textColor:WHITE,fontStyle:'bold',fontSize:7,halign:'center'},
     footStyles:{fillColor:VERDE_MED,textColor:WHITE,fontStyle:'bold',fontSize:7.5},
-    alternateRowStyles:{fillColor:VERDE_CL},
-    bodyStyles:{fillColor:WHITE},
-    margin:{left:M,right:M},
-    theme:'grid'
+    alternateRowStyles:{fillColor:VERDE_CL},bodyStyles:{fillColor:WHITE},
+    margin:{left:M,right:M},theme:'grid'
   });
   y=doc.lastAutoTable.finalY+6;
 
-  // ══════════════════════════════════════════
-  // SECCIÓN: RESUMEN GENERAL
-  // ══════════════════════════════════════════
+  // RESUMEN GENERAL
   if(y>H-75){doc.addPage();y=M;}
-
-  doc.setFillColor(...AZUL_OSC); doc.rect(M,y,W-M*2,7,'F');
-  doc.setTextColor(...WHITE); doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.setFillColor(...AZUL_OSC);doc.rect(M,y,W-M*2,7,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(10);doc.setFont('helvetica','bold');
   doc.text('RESUMEN GENERAL',W/2,y+5.2,{align:'center'});
   y+=9;
 
   const resRows=[
-    ['MONTO CONTRATO',                    fNum(r.con),        false, GRIS],
-    ['TOTAL DE GASTOS',                    fNum(r.tg),         false, GRIS],
-    ['TOTAL BRUTO COBRADO',                fNum(r.br),         false, GRIS],
-    ['RETENCIÓN TOTAL',                    fNum(r.re),         false, GRIS],
-    ['TOTAL NETO COBRADO',                 fNum(r.ne),         false, GRIS],
-    ['GANANCIA NETA (neto - gastos)',       fNum(r.gan),        false, GRIS],
-    ['PARA FERNANDO ('+cfg.socios+'%)',    fNum(r.corrCadaUno),true,  AMARILLO],
-    ['PARA WUILIAN ('+cfg.socios+'%)',     fNum(r.corrCadaUno),true,  AMARILLO],
-    ['PORCENTAJE DE GANANCIA',             fPct(r.pct),        false, GRIS],
-    ['SALDO A COBRAR',                     fNum(r.scob),       false, GRIS],
-    ['SALDO A PAGAR (COSTO TOTAL)',        fNum(r.spag),       false, GRIS],
+    ['MONTO CONTRATO',fNum(r.con),false,GRIS],['TOTAL DE GASTOS',fNum(r.tg),false,GRIS],
+    ['TOTAL BRUTO COBRADO',fNum(r.br),false,GRIS],['RETENCIÓN TOTAL',fNum(r.re),false,GRIS],
+    ['TOTAL NETO COBRADO',fNum(r.ne),false,GRIS],['GANANCIA NETA (neto - gastos)',fNum(r.gan),false,GRIS],
+    ['PARA FERNANDO ('+cfg.socios+'%)',fNum(r.corrCadaUno),true,AMARILLO],
+    ['PARA WUILIAN ('+cfg.socios+'%)',fNum(r.corrCadaUno),true,AMARILLO],
+    ['PORCENTAJE DE GANANCIA',fPct(r.pct),false,GRIS],
+    ['SALDO A COBRAR',fNum(r.scob),false,GRIS],['SALDO A PAGAR (COSTO TOTAL)',fNum(r.spag),false,GRIS],
   ];
-
-  const resLabelW=100, resValW=60;
-  const resX=W/2-(resLabelW+resValW)/2;
-
-  resRows.forEach(([label,val,highlight,bgColor])=>{
-    doc.setFillColor(...bgColor);
-    doc.rect(resX,y,resLabelW,7,'F');
-    doc.rect(resX+resLabelW,y,resValW,7,'F');
-    doc.setDrawColor(180,180,180); doc.setLineWidth(0.2);
-    doc.rect(resX,y,resLabelW,7,'S');
-    doc.rect(resX+resLabelW,y,resValW,7,'S');
-
-    doc.setTextColor(...BLACK);
-    doc.setFontSize(8);
-    doc.setFont('helvetica',highlight?'bold':'normal');
-    doc.text(label,resX+2,y+5);
-    doc.setFont('helvetica','bold');
-    doc.text(val,resX+resLabelW+resValW-2,y+5,{align:'right'});
+  const resLW=100,resVW=60,resX=W/2-(resLW+resVW)/2;
+  resRows.forEach(([label,val,hl,bg])=>{
+    doc.setFillColor(...bg);doc.rect(resX,y,resLW,7,'F');doc.rect(resX+resLW,y,resVW,7,'F');
+    doc.setDrawColor(180,180,180);doc.setLineWidth(0.2);doc.rect(resX,y,resLW,7,'S');doc.rect(resX+resLW,y,resVW,7,'S');
+    doc.setTextColor(...BLACK);doc.setFontSize(8);doc.setFont('helvetica',hl?'bold':'normal');
+    doc.text(label,resX+2,y+5);doc.setFont('helvetica','bold');doc.text(val,resX+resLW+resVW-2,y+5,{align:'right'});
     y+=7;
   });
 
-  // ══════════════════════════════════════════
-  // Footer en cada página
-  // ══════════════════════════════════════════
-  const totalPages=doc.internal.getNumberOfPages();
-  for(let i=1;i<=totalPages;i++){
-    doc.setPage(i);
-    const pH=doc.internal.pageSize.getHeight();
-    doc.setFillColor(240,240,240); doc.rect(0,pH-8,W,8,'F');
-    doc.setDrawColor(...AZUL_MED); doc.setLineWidth(0.3); doc.line(M,pH-8,W-M,pH-8);
-    doc.setTextColor(100,100,120); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
-    doc.text('THALAMUS FINANZAS — Documento generado el '+new Date().toLocaleDateString('es-PY'),M,pH-3.5);
-    doc.text('Página '+i+' de '+totalPages,W-M,pH-3.5,{align:'right'});
+  // Footer
+  const tp=doc.internal.getNumberOfPages();
+  for(let i=1;i<=tp;i++){
+    doc.setPage(i);const pH=doc.internal.pageSize.getHeight();
+    doc.setFillColor(240,240,240);doc.rect(0,pH-8,W,8,'F');
+    doc.setDrawColor(...AZUL_MED);doc.setLineWidth(0.3);doc.line(M,pH-8,W-M,pH-8);
+    doc.setTextColor(100,100,120);doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text('THALAMUS FINANZAS — '+new Date().toLocaleDateString('es-PY'),M,pH-3.5);
+    doc.text('Página '+i+' de '+tp,W-M,pH-3.5,{align:'right'});
   }
 
   const fn='Planilla_'+(o.num?'N'+o.num+'_':'')+o.nombre.replace(/[^a-zA-Z0-9]/g,'_')+'_'+today()+'.pdf';
-  doc.save(fn);
-  toast('PDF exportado ✓','ok');
+  doc.save(fn);toast('PDF exportado ✓','ok');
+}
+
+// ═══════════════════════════════════════
+// EXPORTAR UTILIDADES
+// ═══════════════════════════════════════
+function getUtilidadesData(){
+  const list=Object.values(obras);
+  let totGan=0,totF=0,totW=0;
+  const rows=list.map(o=>{
+    const r=calcRes(o.id);
+    totGan+=r.gan; totF+=r.corrCadaUno; totW+=r.corrCadaUno;
+    return{nombre:(o.num?'Nº'+o.num+' – ':'')+o.nombre,gan:r.gan,f:r.corrCadaUno,w:r.corrCadaUno};
+  });
+  const retF=totalRetiros('fernando'),retW=totalRetiros('wuilian');
+  const retFList=retiros.fernando||[],retWList=retiros.wuilian||[];
+  return{rows,totGan,totF,totW,retF,retW,saldoF:totF-retF,saldoW:totW-retW,retFList,retWList};
+}
+
+window.exportUtilidadesExcel=function(){
+  const loadExcelJS=(cb)=>{
+    if(window.ExcelJS){cb();return;}
+    toast('Cargando librería...','info');
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+    s.onload=cb; document.head.appendChild(s);
+  };
+  loadExcelJS(async()=>{
+    const d=getUtilidadesData();
+    const wb=new ExcelJS.Workbook(); wb.creator='Thalamus Finanzas';
+    const ws=wb.addWorksheet('UTILIDADES');
+    ws.columns=[{key:'A',width:40},{key:'B',width:22},{key:'C',width:22},{key:'D',width:22}];
+    const AZUL='1F3864',GOLD='C9A84C',VERDE='375623',GRIS='D9D9D9',AMAR='F4B942';
+    const FMT='#,##0';
+    const fill=(c)=>({type:'pattern',pattern:'solid',fgColor:{argb:'FF'+c}});
+    const font=(b,c='000000',sz=10)=>({bold:b,color:{argb:'FF'+c},size:sz,name:'Calibri'});
+    const thin={style:'thin',color:{argb:'FF000000'}};
+    const brd={top:thin,left:thin,bottom:thin,right:thin};
+    function sc(addr,val,opts={}){
+      const c=ws.getCell(addr);c.value=val;
+      if(opts.b||opts.c||opts.sz)c.font=font(opts.b||false,opts.c||'000000',opts.sz||10);
+      if(opts.bg)c.fill=fill(opts.bg);
+      c.alignment={horizontal:opts.al||'left',vertical:'middle'};
+      if(opts.fmt)c.numFmt=opts.fmt;
+      c.border=brd;
+    }
+    // Title
+    ws.mergeCells('A1:D1');
+    sc('A1','CONTROL DE UTILIDADES — '+today(),{b:true,c:'FFFFFF',bg:AZUL,sz:12,al:'center'});
+    ws.getRow(1).height=28;
+    // Headers
+    ['A2','B2','C2','D2'].forEach((addr,i)=>{
+      sc(addr,['Obra','Ganancia Neta','Fernando ('+cfg.socios+'%)','Wuilian ('+cfg.socios+'%)'][i],{b:true,c:'FFFFFF',bg:AZUL,al:'center'});
+    });
+    // Rows
+    d.rows.forEach((r,i)=>{
+      const rn=3+i;
+      sc('A'+rn,r.nombre,{bg:i%2?GRIS:'FFFFFF'});
+      sc('B'+rn,r.gan,{fmt:FMT,bg:i%2?GRIS:'FFFFFF',al:'right'});
+      sc('C'+rn,r.f,{fmt:FMT,bg:i%2?GRIS:'FFFFFF',al:'right'});
+      sc('D'+rn,r.w,{fmt:FMT,bg:i%2?GRIS:'FFFFFF',al:'right'});
+    });
+    // Totals
+    let rn=3+d.rows.length;
+    sc('A'+rn,'TOTAL GLOBAL',{b:true,bg:AMAR,al:'center'});
+    sc('B'+rn,d.totGan,{b:true,bg:AMAR,fmt:FMT,al:'right'});
+    sc('C'+rn,d.totF,{b:true,bg:AMAR,fmt:FMT,al:'right'});
+    sc('D'+rn,d.totW,{b:true,bg:AMAR,fmt:FMT,al:'right'});
+    rn+=2;
+    // Resumen socios
+    ws.mergeCells('A'+rn+':D'+rn);
+    sc('A'+rn,'RESUMEN POR SOCIO',{b:true,c:'FFFFFF',bg:AZUL,sz:11,al:'center'}); rn++;
+    const resumen=[
+      ['Fernando — Le corresponde',d.totF],['Fernando — Retirado',d.retF],['Fernando — Saldo',d.saldoF],
+      ['Wuilian — Le corresponde',d.totW],['Wuilian — Retirado',d.retW],['Wuilian — Saldo',d.saldoW],
+    ];
+    resumen.forEach(([label,val],i)=>{
+      sc('A'+rn,label,{b:i%3===2,bg:i%3===2?AMAR:GRIS});
+      sc('B'+rn,val,{b:i%3===2,bg:i%3===2?AMAR:GRIS,fmt:FMT,al:'right'});
+      rn++;
+    });
+    // Retiros Fernando
+    if(d.retFList.length){
+      rn++;
+      ws.mergeCells('A'+rn+':D'+rn);
+      sc('A'+rn,'RETIROS — FERNANDO',{b:true,c:'FFFFFF',bg:'7A5515',al:'center'}); rn++;
+      ['Fecha','Concepto','Monto'].forEach((h,i)=>sc(['A','B','C'][i]+rn,h,{b:true,c:'FFFFFF',bg:AZUL,al:'center'})); rn++;
+      d.retFList.forEach(r=>{sc('A'+rn,r.fecha||'');sc('B'+rn,r.concepto||'');sc('C'+rn,r.monto||0,{fmt:FMT,al:'right'});rn++;});
+    }
+    // Retiros Wuilian
+    if(d.retWList.length){
+      rn++;
+      ws.mergeCells('A'+rn+':D'+rn);
+      sc('A'+rn,'RETIROS — WUILIAN',{b:true,c:'FFFFFF',bg:'2E75B6',al:'center'}); rn++;
+      ['Fecha','Concepto','Monto'].forEach((h,i)=>sc(['A','B','C'][i]+rn,h,{b:true,c:'FFFFFF',bg:AZUL,al:'center'})); rn++;
+      d.retWList.forEach(r=>{sc('A'+rn,r.fecha||'');sc('B'+rn,r.concepto||'');sc('C'+rn,r.monto||0,{fmt:FMT,al:'right'});rn++;});
+    }
+    const buffer=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='Utilidades_'+today()+'.xlsx';a.click();
+    toast('Excel de Utilidades exportado ✓','ok');
+  });
+};
+
+window.exportUtilidadesPDF=function(){
+  if(typeof window.jspdf==='undefined'&&typeof jsPDF==='undefined'){
+    toast('Cargando librería PDF...','info');
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+    s.onload=()=>{
+      const s2=document.createElement('script');
+      s2.src='https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js';
+      s2.onload=()=>_buildUtilidadesPDF();
+      document.head.appendChild(s2);
+    };document.head.appendChild(s);
+  }else{_buildUtilidadesPDF();}
+};
+
+function _buildUtilidadesPDF(){
+  const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!jsPDF){toast('Error cargando PDF','err');return}
+  const d=getUtilidadesData();
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth();
+  const M=10;
+  const AZUL=[31,56,100],AMAR=[244,185,66],GRIS=[230,230,230],BLACK=[0,0,0],WHITE=[255,255,255];
+  const fNum=(x)=>Math.round(x||0).toLocaleString('es-PY');
+
+  // Header
+  doc.setFillColor(...AZUL);doc.rect(M,M,W-M*2,10,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(12);doc.setFont('helvetica','bold');
+  doc.text('CONTROL DE UTILIDADES',W/2,M+7,{align:'center'});
+  doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text(new Date().toLocaleDateString('es-PY'),W-M-2,M+7,{align:'right'});
+
+  let y=M+14;
+
+  // Tabla utilidades por obra
+  doc.autoTable({startY:y,
+    head:[['Obra','Ganancia Neta','Fernando ('+cfg.socios+'%)','Wuilian ('+cfg.socios+'%)']],
+    body:d.rows.map(r=>[r.nombre,fNum(r.gan),fNum(r.f),fNum(r.w)]),
+    foot:[['TOTAL GLOBAL',fNum(d.totGan),fNum(d.totF),fNum(d.totW)]],
+    columnStyles:{0:{cellWidth:70},1:{halign:'right'},2:{halign:'right'},3:{halign:'right'}},
+    styles:{fontSize:7.5,cellPadding:2.5,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+    headStyles:{fillColor:AZUL,textColor:WHITE,fontStyle:'bold',fontSize:7.5,halign:'center'},
+    footStyles:{fillColor:AMAR,textColor:BLACK,fontStyle:'bold'},
+    alternateRowStyles:{fillColor:GRIS},bodyStyles:{fillColor:WHITE},
+    margin:{left:M,right:M},theme:'grid'
+  });
+  y=doc.lastAutoTable.finalY+8;
+
+  // Resumen socios
+  doc.setFillColor(...AZUL);doc.rect(M,y,W-M*2,7,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('RESUMEN POR SOCIO',W/2,y+5,{align:'center'});y+=9;
+  const resRows=[
+    ['Fernando — Le corresponde',fNum(d.totF),false],['Fernando — Retirado',fNum(d.retF),false],['Fernando — Saldo',fNum(d.saldoF),true],
+    ['Wuilian — Le corresponde',fNum(d.totW),false],['Wuilian — Retirado',fNum(d.retW),false],['Wuilian — Saldo',fNum(d.saldoW),true],
+  ];
+  const rW=80,vW=50,rX=W/2-(rW+vW)/2;
+  resRows.forEach(([label,val,hl])=>{
+    const bg=hl?AMAR:GRIS;
+    doc.setFillColor(...bg);doc.rect(rX,y,rW,6.5,'F');doc.rect(rX+rW,y,vW,6.5,'F');
+    doc.setDrawColor(180,180,180);doc.setLineWidth(0.2);doc.rect(rX,y,rW,6.5,'S');doc.rect(rX+rW,y,vW,6.5,'S');
+    doc.setTextColor(...BLACK);doc.setFontSize(8);doc.setFont('helvetica',hl?'bold':'normal');
+    doc.text(label,rX+2,y+4.5);doc.setFont('helvetica','bold');doc.text(val,rX+rW+vW-2,y+4.5,{align:'right'});
+    y+=6.5;
+  });
+  y+=6;
+
+  // Retiros
+  const printRetiros=(nombre,list)=>{
+    if(!list.length)return;
+    if(y>250){doc.addPage();y=M;}
+    doc.setFillColor(...AZUL);doc.rect(M,y,W-M*2,6,'F');
+    doc.setTextColor(...WHITE);doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text('RETIROS — '+nombre.toUpperCase(),W/2,y+4.2,{align:'center'});y+=7;
+    doc.autoTable({startY:y,
+      head:[['Fecha','Concepto','Monto']],
+      body:list.map(r=>[r.fecha||'',r.concepto||'',fNum(r.monto)]),
+      columnStyles:{2:{halign:'right'}},
+      styles:{fontSize:7,cellPadding:2,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+      headStyles:{fillColor:AZUL,textColor:WHITE,fontStyle:'bold',halign:'center'},
+      alternateRowStyles:{fillColor:GRIS},bodyStyles:{fillColor:WHITE},
+      margin:{left:M,right:M},theme:'grid'
+    });
+    y=doc.lastAutoTable.finalY+6;
+  };
+  printRetiros('Fernando',d.retFList);
+  printRetiros('Wuilian',d.retWList);
+
+  // Footer
+  const tp=doc.internal.getNumberOfPages();
+  for(let i=1;i<=tp;i++){
+    doc.setPage(i);const pH=doc.internal.pageSize.getHeight();
+    doc.setFillColor(240,240,240);doc.rect(0,pH-8,W,8,'F');
+    doc.setTextColor(100,100,120);doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text('THALAMUS FINANZAS — Utilidades — '+new Date().toLocaleDateString('es-PY'),M,pH-3.5);
+    doc.text('Página '+i+' de '+tp,W-M,pH-3.5,{align:'right'});
+  }
+  doc.save('Utilidades_'+today()+'.pdf');
+  toast('PDF de Utilidades exportado ✓','ok');
 }
 </script>
 </body>
