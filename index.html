@@ -49,6 +49,60 @@
   --shadow-glow: 0 0 0 1px rgba(201,168,76,.22), 0 4px 24px rgba(201,168,76,.08);
 }
 
+/* ─── LOGIN SCREEN ───────────────────────────────── */
+.login-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .4s, visibility .4s;
+}
+.login-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.login-box {
+  background: var(--surf2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 2.4rem 2rem 2rem;
+  width: 92%; max-width: 370px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.5), var(--shadow-glow);
+}
+.login-logo { text-align: center; margin-bottom: 1.6rem; }
+.login-logo .logo-mark { width: 48px; height: 48px; font-size: 18px; margin: 0 auto 10px; border-radius: 12px; }
+.login-logo .logo-main { font-size: 1.1rem; }
+.login-logo .logo-sub { font-size: .5rem; }
+.login-field { margin-bottom: 1rem; }
+.login-field label { display: block; font-size: .7rem; font-weight: 600; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.login-field input {
+  width: 100%; padding: .6rem .75rem; font-size: .85rem;
+  background: var(--surf); border: 1px solid var(--border2); border-radius: var(--r-sm);
+  color: var(--txt); outline: none; font-family: 'JetBrains Mono', monospace;
+}
+.login-field input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow); }
+.login-btn {
+  width: 100%; padding: .65rem; margin-top: .5rem;
+  background: linear-gradient(135deg, var(--gold), #7a5515); border: none; border-radius: var(--r-sm);
+  color: #000; font-weight: 700; font-size: .85rem; cursor: pointer;
+  letter-spacing: .04em; transition: filter .2s;
+}
+.login-btn:hover { filter: brightness(1.15); }
+.login-error { color: var(--acc3); font-size: .72rem; text-align: center; margin-top: .6rem; min-height: 1rem; }
+.login-footer { text-align: center; margin-top: 1.2rem; font-size: .68rem; color: var(--muted); }
+.login-footer a { color: var(--gold); cursor: pointer; text-decoration: underline; }
+
+/* Admin: User management card */
+.user-row { display: flex; align-items: center; gap: .6rem; padding: .5rem .7rem; border-bottom: 1px solid var(--border); }
+.user-row:last-child { border-bottom: none; }
+.user-row .u-name { flex: 1; font-size: .82rem; color: var(--txt); }
+.user-row .u-role { font-size: .62rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; letter-spacing: .06em; }
+.user-row .u-role.admin { background: rgba(201,168,76,.15); color: var(--gold); }
+.user-row .u-role.user { background: rgba(63,184,216,.12); color: var(--acc2); }
+.user-logged { display: flex; align-items: center; gap: 6px; font-size: .7rem; color: var(--dim); }
+.user-logged .u-avatar {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--surf3); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 700; color: var(--gold);
+}
+.btn-logout { background: none; border: 1px solid var(--border2); border-radius: var(--r-sm); color: var(--dim); font-size: .62rem; padding: 3px 8px; cursor: pointer; }
+.btn-logout:hover { border-color: var(--acc3); color: var(--acc3); }
+
 /* ─── RESET & BASE ───────────────────────────────── */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; overflow:hidden; }
@@ -628,6 +682,31 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-mark">TF</div>
+      <div class="logo-text" style="display:inline-block"><div class="logo-main">THALAMUS</div><div class="logo-sub">Finanzas</div></div>
+    </div>
+    <div id="loginForm">
+      <div class="login-field"><label>Usuario</label><input type="text" id="login-user" placeholder="Ingresá tu usuario" autocomplete="username"></div>
+      <div class="login-field"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="login-btn" onclick="doLogin()">Ingresar</button>
+      <div class="login-error" id="login-err"></div>
+      <div class="login-footer">Primera vez? <a onclick="showRegister()">Crear cuenta</a></div>
+    </div>
+    <div id="registerForm" style="display:none">
+      <div class="login-field"><label>Nuevo usuario</label><input type="text" id="reg-user" placeholder="Elegí un nombre de usuario" autocomplete="off"></div>
+      <div class="login-field"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
+      <div class="login-field"><label>Repetir contraseña</label><input type="password" id="reg-pass2" placeholder="Repetí la contraseña" autocomplete="new-password"></div>
+      <button class="login-btn" onclick="doRegister()">Crear cuenta</button>
+      <div class="login-error" id="reg-err"></div>
+      <div class="login-footer"><a onclick="showLogin()">← Volver al login</a></div>
+    </div>
+  </div>
+</div>
+
 <!-- OVERLAY MOBILE -->
 <div class="sidebar-overlay" id="sideOverlay" onclick="closeSidebar()"></div>
 
@@ -643,8 +722,13 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
     <button class="btn-new" onclick="openNuevaObra()">+ Nueva obra</button>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <div class="user-logged">
+      <div class="u-avatar" id="topAvatar">?</div>
+      <span id="topUser" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+    </div>
     <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbTxt">Conectando...</span></div>
     <button class="btn btn-ghost btn-sm" onclick="navTo('config')">⚙️</button>
+    <button class="btn-logout" onclick="doLogout()">Salir</button>
   </div>
 </div>
 
@@ -949,6 +1033,18 @@ tbody tr:hover td { background:rgba(255,255,255,.03); color:var(--txt); }
     <div class="card-title">Datos</div>
     <div class="row-btns"><button class="btn btn-secondary" onclick="exportJSON()">📤 Exportar JSON</button></div>
   </div>
+  <div class="card" id="userAdminCard">
+    <div class="card-title">👥 Gestión de Usuarios</div>
+    <div style="font-size:.68rem;color:var(--muted);margin-bottom:.7rem">Administrá los usuarios del sistema. Solo los administradores pueden crear y eliminar usuarios.</div>
+    <div id="userList" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:.8rem">
+    </div>
+    <div class="form-grid" style="max-width:420px" id="addUserForm">
+      <div class="fg"><label>Nuevo usuario</label><input type="text" id="adm-user" placeholder="nombre"></div>
+      <div class="fg"><label>Contraseña</label><input type="password" id="adm-pass" placeholder="contraseña"></div>
+      <div class="fg"><label>Rol</label><select id="adm-role"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+    </div>
+    <div class="row-btns"><button class="btn btn-primary" onclick="adminAddUser()">➕ Agregar Usuario</button></div>
+  </div>
 </div>
 
 </main>
@@ -1043,10 +1139,196 @@ localStorage.setItem('fbCfg', JSON.stringify(FB));
 const keys = ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
 const ids = ['cfg-ak','cfg-ad','cfg-pid','cfg-bk','cfg-ms','cfg-ai2'];
 ids.forEach((id,i) => { const el=document.getElementById(id); if(el) el.value=FB[keys[i]]||''; });
-window.connectFB(FB).then(() => window.initApp && window.initApp());
+window.connectFB(FB).then(() => { if(_currentUser) window.initApp && window.initApp(); });
 </script>
 
 <script>
+// ═══════════════════════════════════════
+// USER AUTH SYSTEM
+// ═══════════════════════════════════════
+let _currentUser = null;
+
+// Simple hash for passwords (not crypto-grade but enough for client-side separation)
+async function hashPass(pass){
+  const enc = new TextEncoder().encode(pass+'_thalamus_salt_2024');
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function getUsers(){
+  try{ return JSON.parse(localStorage.getItem('thalamus_users'))||{}; }catch{ return {}; }
+}
+function saveUsers(u){ localStorage.setItem('thalamus_users', JSON.stringify(u)); }
+
+// Create default admin if no users exist
+function ensureDefaultAdmin(){
+  const users = getUsers();
+  if(Object.keys(users).length === 0){
+    // Will be set async on first load
+    hashPass('admin').then(h=>{
+      users['admin'] = { hash: h, role: 'admin', created: new Date().toISOString() };
+      saveUsers(users);
+    });
+  }
+}
+ensureDefaultAdmin();
+
+function userPrefix(){
+  return _currentUser ? 'u/'+_currentUser+'/' : 'oc/';
+}
+
+// UI helpers for login
+window.showRegister = function(){ gs('loginForm').style.display='none'; gs('registerForm').style.display=''; gs('reg-err').textContent=''; gs('reg-user').focus(); }
+window.showLogin = function(){ gs('registerForm').style.display='none'; gs('loginForm').style.display=''; gs('login-err').textContent=''; gs('login-user').focus(); }
+
+window.doLogin = async function(){
+  const user = gs('login-user').value.trim().toLowerCase();
+  const pass = gs('login-pass').value;
+  if(!user||!pass){ gs('login-err').textContent='Completá usuario y contraseña'; return; }
+  const users = getUsers();
+  if(!users[user]){ gs('login-err').textContent='Usuario no encontrado'; return; }
+  const h = await hashPass(pass);
+  if(users[user].hash !== h){ gs('login-err').textContent='Contraseña incorrecta'; return; }
+  _currentUser = user;
+  sessionStorage.setItem('thalamus_session', user);
+  gs('loginOverlay').classList.add('hidden');
+  updateTopUser();
+  updateUserAdmin();
+  await window.initApp();
+};
+
+window.doRegister = async function(){
+  const users = getUsers();
+  // Only allow register if no users exist (first time) or if self-registration
+  const user = gs('reg-user').value.trim().toLowerCase();
+  const pass = gs('reg-pass').value;
+  const pass2 = gs('reg-pass2').value;
+  if(!user||!pass){ gs('reg-err').textContent='Completá todos los campos'; return; }
+  if(user.length<2){ gs('reg-err').textContent='El usuario debe tener al menos 2 caracteres'; return; }
+  if(pass.length<4){ gs('reg-err').textContent='La contraseña debe tener al menos 4 caracteres'; return; }
+  if(pass!==pass2){ gs('reg-err').textContent='Las contraseñas no coinciden'; return; }
+  if(users[user]){ gs('reg-err').textContent='Ese usuario ya existe'; return; }
+  const isFirst = Object.keys(users).length === 0;
+  const h = await hashPass(pass);
+  users[user] = { hash: h, role: isFirst ? 'admin' : 'user', created: new Date().toISOString() };
+  saveUsers(users);
+  _currentUser = user;
+  sessionStorage.setItem('thalamus_session', user);
+  gs('loginOverlay').classList.add('hidden');
+  updateTopUser();
+  updateUserAdmin();
+  toast('Cuenta creada ✓ '+(isFirst?'(Administrador)':''),'ok');
+  await window.initApp();
+};
+
+window.doLogout = function(){
+  _currentUser = null;
+  sessionStorage.removeItem('thalamus_session');
+  obras={}; gastos={}; certificados={}; retiros={fernando:[],wuilian:[]};
+  cur=null;
+  gs('loginOverlay').classList.remove('hidden');
+  gs('login-user').value=''; gs('login-pass').value=''; gs('login-err').textContent='';
+  showLogin();
+  gs('login-user').focus();
+};
+
+function updateTopUser(){
+  if(!_currentUser) return;
+  const avatar = _currentUser.charAt(0).toUpperCase();
+  gs('topAvatar').textContent = avatar;
+  gs('topUser').textContent = _currentUser;
+}
+
+function updateUserAdmin(){
+  const users = getUsers();
+  const isAdmin = users[_currentUser]?.role === 'admin';
+  const card = gs('userAdminCard');
+  const form = gs('addUserForm');
+  if(!card) return;
+  // Show admin card to all, but only admins can add/delete
+  const list = gs('userList');
+  let html = '';
+  for(const [name,data] of Object.entries(users)){
+    const isSelf = name === _currentUser;
+    html += '<div class="user-row">';
+    html += '<span class="u-name">'+(isSelf?'<b>'+name+'</b> (vos)':name)+'</span>';
+    html += '<span class="u-role '+(data.role||'user')+'">'+(data.role==='admin'?'Admin':'Usuario')+'</span>';
+    if(isAdmin && !isSelf) html += ' <button class="btn-logout" style="margin-left:6px" onclick="adminDelUser(\''+name+'\')">✕</button>';
+    if(isAdmin && !isSelf) html += ' <button class="btn-logout" style="margin-left:4px;border-color:var(--gold);color:var(--gold)" onclick="adminResetPass(\''+name+'\')">🔑</button>';
+    html += '</div>';
+  }
+  list.innerHTML = html;
+  if(form) form.style.display = isAdmin ? '' : 'none';
+  // Hide the add button for non-admins
+  const addBtn = card.querySelector('.row-btns');
+  if(addBtn) addBtn.style.display = isAdmin ? '' : 'none';
+}
+
+window.adminAddUser = async function(){
+  const users = getUsers();
+  if(users[_currentUser]?.role !== 'admin'){ toast('Solo administradores pueden agregar usuarios','err'); return; }
+  const name = gs('adm-user').value.trim().toLowerCase();
+  const pass = gs('adm-pass').value;
+  const role = gs('adm-role').value;
+  if(!name||!pass){ toast('Completá usuario y contraseña','err'); return; }
+  if(name.length<2){ toast('El usuario debe tener al menos 2 caracteres','err'); return; }
+  if(pass.length<4){ toast('La contraseña debe tener al menos 4 caracteres','err'); return; }
+  if(users[name]){ toast('Ese usuario ya existe','err'); return; }
+  users[name] = { hash: await hashPass(pass), role, created: new Date().toISOString() };
+  saveUsers(users);
+  gs('adm-user').value=''; gs('adm-pass').value='';
+  updateUserAdmin();
+  toast('Usuario "'+name+'" creado ✓','ok');
+};
+
+window.adminDelUser = function(name){
+  const users = getUsers();
+  if(users[_currentUser]?.role !== 'admin') return;
+  if(!confirm('¿Eliminar usuario "'+name+'"? Sus datos NO se borrarán.')) return;
+  delete users[name];
+  saveUsers(users);
+  updateUserAdmin();
+  toast('Usuario eliminado','ok');
+};
+
+window.adminResetPass = async function(name){
+  const newPass = prompt('Nueva contraseña para "'+name+'" (mínimo 4 caracteres):');
+  if(!newPass||newPass.length<4){ toast('Contraseña muy corta','err'); return; }
+  const users = getUsers();
+  users[name].hash = await hashPass(newPass);
+  saveUsers(users);
+  toast('Contraseña de "'+name+'" actualizada ✓','ok');
+};
+
+// Auto-login from session
+function tryAutoLogin(){
+  const sess = sessionStorage.getItem('thalamus_session');
+  if(sess){
+    const users = getUsers();
+    if(users[sess]){
+      _currentUser = sess;
+      gs('loginOverlay').classList.add('hidden');
+      updateTopUser();
+      updateUserAdmin();
+      return true;
+    }
+  }
+  // Check if there are no users at all — show register
+  const users = getUsers();
+  if(Object.keys(users).length === 0){
+    showRegister();
+  }
+  return false;
+}
+
+// Enter key handlers
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter'){
+    if(document.activeElement===gs('login-pass')||document.activeElement===gs('login-user')) doLogin();
+    if(document.activeElement===gs('reg-pass2')) doRegister();
+  }
+});
+
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
@@ -1128,13 +1410,13 @@ async function fbSet(path,data){
       return;
     }catch(e){console.warn('fbSet error:',e)}
   }
-  localStorage.setItem('oc/'+path,JSON.stringify(data));
+  localStorage.setItem(userPrefix()+path,JSON.stringify(data));
 }
 async function fbDel(path){
   if(window._fbOk&&window._db){
     try{const p=path.split('/');await window._FBM.deleteDoc(window._FBM.doc(window._db,...p));return;}catch(e){}
   }
-  localStorage.removeItem('oc/'+path);
+  localStorage.removeItem(userPrefix()+path);
 }
 async function fbGetAll(col){
   if(window._fbOk&&window._db){
@@ -1143,7 +1425,7 @@ async function fbGetAll(col){
       const res={}; snap.forEach(d=>{res[d.id]=d.data()}); return res;
     }catch(e){console.warn('fbGetAll error:',e)}
   }
-  const res={},prefix='oc/'+col+'/';
+  const res={},prefix=userPrefix()+col+'/';
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
     if(k.startsWith(prefix)){try{res[k.slice(prefix.length)]=JSON.parse(localStorage.getItem(k));}catch{}}
@@ -1158,14 +1440,15 @@ async function fbGetDoc(path){
       return snap.exists()?snap.data():null;
     }catch(e){}
   }
-  try{return JSON.parse(localStorage.getItem('oc/'+path));}catch{return null}
+  try{return JSON.parse(localStorage.getItem(userPrefix()+path));}catch{return null}
 }
 
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
 window.initApp = async function(){
-  const p=localStorage.getItem('ocCfg');
+  if(!_currentUser) return; // Wait for login
+  const p=localStorage.getItem(userPrefix()+'cfg');
   if(p) try{cfg=JSON.parse(p);}catch{}
   gs('p-ay').value=cfg.ayuda; gs('p-he').value=cfg.heri; gs('p-so').value=cfg.socios;
 
@@ -1182,7 +1465,8 @@ window.initApp = async function(){
   if(rd) retiros={fernando:rd.fernando||[],wuilian:rd.wuilian||[]};
 
   populateSel(); navTo('obras');
-  toast('Sistema cargado ✓','ok');
+  updateUserAdmin();
+  toast('Bienvenido, '+_currentUser+' ✓','ok');
 };
 
 window.saveAndConnect=async function(){
@@ -1702,7 +1986,7 @@ window.updateFijo=async function(id,campo,val){
 };
 window.saveCfgP=function(){
   cfg={ayuda:parseFloat(gs('p-ay').value)||10,heri:parseFloat(gs('p-he').value)||1,socios:parseFloat(gs('p-so').value)||50};
-  localStorage.setItem('ocCfg',JSON.stringify(cfg)); toast('Parámetros guardados','ok');
+  localStorage.setItem(userPrefix()+'cfg',JSON.stringify(cfg)); toast('Parámetros guardados','ok');
 };
 window.exportJSON=function(){
   const data=JSON.stringify({obras,gastos,certificados,retiros,cfg},null,2);
@@ -1811,11 +2095,15 @@ window.importAll=async function(){
 // Init fechas por defecto
 document.addEventListener('DOMContentLoaded',()=>{
   ['c-f','ret-f'].forEach(id=>{const el=gs(id);if(el)el.value=today()});
-  if(window._fbOk !== undefined && !window._appLoaded){
+  const autoLogged = tryAutoLogin();
+  if(autoLogged && window._fbOk !== undefined && !window._appLoaded){
     window._appLoaded=true; window.initApp&&window.initApp();
+  } else if(!autoLogged){
+    // Show login, don't init app yet
+    gs('loginOverlay').classList.remove('hidden');
   }
 });
-setTimeout(()=>{if(!window._appLoaded){window._appLoaded=true;window.initApp&&window.initApp();}},5000);
+setTimeout(()=>{if(!window._appLoaded && _currentUser){window._appLoaded=true;window.initApp&&window.initApp();}},5000);
 
 // ═══════════════════════════════════════
 // EXPORTAR EXCEL
