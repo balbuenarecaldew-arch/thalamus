@@ -1616,7 +1616,7 @@ window.saveAndConnect=async function(){
 function obraAy(id){const o=obras[id];return o?.ayuda!=null?parseFloat(o.ayuda):cfg.ayuda}
 function obraHe(id){const o=obras[id];return o?.heri!=null?parseFloat(o.heri):cfg.heri}
 function calcCon(id){const o=obras[id]||{};return(parseFloat(o.contrato)||0)+(parseFloat(o.adenda)||0)}
-function costoG(g){return(parseFloat(g.saldoCheque)||0)}
+function costoG(g){return(parseFloat(g.monto)||0)+(parseFloat(g.saldoTotal)||0)+(parseFloat(g.saldoCheque)||0)}
 function calcAy(id){return calcCon(id)*(obraAy(id)/100)}
 function calcHe(id){return calcCon(id)*(obraHe(id)/100)}
 function calcTE(id){return(gastos[id]||[]).reduce((s,g)=>s+(parseFloat(g.monto)||0),0)+calcAy(id)+calcHe(id)}
@@ -1867,7 +1867,7 @@ function renderQRows(){
       </div>
     </div>`).join('');
 }
-function cRow(r){return(parseFloat(r.saldoCheque)||0)}
+function cRow(r){return(parseFloat(r.monto)||0)+(parseFloat(r.saldoTotal)||0)+(parseFloat(r.saldoCheque)||0)}
 function uqr(id,f,v2){const r=qrows.find(r=>r._id===id);if(r)r[f]=v2}
 window.uqr=uqr;
 function updChip(id){const r=qrows.find(r=>r._id===id);const ch=gs('chip-'+id);if(r&&ch)ch.textContent=fGs(cRow(r))}
@@ -2039,7 +2039,7 @@ window.saveEditG=async function(){
   g.devuelto=parseFloat(gs('eg-devuelto').value)||0;
   g.saldoTotal=parseFloat(gs('eg-saldoTotal').value)||0;
   g.saldoCheque=parseFloat(gs('eg-saldoCheque').value)||0;
-  g.costoTotal=(g.saldoCheque||0);
+  g.costoTotal=(g.monto||0)+(g.saldoTotal||0)+(g.saldoCheque||0);
   await fbSet('obras/'+cur+'/gastos/'+id,g);
   closeM('mEditG');
   updGStrip(); renderGSaved();
@@ -2124,7 +2124,6 @@ function renderResumen(){
     ['PARA WUILIAN ('+cfg.socios+'%)',fGs(r.corrCadaUno),'b'],
     ['PORCENTAJE DE GANANCIA',fPct(r.pct),''],
     ['SALDO A COBRAR',fGs(r.scob),'b'],
-    ['SALDO A PAGAR (costo total)',fGs(r.spag),'r'],
   ].map(([l,val,c])=>`<tr>
     <td style="font-family:'Syne',sans-serif;color:var(--dim);padding:.48rem .6rem;border-bottom:1px solid var(--border)">${l}</td>
     <td style="text-align:right;padding:.48rem .6rem;border-bottom:1px solid var(--border)" class="${c?'m-val '+c:''}">${val}</td>
@@ -2537,7 +2536,7 @@ window.importAll=async function(){
     if(it.tipo==='gasto'){
       const g={id:uid(),fecha:it.fecha||today(),concepto:it.concepto||'',cantidad:0,
         monto:it.monto||0,montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,
-        tipo:it.subTipo||'transferencia',costoTotal:0,registro:it.registro||''};
+        tipo:it.subTipo||'transferencia',costoTotal:it.monto||0,registro:it.registro||''};
       gastos[cur].push(g); await fbSet('obras/'+cur+'/gastos/'+g.id,g); ng++;
     } else {
       const c={id:uid(),fecha:it.fecha||today(),concepto:it.concepto||'',
@@ -2821,7 +2820,7 @@ window.importPaste=async function(){
           g[field]=val;
         }
       });
-      g.costoTotal=(g.saldoCheque||0);
+      g.costoTotal=(g.monto||0)+(g.saldoTotal||0)+(g.saldoCheque||0);
       if(!g.concepto&&!g.monto&&!g.montoCheque)continue; // skip empty
       const gid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;
       g.id=gid;
@@ -2889,19 +2888,17 @@ window.exportExcel = function(){
       const wb=new ExcelJS.Workbook();
       wb.creator='Thalamus Finanzas';
       wb.created=new Date();
-      const ws=wb.addWorksheet('PLANILLA MADRE',{
+      const ws=wb.addWorksheet('\u2726 PLANILLA MADRE',{
         pageSetup:{orientation:'landscape',fitToPage:true,fitToWidth:1}
       });
 
-      // ── Anchos de columna (exactos del original) ──
       ws.columns=[
-        {key:'A',width:4},{key:'B',width:22},{key:'C',width:46},
-        {key:'D',width:14},{key:'E',width:20},{key:'F',width:14},
-        {key:'G',width:20},{key:'H',width:20},{key:'I',width:16},
-        {key:'J',width:16},{key:'K',width:20}
+        {key:'A',width:4},{key:'B',width:14},{key:'C',width:46},
+        {key:'D',width:12},{key:'E',width:18},{key:'F',width:12},
+        {key:'G',width:18},{key:'H',width:13},{key:'I',width:13},
+        {key:'J',width:13},{key:'K',width:17.11}
       ];
 
-      // ── Helpers ──
       const AZUL_OSC='1F3864', AZUL_MED='2E75B6', VERDE_OSC='375623';
       const VERDE_MED='2E7D32', AZUL_CL='D6E4F0', VERDE_CL='E8F5E9';
       const GRIS='D9D9D9', AMARILLO='F4B942', AMAR_INP='FFFACD';
@@ -2910,8 +2907,6 @@ window.exportExcel = function(){
       const fill=(c)=>({type:'pattern',pattern:'solid',fgColor:{argb:'FF'+c}});
       const font=(bold,color='000000',sz=10)=>({bold,color:{argb:'FF'+color},size:sz,name:'Calibri'});
       const aln=(h='left',v='middle',wrap=false)=>({horizontal:h,vertical:v,wrapText:wrap});
-      const thin={style:'thin',color:{argb:'FF000000'}};
-      const brd=()=>({top:thin,left:thin,bottom:thin,right:thin});
 
       function setCell(addr, val, opts={}){
         const c=ws.getCell(addr);
@@ -2922,20 +2917,17 @@ window.exportExcel = function(){
         if(opts.fmt) c.numFmt=opts.fmt;
       }
 
-      // ── MERGES ──
-      const merges=['B1:K1','B2:C2','D2:F2','B3:C3','D3:F3','B4:C4','D4:F4',
-        'B5:C5','D5:F5','B7:K7','B39:D39','B41:J41','B58:D58','B60:J60',
-        'B61:F61','B62:F62','B63:F63','B64:F64','B65:F65','B66:F66',
-        'B67:F67','B68:F68','B69:F69','B70:F70'];
-      merges.forEach(m=>ws.mergeCells(m));
-
-      // ── FILA 1: Título obra ──
+      // ── FILAS 1-5: Título e info ──
+      ws.mergeCells('B1:K1');
       const nombreObra=(o.num?`Nº${o.num} – `:'')+o.nombre;
-      setCell('B1',nombreObra,{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center',size:12});
+      setCell('B1',nombreObra,{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center',size:14});
       ws.getRow(1).height=34.5;
 
-      // ── FILAS 2-5: Info obra ──
       [2,3,4,5].forEach(r=>ws.getRow(r).height=18);
+      ws.mergeCells('B2:C2'); ws.mergeCells('D2:F2');
+      ws.mergeCells('B3:C3'); ws.mergeCells('D3:F3');
+      ws.mergeCells('B4:C4'); ws.mergeCells('D4:F4');
+      ws.mergeCells('B5:C5'); ws.mergeCells('D5:F5');
       setCell('B2','FECHA DE INICIO',{bold:true,bg:GRIS});
       setCell('D2',o.fecha||'',{bg:AMAR_INP});
       setCell('B3','MONTO CONTRATO',{bold:true,bg:GRIS});
@@ -2945,126 +2937,131 @@ window.exportExcel = function(){
       setCell('B5','ESTADO',{bold:true,bg:GRIS});
       setCell('D5',o.estado||'EN EJECUCIÓN',{bg:AMAR_INP});
 
-      // ── FILA 7: Header gastos ──
+      // ── FILA 7-8: Header gastos ──
+      ws.mergeCells('B7:K7');
       setCell('B7','TOTAL DE GASTOS REALES',{bold:true,color:'FFFFFF',bg:AZUL_MED,align:'center',size:11});
       ws.getRow(7).height=22;
-
-      // ── FILA 8: Encabezados columnas ──
       const h8=[['B','FECHA'],['C','CONCEPTO'],['D','CANTIDAD'],
-        ['E','MONTO PAGADO'],['F','REGISTRO'],['G','MONTO PAGADO (CHEQUE)'],
+        ['E','MONTO PAGADO'],['F','REGISTRO'],['G','MONTO PAGADO'],
         ['H','DEVUELTO'],['I','SALDO TOTAL'],['J','SALDO CHEQUE'],['K','COSTO TOTAL']];
-      h8.forEach(([col,txt])=>setCell(`${col}8`,txt,{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center',wrap:true}));
+      h8.forEach(([col,txt])=>setCell(`${col}8`,txt,{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center',wrap:true,size:9}));
       ws.getRow(8).height=30;
 
-      // ── FILAS 9-36: Gastos ──
-      for(let i=0;i<28;i++){
-        const gr=9+i, g=gl[i]||null, row=gr.toString();
-        ws.getRow(gr).height=15.75;
-        setCell(`B${row}`,g?.fecha||'',{bg:AZUL_CL});
-        setCell(`C${row}`,g?.concepto||'',{bg:AZUL_CL});
-        setCell(`D${row}`,g?.cantidad||'',{bg:AZUL_CL,align:'right'});
-        setCell(`E${row}`,parseFloat(g?.monto)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
-        setCell(`F${row}`,g?.registro||'',{bg:AZUL_CL});
-        setCell(`G${row}`,parseFloat(g?.montoCheque)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
-        setCell(`H${row}`,parseFloat(g?.devuelto)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
-        setCell(`I${row}`,parseFloat(g?.saldoTotal)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
-        setCell(`J${row}`,parseFloat(g?.saldoCheque)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
-        // Fórmula Costo Total = E + I + J
-        ws.getCell(`K${row}`).value={formula:`J${row}`};
-        ws.getCell(`K${row}`).fill=fill(AZUL_CL);
-        ws.getCell(`K${row}`).numFmt=FMT_NUM;
-        ws.getCell(`K${row}`).alignment=aln('right');
+      // ── GASTOS DINÁMICO ──
+      const gStart=9;
+      const gCount=Math.max(gl.length,1);
+      for(let i=0;i<gCount;i++){
+        const rn=gStart+i, g=gl[i]||null, row=''+rn;
+        ws.getRow(rn).height=15.75;
+        setCell('B'+row,g?.fecha||'',{bg:AZUL_CL});
+        setCell('C'+row,g?.concepto||'',{bg:AZUL_CL});
+        setCell('D'+row,g?.cantidad||'',{bg:AZUL_CL,align:'right'});
+        setCell('E'+row,parseFloat(g?.monto)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
+        setCell('F'+row,g?.registro||'',{bg:AZUL_CL});
+        setCell('G'+row,parseFloat(g?.montoCheque)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
+        setCell('H'+row,parseFloat(g?.devuelto)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
+        setCell('I'+row,parseFloat(g?.saldoTotal)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
+        setCell('J'+row,parseFloat(g?.saldoCheque)||0,{bg:AZUL_CL,align:'right',fmt:FMT_NUM});
+        ws.getCell('K'+row).value={formula:'J'+row};
+        ws.getCell('K'+row).fill=fill(AZUL_CL);
+        ws.getCell('K'+row).numFmt=FMT_NUM;
+        ws.getCell('K'+row).alignment=aln('right');
       }
+      const gEnd=gStart+gCount-1;
 
-      // ── FILA 37: Gasto fijo Ayuda Social ──
-      ws.getRow(37).height=15.75;
-      setCell('C37',`GASTO FIJO-AYUDA SOCIAL ${Math.round(ayPct*100)}%`,{bg:AZUL_CL});
-      ws.getCell('E37').value={formula:`H61*${ayPct}`};
-      ws.getCell('E37').fill=fill(AZUL_CL); ws.getCell('E37').numFmt=FMT_NUM; ws.getCell('E37').alignment=aln('right');
-      ws.getCell('K37').value={formula:'E37+I37+J37'};
-      ws.getCell('K37').fill=fill(AZUL_CL); ws.getCell('K37').numFmt=FMT_NUM; ws.getCell('K37').alignment=aln('right');
+      // ── Ayuda Social + HERI ──
+      const rAy=gEnd+1, rHe=rAy+1;
+      ws.getRow(rAy).height=15.75; ws.getRow(rHe).height=15.75;
+      setCell('C'+rAy,`GASTO FIJO-AYUDA SOCIAL ${Math.round(ayPct*100)}%`,{bg:AZUL_CL});
+      setCell('C'+rHe,`GASTO FIJO-HERI ${Math.round(hePct*100)}%`,{bg:AZUL_CL});
+      // E formulas will be set after we know resumen row
+      ws.getCell('E'+rAy).fill=fill(AZUL_CL); ws.getCell('E'+rAy).numFmt=FMT_NUM; ws.getCell('E'+rAy).alignment=aln('right');
+      ws.getCell('E'+rHe).fill=fill(AZUL_CL); ws.getCell('E'+rHe).numFmt=FMT_NUM; ws.getCell('E'+rHe).alignment=aln('right');
+      ws.getCell('K'+rAy).value={formula:'J'+rAy}; ws.getCell('K'+rAy).fill=fill(AZUL_CL); ws.getCell('K'+rAy).numFmt=FMT_NUM; ws.getCell('K'+rAy).alignment=aln('right');
+      ws.getCell('K'+rHe).value={formula:'J'+rHe}; ws.getCell('K'+rHe).fill=fill(AZUL_CL); ws.getCell('K'+rHe).numFmt=FMT_NUM; ws.getCell('K'+rHe).alignment=aln('right');
 
-      // ── FILA 38: Gasto fijo HERI ──
-      ws.getRow(38).height=15.75;
-      setCell('C38',`GASTO FIJO-HERI ${Math.round(hePct*100)}%`,{bg:AZUL_CL});
-      ws.getCell('E38').value={formula:`H61*${hePct}`};
-      ws.getCell('E38').fill=fill(AZUL_CL); ws.getCell('E38').numFmt=FMT_NUM; ws.getCell('E38').alignment=aln('right');
-      ws.getCell('K38').value={formula:'E38+I38+J38'};
-      ws.getCell('K38').fill=fill(AZUL_CL); ws.getCell('K38').numFmt=FMT_NUM; ws.getCell('K38').alignment=aln('right');
+      // ── Total Gastos ──
+      const rTG=rHe+1;
+      ws.getRow(rTG).height=18;
+      ws.mergeCells('B'+rTG+':D'+rTG);
+      setCell('B'+rTG,'TOTAL GASTOS',{bold:true,bg:AMARILLO,align:'center'});
+      ws.getCell('E'+rTG).value={formula:`SUM(E${gStart}:E${rHe})`};
+      ws.getCell('E'+rTG).fill=fill(AMARILLO); ws.getCell('E'+rTG).font=font(true); ws.getCell('E'+rTG).numFmt=FMT_NUM; ws.getCell('E'+rTG).alignment=aln('right');
+      ws.getCell('K'+rTG).value={formula:`SUM(K${gStart}:K${rHe})`};
+      ws.getCell('K'+rTG).fill=fill(AMARILLO); ws.getCell('K'+rTG).numFmt=FMT_NUM; ws.getCell('K'+rTG).alignment=aln('right');
 
-      // ── FILA 39: Total Gastos ──
-      ws.getRow(39).height=18;
-      setCell('B39','TOTAL GASTOS',{bold:true,bg:AMARILLO,align:'center'});
-      ws.getCell('E39').value={formula:'SUM(E9:E38)'};
-      ws.getCell('E39').fill=fill(AMARILLO); ws.getCell('E39').font=font(true);
-      ws.getCell('E39').numFmt=FMT_NUM; ws.getCell('E39').alignment=aln('right');
-      ws.getCell('K39').value={formula:'SUM(K9:K38)'};
-      ws.getCell('K39').fill=fill(AMARILLO); ws.getCell('K39').numFmt=FMT_NUM; ws.getCell('K39').alignment=aln('right');
+      // ── CERTIFICADOS DINÁMICO ──
+      const rCH=rTG+2; // cert header
+      ws.mergeCells('B'+rCH+':J'+rCH);
+      ws.getRow(rCH).height=22;
+      setCell('B'+rCH,'DETALLE DE PAGOS RECIBIDOS (CERTIFICADOS)',{bold:true,color:'FFFFFF',bg:VERDE_OSC,align:'center',size:11});
 
-      // ── FILA 41: Header certificados ──
-      ws.getRow(41).height=22;
-      setCell('B41','DETALLE DE PAGOS RECIBIDOS (CERTIFICADOS)',{bold:true,color:'FFFFFF',bg:VERDE_OSC,align:'center',size:11});
-
-      // ── FILA 42: Encabezados certs ──
-      ws.getRow(42).height=20;
+      const rCC=rCH+1; // cert columns
+      ws.getRow(rCC).height=20;
       [['B','FECHA'],['C','CONCEPTO / CERTIFICADO'],['E','TOTAL PAGADO (BRUTO)'],
        ['G','RETENCIÓN REAL'],['H','NETO COBRADO']].forEach(([col,txt])=>
-        setCell(`${col}42`,txt,{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center'}));
+        setCell(col+rCC,txt,{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center',size:9}));
 
-      // ── FILAS 43-57: Certificados ──
-      for(let i=0;i<15;i++){
-        const cr=43+i, c=cl[i]||null, row=cr.toString();
-        ws.getRow(cr).height=15.75;
-        setCell(`B${row}`,c?.fecha||'',{bg:VERDE_CL});
-        setCell(`C${row}`,c?.concepto||'',{bg:VERDE_CL});
-        setCell(`E${row}`,parseFloat(c?.bruto)||0,{bg:VERDE_CL,align:'right',fmt:FMT_NUM});
-        setCell(`H${row}`,parseFloat(c?.neto)||0,{bg:VERDE_CL,align:'right',fmt:FMT_NUM});
-        ws.getCell(`G${row}`).value={formula:`E${row}-H${row}`};
-        ws.getCell(`G${row}`).fill=fill(VERDE_CL); ws.getCell(`G${row}`).numFmt=FMT_NUM; ws.getCell(`G${row}`).alignment=aln('right');
+      const cStart=rCC+1;
+      const cCount=Math.max(cl.length,1);
+      for(let i=0;i<cCount;i++){
+        const rn=cStart+i, c=cl[i]||null, row=''+rn;
+        ws.getRow(rn).height=15.75;
+        setCell('B'+row,c?.fecha||'',{bg:VERDE_CL});
+        setCell('C'+row,c?.concepto||'',{bg:VERDE_CL});
+        setCell('E'+row,parseFloat(c?.bruto)||0,{bg:VERDE_CL,align:'right',fmt:FMT_NUM});
+        setCell('H'+row,parseFloat(c?.neto)||0,{bg:VERDE_CL,align:'right',fmt:FMT_NUM});
+        ws.getCell('G'+row).value={formula:'E'+row+'-H'+row};
+        ws.getCell('G'+row).fill=fill(VERDE_CL); ws.getCell('G'+row).numFmt=FMT_NUM; ws.getCell('G'+row).alignment=aln('right');
       }
+      const cEnd=cStart+cCount-1;
 
-      // ── FILA 58: Total pagos recibidos ──
-      ws.getRow(58).height=18;
-      setCell('B58','TOTAL PAGOS RECIBIDOS',{bold:true,color:'FFFFFF',bg:VERDE_MED,align:'center'});
+      // ── Total Pagos Recibidos ──
+      const rTC=cEnd+1;
+      ws.getRow(rTC).height=18;
+      ws.mergeCells('B'+rTC+':D'+rTC);
+      setCell('B'+rTC,'TOTAL PAGOS RECIBIDOS',{bold:true,color:'FFFFFF',bg:VERDE_MED,align:'center'});
       ['E','G','H'].forEach(col=>{
-        const formulas={'E':'SUM(E43:E57)','G':'SUM(G43:G57)','H':'SUM(H43:H57)'};
-        ws.getCell(`${col}58`).value={formula:formulas[col]};
-        ws.getCell(`${col}58`).fill=fill(VERDE_MED);
-        ws.getCell(`${col}58`).font=font(true,'FFFFFF');
-        ws.getCell(`${col}58`).numFmt=FMT_NUM;
-        ws.getCell(`${col}58`).alignment=aln('right');
+        ws.getCell(col+rTC).value={formula:`SUM(${col}${cStart}:${col}${cEnd})`};
+        ws.getCell(col+rTC).fill=fill(VERDE_MED); ws.getCell(col+rTC).font=font(true,'FFFFFF');
+        ws.getCell(col+rTC).numFmt=FMT_NUM; ws.getCell(col+rTC).alignment=aln('right');
       });
 
-      // ── FILA 60: Header resumen ──
-      ws.getRow(60).height=15.6;
-      setCell('B60','RESUMEN GENERAL',{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center',size:11});
+      // ── RESUMEN GENERAL ──
+      const rRH=rTC+2; // resumen header
+      ws.mergeCells('B'+rRH+':J'+rRH);
+      ws.getRow(rRH).height=15.6;
+      setCell('B'+rRH,'RESUMEN GENERAL',{bold:true,color:'FFFFFF',bg:AZUL_OSC,align:'center',size:12});
 
-      // ── FILAS 61-70: Resumen con fórmulas exactas ──
+      const r1=rRH+1; // MONTO CONTRATO row
+      // Now fix Ayuda/HERI formulas
+      ws.getCell('E'+rAy).value={formula:'H'+r1+'*'+ayPct};
+      ws.getCell('E'+rHe).value={formula:'H'+r1+'*'+hePct};
+
       const resumen=[
-        [61,'MONTO CONTRATO',     {formula:'D3+D4'},      FMT_NUM, false],
-        [62,'TOTAL DE GASTOS',    {formula:'E39'},         FMT_NUM, false],
-        [63,'TOTAL BRUTO COBRADO',{formula:'E58'},         FMT_NUM, false],
-        [64,'RETENCIÓN TOTAL',    {formula:'G58'},         FMT_NUM, false],
-        [65,'TOTAL NETO COBRADO', {formula:'H58'},         FMT_NUM, false],
-        [66,'GANANCIA NETA (neto - gastos)',{formula:'H58-E39'}, FMT_NUM, false],
-        [67,'PARA SOCIOS (50%)',  {formula:'(H58-E39)/2'},FMT_NUM, true ],
-        [68,'PORCENTAJE DE GANANCIA',{formula:'IFERROR((H58-E39)/E58,0)'}, FMT_PCT, false],
-        [69,'SALDO A COBRAR',     {formula:'H61-E58'},    FMT_NUM, false],
-        [70,'SALDO A PAGAR',      {formula:'K39'},         FMT_NUM, false],
+        [r1,  'MONTO CONTRATO',              {formula:'D3+D4'},                             FMT_NUM, false],
+        [r1+1,'TOTAL DE GASTOS',             {formula:'E'+rTG},                             FMT_NUM, false],
+        [r1+2,'TOTAL BRUTO COBRADO',         {formula:'E'+rTC},                             FMT_NUM, false],
+        [r1+3,'RETENCIÓN TOTAL',             {formula:'G'+rTC},                             FMT_NUM, false],
+        [r1+4,'TOTAL NETO COBRADO',          {formula:'H'+rTC},                             FMT_NUM, false],
+        [r1+5,'GANANCIA NETA (neto - gastos)',{formula:'H'+rTC+'-E'+rTG},                   FMT_NUM, false],
+        [r1+6,'PARA SOCIOS (50%)',           {formula:'(H'+rTC+'-E'+rTG+')/2'},             FMT_NUM, true ],
+        [r1+7,'PORCENTAJE DE GANANCIA',      {formula:'IFERROR((H'+rTC+'-E'+rTG+')/E'+rTC+',0)'}, FMT_PCT, false],
+        [r1+8,'SALDO A COBRAR',              {formula:'H'+r1+'-E'+rTC},                    FMT_NUM, false],
+        [r1+9,'SALDO A PAGAR',               {formula:'K'+rTG},                             FMT_NUM, false],
       ];
       resumen.forEach(([rn,label,formula,fmt,bold])=>{
         ws.getRow(rn).height=18;
         const bg=bold?AMARILLO:GRIS;
-        setCell(`B${rn}`,label,{bold,bg,align:'left'});
-        const hCell=ws.getCell(`H${rn}`);
+        ws.mergeCells('B'+rn+':F'+rn);
+        setCell('B'+rn,label,{bold,bg,align:'left'});
+        const hCell=ws.getCell('H'+rn);
         hCell.value=formula; hCell.fill=fill(bg);
         hCell.font=font(bold); hCell.numFmt=fmt; hCell.alignment=aln('right');
       });
 
-      // ── Freeze panes en fila 9 ──
       ws.views=[{state:'frozen',ySplit:8,xSplit:1,topLeftCell:'B9',activeCell:'B9'}];
 
-      // ── Generar y descargar ──
       const buffer=await wb.xlsx.writeBuffer();
       const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
       const url=URL.createObjectURL(blob);
