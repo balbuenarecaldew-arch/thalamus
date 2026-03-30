@@ -1567,37 +1567,82 @@ async function fbGetDoc(path){
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
+// ── Cache helpers ──
+function saveCache(){
+  try{localStorage.setItem('th_cache',JSON.stringify({obras,gastos,certificados,retiros,cfg,_ts:Date.now()}));}catch(e){}
+}
+function loadCache(){
+  try{return JSON.parse(localStorage.getItem('th_cache'));}catch{return null;}
+}
+
 window.initApp = async function(){
   if(!_currentUser){return;}
   const p=localStorage.getItem('ocCfg');
   if(p) try{cfg=JSON.parse(p);}catch{}
   gs('p-ay').value=cfg.ayuda; gs('p-he').value=cfg.heri; gs('p-so').value=cfg.socios;
 
-  const raw=await fbGetAll('obras');
-  obras={};
-  for(const [id,d] of Object.entries(raw||{})){
-    obras[id]={...d,id};
-    if(!obras[id].lastModified) obras[id].lastModified=Date.now()-(Object.keys(raw).length*1000);
+  // ── PASO 1: Cargar del caché INSTANTÁNEO ──
+  const cache=loadCache();
+  let fromCache=false;
+  if(cache&&cache.obras&&Object.keys(cache.obras).length){
+    obras=cache.obras; gastos=cache.gastos||{}; certificados=cache.certificados||{}; retiros=cache.retiros||{fernando:[],wuilian:[]};
+    if(cache.cfg) cfg=cache.cfg;
+    fromCache=true;
+    // Renderizar inmediatamente con datos del caché
+    populateSel(); navTo('obras');
+    applyRole(); renderUserList();
+    if(_currentUser==='fernando') toast('BIENVENIDO MI QUERIDO BRO 🤜🤛','ok');
+    else toast('Bienvenido, '+_currentUser+' ✓','ok');
   }
-  for(const id of Object.keys(obras)){
-    const gr=await fbGetAll('obras/'+id+'/gastos');
-    gastos[id]=Object.entries(gr||{}).map(([gid,gd])=>({...gd,id:gd.id||gid}));
-    const cr=await fbGetAll('obras/'+id+'/certificados');
-    certificados[id]=Object.entries(cr||{}).map(([cid,cd])=>({...cd,id:cd.id||cid}));
-  }
-  const rd=await fbGetDoc('retiros/socios');
-  if(rd) retiros={fernando:rd.fernando||[],wuilian:rd.wuilian||[]};
 
-  // Track login
-  await trackLogin(_currentUser);
-  // Auto-backup diario
+  // ── PASO 2: Sincronizar con Firebase en background ──
+  try{
+    const raw=await fbGetAll('obras');
+    const newObras={};
+    for(const [id,d] of Object.entries(raw||{})){
+      newObras[id]={...d,id};
+      if(!newObras[id].lastModified) newObras[id].lastModified=Date.now()-(Object.keys(raw).length*1000);
+    }
+    const ids=Object.keys(newObras);
+    const [gastosArr, certsArr, rd] = await Promise.all([
+      Promise.all(ids.map(id=>fbGetAll('obras/'+id+'/gastos').then(gr=>({id,data:gr})))),
+      Promise.all(ids.map(id=>fbGetAll('obras/'+id+'/certificados').then(cr=>({id,data:cr})))),
+      fbGetDoc('retiros/socios')
+    ]);
+    obras=newObras;
+    gastos={}; certificados={};
+    gastosArr.forEach(({id,data})=>{
+      gastos[id]=Object.entries(data||{}).map(([gid,gd])=>({...gd,id:gd.id||gid}));
+    });
+    certsArr.forEach(({id,data})=>{
+      certificados[id]=Object.entries(data||{}).map(([cid,cd])=>({...cd,id:cd.id||cid}));
+    });
+    if(rd) retiros={fernando:rd.fernando||[],wuilian:rd.wuilian||[]};
+
+    // Guardar en caché para la próxima vez
+    saveCache();
+
+    // Re-renderizar con datos frescos (solo si cambió algo o no teníamos caché)
+    populateSel();
+    const activePage=document.querySelector('.page.active');
+    if(activePage){
+      const name=activePage.id.replace('page-','');
+      navTo(name);
+    }
+    applyRole(); renderUserList();
+
+    if(!fromCache){
+      if(_currentUser==='fernando') toast('BIENVENIDO MI QUERIDO BRO 🤜🤛','ok');
+      else toast('Bienvenido, '+_currentUser+' ✓','ok');
+    }
+  }catch(e){
+    console.warn('Firebase sync error:',e);
+    if(!fromCache) toast('Error cargando datos de Firebase','err');
+  }
+
+  // Track login y backup en background
+  trackLogin(_currentUser);
   autoBackup();
-
-  populateSel(); navTo('obras');
-  applyRole(); renderUserList();
-  // Welcome message
-  if(_currentUser==='fernando') toast('BIENVENIDO MI QUERIDO BRO 🤜🤛','ok');
-  else toast('Bienvenido, '+_currentUser+' ✓','ok');
 };
 
 window.saveAndConnect=async function(){
@@ -1637,7 +1682,7 @@ function calcRes(id){
   const corrCadaUno=gan*(cfg.socios/100);
   return{con,tg,tk,br,ne,re,gan,corrCadaUno,pct,scob:con-br,spag:tk};
 }
-async function touchObra(){if(cur&&obras[cur]){obras[cur].lastModified=Date.now();await fbSet('obras/'+cur,obras[cur]);}}
+async function touchObra(){if(cur&&obras[cur]){obras[cur].lastModified=Date.now();await fbSet('obras/'+cur,obras[cur]);}saveCache();}
 
 // ═══════════════════════════════════════
 // OBRAS
@@ -1734,7 +1779,7 @@ window.saveObra=async function(){
   if(!gastos[id])gastos[id]=[];
   if(!certificados[id])certificados[id]=[];
   await fbSet('obras/'+id,o);
-  closeM('mObra'); populateSel(); renderObrasGrid(); renderFijosRows();
+  closeM('mObra'); populateSel(); renderObrasGrid(); renderFijosRows(); saveCache();
   if(!eid)selectObra(id);
   toast('Obra guardada','ok');
 };
@@ -1744,7 +1789,7 @@ window.delObra=function(id){
     for(const c of(certificados[id]||[]))await fbDel('obras/'+id+'/certificados/'+c.id);
     await fbDel('obras/'+id);
     delete obras[id]; delete gastos[id]; delete certificados[id];
-    if(cur===id)cur=null; populateSel(); renderObrasGrid(); renderFijosRows();
+    if(cur===id)cur=null; populateSel(); renderObrasGrid(); renderFijosRows(); saveCache();
     toast('Obra eliminada','info');
   });
 };
@@ -2231,12 +2276,12 @@ window.saveRetiro=async function(){
   if(!retiros[socio])retiros[socio]=[];
   retiros[socio].push(r);
   await fbSet('retiros/socios',retiros);
-  closeM('mRetiro'); renderUtilidades(); toast('Retiro registrado','ok');
+  closeM('mRetiro'); renderUtilidades(); saveCache(); toast('Retiro registrado','ok');
 };
 window.delRetiro=async function(socio,idx){
   retiros[socio].splice(idx,1);
   await fbSet('retiros/socios',retiros);
-  renderUtilidades(); toast('Retiro eliminado','info');
+  renderUtilidades(); saveCache(); toast('Retiro eliminado','info');
 };
 
 // ═══════════════════════════════════════
@@ -2261,7 +2306,7 @@ window.updateFijo=async function(id,campo,val){
 };
 window.saveCfgP=function(){
   cfg={ayuda:parseFloat(gs('p-ay').value)||10,heri:parseFloat(gs('p-he').value)||1,socios:parseFloat(gs('p-so').value)||50};
-  localStorage.setItem('ocCfg',JSON.stringify(cfg)); toast('Parámetros guardados','ok');
+  localStorage.setItem('ocCfg',JSON.stringify(cfg)); saveCache(); toast('Parámetros guardados','ok');
 };
 window.exportJSON=function(){
   const data=JSON.stringify({obras,gastos,certificados,retiros,cfg},null,2);
