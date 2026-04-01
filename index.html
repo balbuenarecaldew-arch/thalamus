@@ -1159,6 +1159,7 @@ service cloud.firestore {
     <div id="pasteStep2" style="display:none">
       <p style="color:var(--dim);font-size:.76rem;margin-bottom:.6rem">
         <b>Detecté <span id="pasteRowCount">0</span> filas y <span id="pasteColCount">0</span> columnas.</b> Asigná cada columna al campo correspondiente:
+        <span id="pasteLearnedHint" style="display:none;color:var(--green);font-size:.66rem;margin-left:6px">✓ Mapeo aprendido aplicado</span>
       </p>
       <div id="pasteMapRow" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem"></div>
       <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:.6rem">
@@ -1171,6 +1172,7 @@ service cloud.firestore {
         <button class="btn btn-primary" onclick="importPaste()">📥 Importar <span id="pasteImportCount">0</span> filas</button>
         <button class="btn btn-ghost" onclick="backToPasteStep1()">← Volver</button>
         <button class="btn btn-ghost" onclick="closeM('mPaste')">Cancelar</button>
+        <button class="btn btn-xs btn-danger" onclick="resetLearnedMappings()" title="Olvidar mapeos aprendidos">🧠 Resetear memoria</button>
       </div>
     </div>
   </div>
@@ -2305,7 +2307,8 @@ window.updateFijo=async function(id,campo,val){
   toast('% actualizado','ok');
 };
 window.saveCfgP=function(){
-  cfg={ayuda:parseFloat(gs('p-ay').value)||10,heri:parseFloat(gs('p-he').value)||1,socios:parseFloat(gs('p-so').value)||50};
+  const _ay=parseFloat(gs('p-ay').value), _he=parseFloat(gs('p-he').value), _so=parseFloat(gs('p-so').value);
+  cfg={ayuda:isNaN(_ay)?10:_ay, heri:isNaN(_he)?1:_he, socios:isNaN(_so)?50:_so};
   localStorage.setItem('ocCfg',JSON.stringify(cfg)); saveCache(); toast('Parámetros guardados','ok');
 };
 window.exportJSON=function(){
@@ -2607,6 +2610,62 @@ setTimeout(()=>{if(!window._appLoaded && _currentUser){window._appLoaded=true;wi
 // PEGAR DESDE EXCEL
 // ═══════════════════════════════════════
 let _pasteMode='', _pasteRows=[], _pasteCols=0;
+let _pasteDetectedHeaders=[]; // headers detected from current paste
+
+// ─── LEARNED COLUMN MAPPINGS ───────────────────
+// Stores header_name → field_key mappings the user has confirmed
+function getLearnedMappings(mode){
+  try{ return JSON.parse(localStorage.getItem('paste_learned_'+mode))||{}; }catch{return{}}
+}
+function saveLearnedMappings(mode, map){
+  localStorage.setItem('paste_learned_'+mode, JSON.stringify(map));
+}
+// Header synonyms: common Excel header names → field keys
+const HEADER_SYNONYMS_GASTOS={
+  'fecha':       'fecha',
+  'date':        'fecha',
+  'concepto':    'concepto',
+  'descripcion': 'concepto',
+  'descripción': 'concepto',
+  'detalle':     'concepto',
+  'item':        'concepto',
+  'cantidad':    'cantidad',
+  'qty':         'cantidad',
+  'monto':       'monto',
+  'monto pagado':'monto',
+  'pagado':      'monto',
+  'importe':     'monto',
+  'total':       'monto',
+  'valor':       'monto',
+  'registro':    'registro',
+  'nro':         'registro',
+  'numero':      'registro',
+  'número':      'registro',
+  'cheque':      'montoCheque',
+  'monto cheque':'montoCheque',
+  'cheque pagado':'montoCheque',
+  'devuelto':    'devuelto',
+  'devolucion':  'devuelto',
+  'devolución':  'devuelto',
+  'saldo total': 'saldoTotal',
+  'saldo':       'saldoTotal',
+  'saldo cheque':'saldoCheque',
+};
+const HEADER_SYNONYMS_CERTS={
+  'fecha':       'fecha',
+  'date':        'fecha',
+  'concepto':    'concepto',
+  'certificado': 'concepto',
+  'descripcion': 'concepto',
+  'descripción': 'concepto',
+  'bruto':       'bruto',
+  'total bruto': 'bruto',
+  'total':       'bruto',
+  'monto':       'bruto',
+  'neto':        'neto',
+  'neto cobrado':'neto',
+  'cobrado':     'neto',
+};
 
 const GASTO_FIELDS=[
   {key:'ignorar',label:'— Ignorar —'},
@@ -2683,10 +2742,12 @@ window.parsePaste=function(){
   // Detect if first row is header
   const fields=_pasteMode==='gastos'?GASTO_FIELDS:CERT_FIELDS;
   let hasHeader=false;
-  const firstRow=_pasteRows[0].map(c=>c.toLowerCase());
+  _pasteDetectedHeaders=[];
+  const firstRow=_pasteRows[0].map(c=>c.toLowerCase().trim());
   const headerKeywords=['fecha','concepto','monto','bruto','neto','certificado','pagado','cheque','retenc','cantidad','devuelto','saldo','registro'];
   if(firstRow.some(c=>headerKeywords.some(k=>c.includes(k)))){
     hasHeader=true;
+    _pasteDetectedHeaders=_pasteRows[0].map(c=>c.trim()); // save original headers
     _pasteRows.shift(); // remove header row
   }
 
@@ -2700,7 +2761,7 @@ window.parsePaste=function(){
   const mapRow=gs('pasteMapRow');
   mapRow.innerHTML='';
 
-  // Auto-assign columns
+  // Auto-assign columns using: 1) learned mappings 2) header synonyms 3) content analysis
   const numericCols=[];
   for(let c=0;c<_pasteCols;c++){
     const colVals=_pasteRows.map(r=>r[c]||'');
@@ -2710,10 +2771,40 @@ window.parsePaste=function(){
 
   const assigned=new Set();
   const autoMap=[];
+  const learned=getLearnedMappings(_pasteMode);
+  const synonyms=_pasteMode==='gastos'?HEADER_SYNONYMS_GASTOS:HEADER_SYNONYMS_CERTS;
+  const validKeys=new Set(fields.map(f=>f.key).filter(k=>k!=='ignorar'));
 
   for(let c=0;c<_pasteCols;c++){
     const colVals=_pasteRows.map(r=>r[c]||'');
-    let guess=guessField(colVals, fields, c);
+    let guess=null;
+
+    // Priority 1: Learned mapping from previous user corrections
+    if(_pasteDetectedHeaders.length>c){
+      const hdr=_pasteDetectedHeaders[c].toLowerCase().trim();
+      if(learned[hdr] && validKeys.has(learned[hdr]) && !assigned.has(learned[hdr])){
+        guess=learned[hdr];
+      }
+    }
+
+    // Priority 2: Header synonym matching
+    if(!guess && _pasteDetectedHeaders.length>c){
+      const hdr=_pasteDetectedHeaders[c].toLowerCase().trim();
+      // Try exact match first, then partial
+      if(synonyms[hdr] && !assigned.has(synonyms[hdr])){
+        guess=synonyms[hdr];
+      } else {
+        // Try matching partial: e.g. header "Cheque Pagado" contains "cheque pagado"
+        for(const [syn,field] of Object.entries(synonyms)){
+          if(!assigned.has(field) && (hdr.includes(syn) || syn.includes(hdr)) && hdr.length>1){
+            guess=field; break;
+          }
+        }
+      }
+    }
+
+    // Priority 3: Original content-based analysis
+    if(!guess) guess=guessField(colVals, fields, c);
 
     // For numeric columns, auto-assign in order
     if(!guess&&numericCols.includes(c)){
@@ -2736,7 +2827,13 @@ window.parsePaste=function(){
 
     const label=document.createElement('div');
     label.className='pcl';
-    label.textContent='Col '+(c+1);
+    if(_pasteDetectedHeaders.length>c && _pasteDetectedHeaders[c]){
+      label.textContent=_pasteDetectedHeaders[c];
+      label.title='Encabezado detectado: '+_pasteDetectedHeaders[c];
+      label.style.color='var(--gold)';
+    } else {
+      label.textContent='Col '+(c+1);
+    }
     box.appendChild(label);
 
     const preview=document.createElement('div');
@@ -2757,6 +2854,17 @@ window.parsePaste=function(){
     sel.onchange=()=>renderPastePreview();
     box.appendChild(sel);
     mapRow.appendChild(box);
+  }
+
+  // Show hint if learned mappings were used
+  const learnedHint=gs('pasteLearnedHint');
+  if(learnedHint){
+    const usedLearned=_pasteDetectedHeaders.length>0 && autoMap.some((m,i)=>{
+      if(m==='ignorar'||!_pasteDetectedHeaders[i])return false;
+      const hdr=_pasteDetectedHeaders[i].toLowerCase().trim();
+      return learned[hdr]===m;
+    });
+    learnedHint.style.display=usedLearned?'inline':'none';
   }
 
   renderPastePreview();
@@ -2801,6 +2909,13 @@ function renderPastePreview(){
 window.backToPasteStep1=function(){
   gs('pasteStep1').style.display='';
   gs('pasteStep2').style.display='none';
+};
+
+window.resetLearnedMappings=function(){
+  localStorage.removeItem('paste_learned_gastos');
+  localStorage.removeItem('paste_learned_certificados');
+  toast('Memoria de mapeos reseteada. Pegá de nuevo para re-detectar.','ok');
+  backToPasteStep1();
 };
 
 function parseNum(v){
@@ -2900,7 +3015,21 @@ window.importPaste=async function(){
   }
 
   closeM('mPaste');
+
+  // Learn from the user's column mapping choices
+  if(_pasteDetectedHeaders.length){
+    const learned=getLearnedMappings(_pasteMode);
+    mapping.forEach((field,i)=>{
+      if(field!=='ignorar' && _pasteDetectedHeaders[i]){
+        const hdr=_pasteDetectedHeaders[i].toLowerCase().trim();
+        if(hdr) learned[hdr]=field;
+      }
+    });
+    saveLearnedMappings(_pasteMode, learned);
+  }
+
   _pasteRows=[];
+  _pasteDetectedHeaders=[];
   _importing=false;
   touchObra();
   toast(`✅ ${count} ${_pasteMode==='gastos'?'gastos':'certificados'} importados`,'ok');
