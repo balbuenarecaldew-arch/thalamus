@@ -1862,7 +1862,7 @@ function renderGlobal(){
   gs('gm-gasto').textContent=fGs(totG);
   gs('gm-gan').textContent=fGs(totGan);
   // totGan * cfg.socios/100 * 2 porque son dos socios
-  gs('gm-soc').textContent=fGs(totGan*(cfg.socios/100)*2);
+  gs('gm-soc').textContent=fGs(totGan*(cfg.socios/100));
   const pct=totCon>0?Math.min(100,totBr/totCon*100):0;
   gs('gp-fill').style.width=pct+'%'; gs('gp-pct').textContent=pct.toFixed(1)+'%';
   gs('gp-cobrado').textContent=fGs(totBr);
