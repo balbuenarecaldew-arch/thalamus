@@ -1,4 +1,24 @@
 // ═══════════════════════════════════════
+// THEME SWITCHER
+// ═══════════════════════════════════════
+window.switchTheme=function(css){
+  const link=document.getElementById('themeCSS');
+  if(link) link.href=css;
+  localStorage.setItem('th_theme',css);
+};
+(function loadSavedTheme(){
+  const saved=localStorage.getItem('th_theme');
+  if(saved){
+    const link=document.getElementById('themeCSS');
+    if(link) link.href=saved;
+    document.addEventListener('DOMContentLoaded',()=>{
+      const sel=document.getElementById('themeSelect');
+      if(sel) sel.value=saved;
+    });
+  }
+})();
+
+// ═══════════════════════════════════════
 // AUTH & ROLES
 // ═══════════════════════════════════════
 let _currentUser=null, _currentRole='socio';
