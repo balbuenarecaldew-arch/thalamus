@@ -1940,14 +1940,6 @@ function renderContratista(){
   migrateContratistaData();
   populateContratistaObraSelect('ct-obra');
   gs('ct-fecha').value=gs('ct-fecha').value||today();
-  // Hide dashboard
-  const dashEl=gs('ct-adeudado')?.closest('.stat-row')||gs('ct-adeudado')?.closest('.ges-stats');
-  if(dashEl) dashEl.style.display='none';
-  // Also hide any parent stat container
-  const statParent=gs('ct-adeudado')?.parentElement?.parentElement;
-  if(statParent&&(statParent.classList.contains('stat-row')||statParent.classList.contains('ges-stats')||statParent.classList.contains('ges-dash'))) statParent.style.display='none';
-  // Hide all elements between page title and the filter/sort controls  
-  document.querySelectorAll('#page-contratista .ges-stats, #page-contratista .stat-row, #page-contratista .ges-dash').forEach(el=>el.style.display='none');
 
   gs('ct-count').textContent=contratistaPagos.length;
   const sortVal=(gs('contratistaSort')?.value)||'num-asc';
