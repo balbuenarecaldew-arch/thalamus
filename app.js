@@ -487,10 +487,10 @@ function renderObrasGrid(){
   if(key==='num') list.sort((a,b)=>asc*((parseInt(a.num)||999)-(parseInt(b.num)||999)));
   else if(key==='fecha') list.sort((a,b)=>asc*((a.lastModified||0)-(b.lastModified||0)));
   else list.sort((a,b)=>asc*(a.nombre||'').localeCompare(b.nombre||''));
-  g.innerHTML=list.map(o=>{
+  g.innerHTML=list.map((o,idx)=>{
     const r=calcRes(o.id);
     return`<div class="obra-card ${o.id===cur?'act':''}" onclick="selectObra('${o.id}')">
-      <div class="oc-num">${o.num?'<span style="font-size:1.1rem;font-weight:800;letter-spacing:.02em">Nº'+o.num+'</span> ·':''} ${o.estado||'EN EJECUCIÓN'}${o.estado==='FINALIZADA'?' 🔒':''}</div>
+      <div class="oc-num"><span style="font-size:.62rem;color:var(--muted);margin-right:4px">${idx+1}.</span>${o.num?'<span style="font-size:1.1rem;font-weight:800;letter-spacing:.02em">Nº'+o.num+'</span> ·':''} ${o.estado||'EN EJECUCIÓN'}${o.estado==='FINALIZADA'?' 🔒':''}</div>
       <div class="oc-nombre">${o.nombre||'Sin nombre'}</div>
       <div class="oc-stats">
         ${isOp?'':`<span class="oc-stat">Contrato: ${fGs(calcCon(o.id))}</span>`}
@@ -809,16 +809,19 @@ function renderGSaved(){
   }
   // ── CONTRATISTA ROWS ──
   if(ctPagos.length){
-    html+=ctPagos.map((p,i)=>`<tr style="background:rgba(157,127,218,.04) !important">
+    html+=ctPagos.map((p,i)=>{
+      const cName=p.contratistaId&&obras[cur]?.contratistas?
+        (obras[cur].contratistas.find(c=>c.id===p.contratistaId)?.nombre||''):'';
+      return`<tr style="background:rgba(157,127,218,.04) !important">
       <td style="color:var(--purple);font-size:.68rem;text-align:center;font-weight:600"><span class="tag tag-p" style="font-size:.5rem">CONTRAT.</span></td>
       <td>${p.fecha||'—'}</td>
-      <td style="font-family:'Syne',sans-serif;color:var(--purple);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.concepto||'Pago Contratista'}">👔 ${p.concepto||'Pago Contratista'}</td>
+      <td style="font-family:'Syne',sans-serif;color:var(--purple);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.concepto||'Pago Contratista'}${cName?' ('+cName+')':''}">👔 ${p.concepto||'Pago Contratista'}${cName?' <span style="font-size:.6rem;opacity:.7">('+cName+')</span>':''}</td>
       <td style="color:var(--purple)">${fGs(p.monto)}</td><td>—</td>
       <td>—</td><td>—</td><td>—</td>
       <td style="color:var(--purple);font-weight:600">${fGs(p.monto)}</td>
       <td><span class="tag tag-p" style="font-size:.5rem">CONTRAT.</span></td>
       <td style="white-space:nowrap"><button class="btn btn-ghost btn-xs" onclick="navTo('contratista')" title="Ver en Contratista">👔</button></td>
-    </tr>`).join('');
+    </tr>`}).join('');
   }
   if(!list.length&&!gPagos.length&&!aPagos.length&&!ctPagos.length){
     tbody.innerHTML='<tr class="empty-row"><td colspan="11">Sin gastos registrados aún</td></tr>';
@@ -1055,7 +1058,11 @@ function renderResumen(){
       resModHtml+=gPagosRes.map(p=>`<tr class="gestor-row-in-gastos"><td>${p.fecha||'\u2014'}</td><td style="font-family:'Syne',sans-serif;color:var(--amber);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👷 ${p.concepto||'Entrega al Gestor'}</td><td style="color:var(--amber)">${fGs(p.monto)}</td><td>—</td><td>—</td><td style="color:var(--amber)">${fGs(p.monto)}</td></tr>`).join('');
     }
     if(ctPagosRes.length){
-      resModHtml+=ctPagosRes.map(p=>`<tr style="background:rgba(157,127,218,.04)"><td>${p.fecha||'\u2014'}</td><td style="font-family:'Syne',sans-serif;color:var(--purple);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👔 ${p.concepto||'Pago Contratista'}</td><td style="color:var(--purple)">${fGs(p.monto)}</td><td>—</td><td>—</td><td style="color:var(--purple)">${fGs(p.monto)}</td></tr>`).join('');
+      resModHtml+=ctPagosRes.map(p=>{
+        const cName=p.contratistaId&&obras[cur]?.contratistas?
+          (obras[cur].contratistas.find(c=>c.id===p.contratistaId)?.nombre||''):'';
+        return`<tr style="background:rgba(157,127,218,.04)"><td>${p.fecha||'\u2014'}</td><td style="font-family:'Syne',sans-serif;color:var(--purple);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👔 ${p.concepto||'Pago Contratista'}${cName?' <span style="font-size:.6rem;opacity:.7">('+cName+')</span>':''}</td><td style="color:var(--purple)">${fGs(p.monto)}</td><td>—</td><td>—</td><td style="color:var(--purple)">${fGs(p.monto)}</td></tr>`;
+      }).join('');
     }
     const regHtml=gl.length
       ? gl.map(g=>`<tr><td>${g.fecha||'\u2014'}</td><td style="font-family:'Syne',sans-serif;color:var(--txt);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.concepto}</td><td>${fGs(g.monto)}</td><td>${fGs(g.montoCheque)}</td><td>${fGs(g.devuelto)}</td><td style="color:var(--gold)">${fGs(g.costoTotal)}</td></tr>`).join('')
@@ -1175,8 +1182,10 @@ window.delRetiro=function(socio,idx){
 // ═══════════════════════════════════════
 function obraParticipaGestor(id){
   const o=obras[id]; if(!o) return false;
-  if(o.gestorMonto!=null&&o.gestorMonto!=='') return true;
-  if(o.heri!=null) return true;
+  if(o.gestorMonto!=null&&o.gestorMonto!==''){
+    const m=parseFloat(o.gestorMonto); if(!isNaN(m)&&m>0) return true;
+  }
+  if(o.heri!=null&&calcCon(id)*(parseFloat(o.heri)/100)>0) return true;
   if(gestorPagos.some(p=>p.obraId===id)) return true;
   return false;
 }
@@ -1580,8 +1589,10 @@ window.borrarTodosGestor=function(){
 // ═══════════════════════════════════════
 function obraParticipaAyuda(id){
   const o=obras[id]; if(!o) return false;
-  if(o.ayudaMonto!=null&&o.ayudaMonto!=='') return true;
-  if(o.ayuda!=null) return true;
+  if(o.ayudaMonto!=null&&o.ayudaMonto!==''){
+    const m=parseFloat(o.ayudaMonto); if(!isNaN(m)&&m>0) return true;
+  }
+  if(o.ayuda!=null&&calcCon(id)*(parseFloat(o.ayuda)/100)>0) return true;
   if(ayudaSocialPagos.some(p=>p.obraId===id)) return true;
   return false;
 }
