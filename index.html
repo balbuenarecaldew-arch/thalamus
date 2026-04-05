@@ -233,7 +233,10 @@
 <div class="page" id="page-resumen">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
     <div><div class="page-title">Resumen General</div><div class="page-sub" id="resumen-sub" style="margin-bottom:0">Fiel a la planilla madre</div></div>
-    <button class="btn btn-secondary btn-sm" onclick="goNextObra()">Siguiente Obra →</button>
+    <div style="display:flex;gap:.4rem;align-items:center">
+      <button class="btn btn-ghost btn-sm" onclick="if(cur)editObra(cur)" title="Editar obra seleccionada">✏️ Editar</button>
+      <button class="btn btn-secondary btn-sm" onclick="goNextObra()">Siguiente Obra →</button>
+    </div>
   </div>
   <div class="row-btns" style="margin-top:0;margin-bottom:.9rem">
     <button class="btn btn-primary" onclick="exportExcel()">📊 Exportar Excel</button>
@@ -312,6 +315,9 @@
 <div class="page" id="page-gestor">
   <div class="page-title">Gestor</div>
   <div class="page-sub">Control de pagos a HERI — % del contrato de cada obra</div>
+  <div class="row-btns" style="margin-top:0;margin-bottom:.5rem">
+    <button class="btn btn-secondary btn-sm" onclick="exportGestorPDF()">📄 Exportar PDF Gestor</button>
+  </div>
   <div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
     <div class="metric"><div class="m-label">Total Adeudado a HERI</div><div class="m-val y" id="ges-adeudado">₲ 0</div></div>
     <div class="metric" style="--amber:#e8a044;border-top:2px solid var(--amber)"><div class="m-label">Total Entregado</div><div class="m-val" style="color:var(--amber)" id="ges-entregado">₲ 0</div></div>
@@ -378,6 +384,9 @@
 <div class="page" id="page-ayudaSocial">
   <div class="page-title">Ayuda Social</div>
   <div class="page-sub">Control de pagos de Ayuda Social — % del contrato de cada obra</div>
+  <div class="row-btns" style="margin-top:0;margin-bottom:.5rem">
+    <button class="btn btn-secondary btn-sm" onclick="exportAyudaPDF()">📄 Exportar PDF Ayuda Social</button>
+  </div>
   <div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
     <div class="metric"><div class="m-label">Total Adeudado (Ayuda Social)</div><div class="m-val y" id="as-adeudado">₲ 0</div></div>
     <div class="metric" style="border-top:2px solid var(--green)"><div class="m-label">Total Entregado</div><div class="m-val g" id="as-entregado">₲ 0</div></div>
@@ -444,6 +453,9 @@
 <div class="page" id="page-contratista">
   <div class="page-title">Contratistas</div>
   <div class="page-sub">Control de pagos a contratistas — cada obra puede tener múltiples contratistas</div>
+  <div class="row-btns" style="margin-top:0;margin-bottom:.5rem">
+    <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--purple),#6b4fb0);color:#fff;border:none" onclick="exportContratistaPDF()">📄 Exportar PDF Contratistas</button>
+  </div>
   <div style="display:none"><span id="ct-adeudado"></span><span id="ct-entregado"></span><span id="ct-saldo"></span><span id="ct-count"></span></div>
   <div class="card">
     <div class="card-title">Registrar Entrega</div>
@@ -452,7 +464,8 @@
       <div class="fg"><label>Fecha</label><input type="date" id="ct-fecha"></div>
       <div class="fg"><label>Monto (₲)</label><input type="number" id="ct-monto" placeholder="0"></div>
       <div class="fg span2"><label>Concepto / Descripción</label><input type="text" id="ct-concepto" placeholder="Pago parcial, anticipo..."></div>
-      <div class="fg"><label>Asignar a Obra (opcional)</label><select id="ct-obra" class="obra-sel" style="max-width:none;flex:none"><option value="">— Sin asignar —</option></select></div>
+      <div class="fg"><label>Asignar a Obra</label><select id="ct-obra" class="obra-sel" style="max-width:none;flex:none" onchange="populateContratistaSelect()"><option value="">— Sin asignar —</option></select></div>
+      <div class="fg"><label>Contratista</label><select id="ct-contratista" class="obra-sel" style="max-width:none;flex:none"><option value="">— Elegí una obra primero —</option></select></div>
     </div>
     <div class="row-btns">
       <button class="btn btn-primary" style="background:linear-gradient(135deg,var(--purple),#6b4fb0)" onclick="saveContratistaPago()">💾 Registrar Entrega</button>
@@ -772,7 +785,8 @@ service cloud.firestore {
       <div class="fg"><label>Fecha</label><input type="date" id="ect-fecha"></div>
       <div class="fg"><label>Monto (₲)</label><input type="number" id="ect-monto"></div>
       <div class="fg span2"><label>Concepto</label><input type="text" id="ect-concepto"></div>
-      <div class="fg span2"><label>Asignar a Obra</label><select id="ect-obra" class="obra-sel" style="max-width:none;flex:none"><option value="">— Sin asignar —</option></select></div>
+      <div class="fg"><label>Asignar a Obra</label><select id="ect-obra" class="obra-sel" style="max-width:none;flex:none" onchange="populateEditContratistaSelect()"><option value="">— Sin asignar —</option></select></div>
+      <div class="fg"><label>Contratista</label><select id="ect-contratista" class="obra-sel" style="max-width:none;flex:none"><option value="">— Elegí una obra primero —</option></select></div>
     </div>
     <div class="row-btns"><button class="btn btn-primary" style="background:linear-gradient(135deg,var(--purple),#6b4fb0)" onclick="saveEditContratista()">💾 Guardar</button><button class="btn btn-ghost" onclick="closeM('mEditContratista')">Cancelar</button></div>
   </div>

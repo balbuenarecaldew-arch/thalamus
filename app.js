@@ -490,7 +490,7 @@ function renderObrasGrid(){
   g.innerHTML=list.map(o=>{
     const r=calcRes(o.id);
     return`<div class="obra-card ${o.id===cur?'act':''}" onclick="selectObra('${o.id}')">
-      <div class="oc-num">${o.num?'Nº'+o.num+' ·':''} ${o.estado||'EN EJECUCIÓN'}${o.estado==='FINALIZADA'?' 🔒':''}</div>
+      <div class="oc-num">${o.num?'<span style="font-size:1.1rem;font-weight:800;letter-spacing:.02em">Nº'+o.num+'</span> ·':''} ${o.estado||'EN EJECUCIÓN'}${o.estado==='FINALIZADA'?' 🔒':''}</div>
       <div class="oc-nombre">${o.nombre||'Sin nombre'}</div>
       <div class="oc-stats">
         ${isOp?'':`<span class="oc-stat">Contrato: ${fGs(calcCon(o.id))}</span>`}
@@ -621,7 +621,7 @@ function renderDash(){
     gs('dsh-strip').style.display='none'; return;
   }
   const o=obras[cur],r=calcRes(cur);
-  gs('dsh-title').textContent='Dashboard — '+(o.num?'Nº'+o.num+' – ':'')+o.nombre;
+  gs('dsh-title').innerHTML='Dashboard — '+(o.num?'<span style="font-size:1.2em;font-weight:800">Nº'+o.num+'</span> – ':'')+o.nombre;
   gs('dsh-sub').textContent='Al '+new Date().toLocaleDateString('es-PY');
   gs('dsh-strip').style.display='flex';
   gs('dsh-nombre').textContent=o.nombre; gs('dsh-fecha').textContent=o.fecha||'—';
@@ -691,7 +691,7 @@ function renderGlobal(){
 function renderGastosPage(){
   if(!cur){toast('Seleccioná una obra primero','err');navTo('obras');return}
   const o=obras[cur];
-  gs('gsub').textContent='Obra: '+(o.num?'Nº'+o.num+' – ':'')+o.nombre;
+  gs('gsub').innerHTML='Obra: '+(o.num?'<span style="font-size:1.2em;font-weight:800">Nº'+o.num+'</span> – ':'')+o.nombre;
   gs('gstrip').style.display='flex'; gs('gsn').textContent=o.nombre;
   updGStrip();
   if(qrows.length===0)addRow();
@@ -1024,7 +1024,7 @@ function renderCerts(){
 function renderResumen(){
   if(!cur){toast('Seleccioná una obra','err');navTo('obras');return}
   const o=obras[cur], r=calcRes(cur);
-  gs('resumen-sub').textContent=(o.num?'N\xba'+o.num+' \u2013 ':'')+o.nombre+' \u00b7 '+new Date().toLocaleDateString('es-PY');
+  gs('resumen-sub').innerHTML=(o.num?'<span style="font-size:1.2em;font-weight:800">N\xba'+o.num+'</span> \u2013 ':'')+o.nombre+' \u00b7 '+new Date().toLocaleDateString('es-PY');
   gs('rtbody').innerHTML=[
     ['MONTO CONTRATO',fGs(r.con),'y'],
     ['TOTAL DE GASTOS',fGs(r.tg),'r'],
@@ -1285,7 +1285,7 @@ function renderGestor(){
       return`<div class="gestor-obra-card">
         <div class="gestor-obra-card-header">
           <div class="gestor-obra-card-title" style="flex:1;min-width:0">
-            <span class="gestor-obra-card-num" style="flex-shrink:0">${o.num?'Nº'+o.num:''}</span>
+            <span class="gestor-obra-card-num" style="flex-shrink:0;font-size:1rem;font-weight:800;letter-spacing:.02em">${o.num?'Nº'+o.num:''}</span>
             <span style="white-space:normal;word-break:break-word">${o.nombre||'Sin nombre'}</span>
           </div>
           <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;margin-left:.4rem">
@@ -1653,7 +1653,7 @@ function renderAyudaSocial(){
       return`<div class="gestor-obra-card">
         <div class="gestor-obra-card-header">
           <div class="gestor-obra-card-title" style="flex:1;min-width:0">
-            <span class="gestor-obra-card-num" style="flex-shrink:0">${o.num?'Nº'+o.num:''}</span>
+            <span class="gestor-obra-card-num" style="flex-shrink:0;font-size:1rem;font-weight:800;letter-spacing:.02em">${o.num?'Nº'+o.num:''}</span>
             <span style="white-space:normal;word-break:break-word">${o.nombre||'Sin nombre'}</span>
           </div>
           <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;margin-left:.4rem">
@@ -1919,22 +1919,50 @@ function populateContratistaObraSelect(selId){
   const val=sel.value;
   sel.innerHTML='<option value="">— Sin asignar —</option>';
   Object.values(obras).filter(o=>(o.estado||'EN EJECUCIÓN')==='EN EJECUCIÓN').sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'')).forEach(o=>{
-    const contrs=getObraContratistas(o.id);
-    contrs.forEach(c=>{
-      const opt=document.createElement('option');
-      opt.value=o.id+'|'+c.id;
-      opt.textContent=(o.num?'Nº'+o.num+' – ':'')+o.nombre+' → '+c.nombre;
-      sel.appendChild(opt);
-    });
-    if(!contrs.length){
-      const opt=document.createElement('option');
-      opt.value=o.id+'|';
-      opt.textContent=(o.num?'Nº'+o.num+' – ':'')+o.nombre+' (sin contratista)';
-      sel.appendChild(opt);
-    }
+    const opt=document.createElement('option');
+    opt.value=o.id;
+    opt.textContent=(o.num?'Nº'+o.num+' – ':'')+o.nombre;
+    sel.appendChild(opt);
   });
   if(val) sel.value=val;
 }
+
+function _fillContratistaDropdown(obraId, selId){
+  const sel=gs(selId);
+  if(!sel) return;
+  sel.innerHTML='';
+  if(!obraId){
+    sel.innerHTML='<option value="">— Elegí una obra primero —</option>';
+    return;
+  }
+  const contrs=getObraContratistas(obraId);
+  if(!contrs.length){
+    sel.innerHTML='<option value="">— No hay contratistas en esta obra —</option>';
+    return;
+  }
+  if(contrs.length===1){
+    const c=contrs[0];
+    sel.innerHTML='<option value="'+c.id+'">'+c.nombre+'</option>';
+    return;
+  }
+  sel.innerHTML='<option value="">— Seleccioná contratista —</option>';
+  contrs.forEach(c=>{
+    const opt=document.createElement('option');
+    opt.value=c.id;
+    opt.textContent=c.nombre;
+    sel.appendChild(opt);
+  });
+}
+
+window.populateContratistaSelect=function(){
+  const obraId=gs('ct-obra')?.value||'';
+  _fillContratistaDropdown(obraId,'ct-contratista');
+};
+
+window.populateEditContratistaSelect=function(){
+  const obraId=gs('ect-obra')?.value||'';
+  _fillContratistaDropdown(obraId,'ect-contratista');
+};
 
 function renderContratista(){
   migrateContratistaData();
@@ -2069,7 +2097,7 @@ function renderContratista(){
       return`<div class="ct-accordion">
         <div class="ct-acc-header${isOpen?' open':''}" onclick="toggleCtAccordion('${o.id}',this)">
           <div class="ct-acc-left">
-            <span class="ct-acc-num">${o.num?'Nº'+o.num:''}</span>
+            <span class="ct-acc-num" style="font-size:1rem;font-weight:800;letter-spacing:.02em">${o.num?'Nº'+o.num:''}</span>
             <span class="ct-acc-name" style="white-space:normal;word-break:break-word">${o.nombre||'Sin nombre'}</span>
           </div>
           <div class="ct-acc-right">
@@ -2206,6 +2234,7 @@ window.updateContratistaMonto=async function(obraId,cId,val){
 
 window.clrContratistaForm=function(){
   gs('ct-fecha').value=today(); gs('ct-monto').value=''; gs('ct-concepto').value=''; gs('ct-obra').value='';
+  const cSel=gs('ct-contratista'); if(cSel) cSel.innerHTML='<option value="">— Elegí una obra primero —</option>';
 };
 window.toggleCtAccordion=function(id,headerEl){
   let _ctOpen={};
@@ -2219,10 +2248,12 @@ window.toggleCtAccordion=function(id,headerEl){
 window.saveContratistaPago=async function(){
   const monto=parseFloat(gs('ct-monto').value)||0;
   if(!monto){toast('Ingresá el monto','err');return}
-  const combo=gs('ct-obra').value||'';
-  const parts=combo.split('|');
-  const obraId=parts[0]||'';
-  const contratistaId=parts[1]||'';
+  const obraId=gs('ct-obra').value||'';
+  const contratistaId=gs('ct-contratista')?.value||'';
+  if(obraId&&!contratistaId){
+    const contrs=getObraContratistas(obraId);
+    if(contrs.length>1){toast('Seleccioná un contratista','err');return}
+  }
   if(obraId&&obras[obraId]?.estado==='FINALIZADA'){toast('🔒 Obra FINALIZADA — no se puede asignar gastos','err');return}
   const p={id:uid(),fecha:v('ct-fecha')||today(),monto,
     concepto:v('ct-concepto')||'Pago contratista',
@@ -2247,17 +2278,21 @@ window.editContratistaPago=function(id){
   gs('ect-monto').value=p.monto||0;
   gs('ect-concepto').value=p.concepto||'';
   populateContratistaObraSelect('ect-obra');
-  gs('ect-obra').value=(p.obraId||'')+'|'+(p.contratistaId||'');
+  gs('ect-obra').value=p.obraId||'';
+  _fillContratistaDropdown(p.obraId||'','ect-contratista');
+  if(p.contratistaId) gs('ect-contratista').value=p.contratistaId;
   openM('mEditContratista');
 };
 window.saveEditContratista=async function(){
   const id=gs('ect-id').value;
   const p=contratistaPagos.find(p=>p.id===id);
   if(!p){toast('No encontrado','err');return}
-  const combo=gs('ect-obra').value||'';
-  const parts=combo.split('|');
-  const newObraId=parts[0]||'';
-  const newContrId=parts[1]||'';
+  const newObraId=gs('ect-obra').value||'';
+  const newContrId=gs('ect-contratista')?.value||'';
+  if(newObraId&&!newContrId){
+    const contrs=getObraContratistas(newObraId);
+    if(contrs.length>1){toast('Seleccioná un contratista','err');return}
+  }
   if(newObraId&&obras[newObraId]?.estado==='FINALIZADA'){toast('🔒 No se puede asignar a obra FINALIZADA','err');return}
   p.fecha=gs('ect-fecha').value;
   p.monto=parseFloat(gs('ect-monto').value)||0;
@@ -3703,4 +3738,296 @@ function _buildUtilidadesPDF(){
   }
   doc.save('Utilidades_'+today()+'.pdf');
   toast('PDF de Utilidades exportado ✓','ok');
+}
+
+// ═══════════════════════════════════════
+// PDF — GESTOR
+// ═══════════════════════════════════════
+function _loadPDFLib(cb){
+  if(typeof window.jspdf!=='undefined'||typeof jsPDF!=='undefined'){cb();return;}
+  toast('Cargando librería PDF...','info');
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+  s.onload=()=>{
+    const s2=document.createElement('script');
+    s2.src='https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js';
+    s2.onload=cb; document.head.appendChild(s2);
+  };document.head.appendChild(s);
+}
+
+window.exportGestorPDF=function(){_loadPDFLib(_buildGestorPDF);};
+
+function _buildGestorPDF(){
+  const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!jsPDF){toast('Error cargando PDF','err');return}
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth();
+  const M=10;
+  const AZUL=[31,56,100],AMBER=[232,160,68],GRIS=[230,230,230],BLACK=[0,0,0],WHITE=[255,255,255],GREEN=[46,125,50],RED=[224,82,82];
+  const fNum=(x)=>Math.round(x||0).toLocaleString('es-PY');
+
+  // Header
+  doc.setFillColor(...AZUL);doc.rect(M,M,W-M*2,10,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(12);doc.setFont('helvetica','bold');
+  doc.text('CONTROL DE GESTOR (HERI)',W/2,M+7,{align:'center'});
+  doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text(new Date().toLocaleDateString('es-PY'),W-M-2,M+7,{align:'right'});
+
+  let y=M+14;
+
+  // Resumen global
+  const adeudado=calcGestorAdeudado();
+  const entregado=calcGestorEntregado();
+  const saldo=adeudado-entregado;
+  doc.autoTable({startY:y,
+    head:[['Total Adeudado','Total Entregado','Saldo Pendiente']],
+    body:[[fNum(adeudado),fNum(entregado),fNum(saldo)]],
+    styles:{fontSize:9,cellPadding:3,textColor:BLACK,halign:'center'},
+    headStyles:{fillColor:AZUL,textColor:WHITE,fontStyle:'bold'},
+    bodyStyles:{fillColor:WHITE,fontStyle:'bold'},
+    margin:{left:M,right:M},theme:'grid'
+  });
+  y=doc.lastAutoTable.finalY+6;
+
+  // Tabla por obra
+  const obraList=Object.values(obras).filter(o=>obraHe(o.id)!==0||(o.gestorMonto!=null&&o.gestorMonto!=='')).sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0));
+  const body=obraList.map(o=>{
+    const ad=calcGestorAdeudadoObra(o.id);
+    const en=calcGestorEntregadoObra(o.id);
+    const sal=ad-en;
+    const pagos=gestorPagos.filter(p=>p.obraId===o.id);
+    return[(o.num?'Nº'+o.num:''),o.nombre||'',fNum(ad),fNum(en),fNum(sal),pagos.length.toString()];
+  });
+  doc.autoTable({startY:y,
+    head:[['Nº','Obra','Corresponde','Entregado','Pendiente','Entregas']],
+    body:body,
+    foot:[['','TOTAL',fNum(adeudado),fNum(entregado),fNum(saldo),'']],
+    columnStyles:{0:{cellWidth:14,halign:'center'},2:{halign:'right'},3:{halign:'right'},4:{halign:'right'},5:{halign:'center',cellWidth:18}},
+    styles:{fontSize:7.5,cellPadding:2.5,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+    headStyles:{fillColor:AZUL,textColor:WHITE,fontStyle:'bold',halign:'center'},
+    footStyles:{fillColor:AMBER,textColor:BLACK,fontStyle:'bold'},
+    alternateRowStyles:{fillColor:GRIS},bodyStyles:{fillColor:WHITE},
+    margin:{left:M,right:M},theme:'grid'
+  });
+  y=doc.lastAutoTable.finalY+6;
+
+  // Detalle entregas por obra
+  obraList.forEach(o=>{
+    const pagos=gestorPagos.filter(p=>p.obraId===o.id).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+    if(!pagos.length)return;
+    if(y>250){doc.addPage();y=M;}
+    doc.setFillColor(...AMBER);doc.rect(M,y,W-M*2,6,'F');
+    doc.setTextColor(...BLACK);doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text((o.num?'Nº'+o.num+' — ':'')+o.nombre,M+2,y+4.2);y+=7;
+    doc.autoTable({startY:y,
+      head:[['Fecha','Concepto','Monto']],
+      body:pagos.map(p=>[p.fecha||'',p.concepto||'Entrega',fNum(p.monto)]),
+      columnStyles:{2:{halign:'right'}},
+      styles:{fontSize:7,cellPadding:2,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+      headStyles:{fillColor:AZUL,textColor:WHITE,fontStyle:'bold',halign:'center'},
+      alternateRowStyles:{fillColor:GRIS},bodyStyles:{fillColor:WHITE},
+      margin:{left:M,right:M},theme:'grid'
+    });
+    y=doc.lastAutoTable.finalY+4;
+  });
+
+  // Footer
+  const tp=doc.internal.getNumberOfPages();
+  for(let i=1;i<=tp;i++){
+    doc.setPage(i);const pH=doc.internal.pageSize.getHeight();
+    doc.setFillColor(240,240,240);doc.rect(0,pH-8,W,8,'F');
+    doc.setTextColor(100,100,120);doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text('THALAMUS FINANZAS — Gestor — '+new Date().toLocaleDateString('es-PY'),M,pH-3.5);
+    doc.text('Página '+i+' de '+tp,W-M,pH-3.5,{align:'right'});
+  }
+  doc.save('Gestor_'+today()+'.pdf');
+  toast('PDF del Gestor exportado ✓','ok');
+}
+
+// ═══════════════════════════════════════
+// PDF — AYUDA SOCIAL
+// ═══════════════════════════════════════
+window.exportAyudaPDF=function(){_loadPDFLib(_buildAyudaPDF);};
+
+function _buildAyudaPDF(){
+  const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!jsPDF){toast('Error cargando PDF','err');return}
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth();
+  const M=10;
+  const AZUL=[31,56,100],VERDE=[46,125,50],GRIS=[230,230,230],BLACK=[0,0,0],WHITE=[255,255,255],VERDE_CL=[61,212,154];
+  const fNum=(x)=>Math.round(x||0).toLocaleString('es-PY');
+
+  doc.setFillColor(...AZUL);doc.rect(M,M,W-M*2,10,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(12);doc.setFont('helvetica','bold');
+  doc.text('CONTROL DE AYUDA SOCIAL',W/2,M+7,{align:'center'});
+  doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text(new Date().toLocaleDateString('es-PY'),W-M-2,M+7,{align:'right'});
+
+  let y=M+14;
+  const adeudado=calcAyudaAdeudado();
+  const entregado=calcAyudaEntregado();
+  const saldo=adeudado-entregado;
+  doc.autoTable({startY:y,
+    head:[['Total Adeudado','Total Entregado','Saldo Pendiente']],
+    body:[[fNum(adeudado),fNum(entregado),fNum(saldo)]],
+    styles:{fontSize:9,cellPadding:3,textColor:BLACK,halign:'center'},
+    headStyles:{fillColor:AZUL,textColor:WHITE,fontStyle:'bold'},
+    bodyStyles:{fillColor:WHITE,fontStyle:'bold'},
+    margin:{left:M,right:M},theme:'grid'
+  });
+  y=doc.lastAutoTable.finalY+6;
+
+  const obraList=Object.values(obras).filter(o=>obraAy(o.id)!==0||(o.ayudaMonto!=null&&o.ayudaMonto!=='')).sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0));
+  const body=obraList.map(o=>{
+    const ad=calcAyudaAdeudadoObra(o.id);
+    const en=calcAyudaEntregadoObra(o.id);
+    const sal=ad-en;
+    const pagos=ayudaSocialPagos.filter(p=>p.obraId===o.id);
+    return[(o.num?'Nº'+o.num:''),o.nombre||'',fNum(ad),fNum(en),fNum(sal),pagos.length.toString()];
+  });
+  doc.autoTable({startY:y,
+    head:[['Nº','Obra','Corresponde','Entregado','Pendiente','Entregas']],
+    body:body,
+    foot:[['','TOTAL',fNum(adeudado),fNum(entregado),fNum(saldo),'']],
+    columnStyles:{0:{cellWidth:14,halign:'center'},2:{halign:'right'},3:{halign:'right'},4:{halign:'right'},5:{halign:'center',cellWidth:18}},
+    styles:{fontSize:7.5,cellPadding:2.5,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+    headStyles:{fillColor:VERDE,textColor:WHITE,fontStyle:'bold',halign:'center'},
+    footStyles:{fillColor:VERDE_CL,textColor:BLACK,fontStyle:'bold'},
+    alternateRowStyles:{fillColor:GRIS},bodyStyles:{fillColor:WHITE},
+    margin:{left:M,right:M},theme:'grid'
+  });
+  y=doc.lastAutoTable.finalY+6;
+
+  obraList.forEach(o=>{
+    const pagos=ayudaSocialPagos.filter(p=>p.obraId===o.id).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+    if(!pagos.length)return;
+    if(y>250){doc.addPage();y=M;}
+    doc.setFillColor(...VERDE_CL);doc.rect(M,y,W-M*2,6,'F');
+    doc.setTextColor(...BLACK);doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text((o.num?'Nº'+o.num+' — ':'')+o.nombre,M+2,y+4.2);y+=7;
+    doc.autoTable({startY:y,
+      head:[['Fecha','Concepto','Monto']],
+      body:pagos.map(p=>[p.fecha||'',p.concepto||'Entrega',fNum(p.monto)]),
+      columnStyles:{2:{halign:'right'}},
+      styles:{fontSize:7,cellPadding:2,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+      headStyles:{fillColor:VERDE,textColor:WHITE,fontStyle:'bold',halign:'center'},
+      alternateRowStyles:{fillColor:GRIS},bodyStyles:{fillColor:WHITE},
+      margin:{left:M,right:M},theme:'grid'
+    });
+    y=doc.lastAutoTable.finalY+4;
+  });
+
+  const tp=doc.internal.getNumberOfPages();
+  for(let i=1;i<=tp;i++){
+    doc.setPage(i);const pH=doc.internal.pageSize.getHeight();
+    doc.setFillColor(240,240,240);doc.rect(0,pH-8,W,8,'F');
+    doc.setTextColor(100,100,120);doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text('THALAMUS FINANZAS — Ayuda Social — '+new Date().toLocaleDateString('es-PY'),M,pH-3.5);
+    doc.text('Página '+i+' de '+tp,W-M,pH-3.5,{align:'right'});
+  }
+  doc.save('AyudaSocial_'+today()+'.pdf');
+  toast('PDF de Ayuda Social exportado ✓','ok');
+}
+
+// ═══════════════════════════════════════
+// PDF — CONTRATISTAS
+// ═══════════════════════════════════════
+window.exportContratistaPDF=function(){_loadPDFLib(_buildContratistaPDF);};
+
+function _buildContratistaPDF(){
+  const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!jsPDF){toast('Error cargando PDF','err');return}
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth();
+  const M=10;
+  const AZUL=[31,56,100],PURPLE=[107,79,176],PURP_CL=[157,127,218],GRIS=[230,230,230],BLACK=[0,0,0],WHITE=[255,255,255],RED=[224,82,82],GREEN=[46,125,50];
+  const fNum=(x)=>Math.round(x||0).toLocaleString('es-PY');
+
+  doc.setFillColor(...PURPLE);doc.rect(M,M,W-M*2,10,'F');
+  doc.setTextColor(...WHITE);doc.setFontSize(12);doc.setFont('helvetica','bold');
+  doc.text('CONTROL DE CONTRATISTAS',W/2,M+7,{align:'center'});
+  doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text(new Date().toLocaleDateString('es-PY'),W-M-2,M+7,{align:'right'});
+
+  let y=M+14;
+  const obraList=Object.values(obras).filter(o=>(o.estado||'EN EJECUCIÓN')==='EN EJECUCIÓN').sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0));
+
+  obraList.forEach(o=>{
+    const contrs=getObraContratistas(o.id);
+    if(!contrs.length)return;
+    if(y>240){doc.addPage();y=M;}
+
+    // Obra header
+    doc.setFillColor(...AZUL);doc.rect(M,y,W-M*2,7,'F');
+    doc.setTextColor(...WHITE);doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text((o.num?'Nº'+o.num+' — ':'')+o.nombre,M+2,y+5);
+    doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.text('Contrato: '+fNum(calcCon(o.id)),W-M-2,y+5,{align:'right'});
+    y+=9;
+
+    contrs.forEach(c=>{
+      if(y>255){doc.addPage();y=M;}
+      const cAde=parseFloat(c.monto)||0;
+      const cEnt=calcContratistaEntregadoContr(o.id,c.id);
+      const cSal=cAde-cEnt;
+      const cPct=cAde>0?Math.min(100,cEnt/cAde*100):0;
+      const cPagos=contratistaPagos.filter(p=>p.obraId===o.id&&p.contratistaId===c.id).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+
+      // Contratista sub-header
+      doc.setFillColor(...PURP_CL);doc.rect(M,y,W-M*2,6,'F');
+      doc.setTextColor(...WHITE);doc.setFontSize(8);doc.setFont('helvetica','bold');
+      doc.text('👷 '+c.nombre,M+2,y+4.2);
+      doc.text('Asignado: '+fNum(cAde)+' | Entregado: '+fNum(cEnt)+' | Pendiente: '+fNum(cSal)+' ('+cPct.toFixed(0)+'%)',W-M-2,y+4.2,{align:'right'});
+      y+=7;
+
+      if(cPagos.length){
+        doc.autoTable({startY:y,
+          head:[['Fecha','Concepto','Monto']],
+          body:cPagos.map(p=>[p.fecha||'',p.concepto||'Entrega',fNum(p.monto)]),
+          foot:[['','Total Entregado',fNum(cEnt)]],
+          columnStyles:{2:{halign:'right'}},
+          styles:{fontSize:7,cellPadding:2,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+          headStyles:{fillColor:PURPLE,textColor:WHITE,fontStyle:'bold',halign:'center'},
+          footStyles:{fillColor:GRIS,textColor:BLACK,fontStyle:'bold'},
+          alternateRowStyles:{fillColor:[245,242,252]},bodyStyles:{fillColor:WHITE},
+          margin:{left:M+4,right:M+4},theme:'grid'
+        });
+        y=doc.lastAutoTable.finalY+4;
+      }else{
+        doc.setTextColor(150,150,150);doc.setFontSize(7);doc.setFont('helvetica','italic');
+        doc.text('Sin entregas registradas',M+6,y+3);y+=6;
+      }
+    });
+    y+=3;
+  });
+
+  // Pagos sin asignar
+  const sinPagos=contratistaPagos.filter(p=>!p.obraId);
+  if(sinPagos.length){
+    if(y>250){doc.addPage();y=M;}
+    doc.setFillColor(...RED);doc.rect(M,y,W-M*2,6,'F');
+    doc.setTextColor(...WHITE);doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text('⚠️ ENTREGAS SIN ASIGNAR A OBRA ('+sinPagos.length+')',M+2,y+4.2);y+=7;
+    doc.autoTable({startY:y,
+      head:[['Fecha','Concepto','Monto']],
+      body:sinPagos.map(p=>[p.fecha||'',p.concepto||'Entrega',fNum(p.monto)]),
+      columnStyles:{2:{halign:'right'}},
+      styles:{fontSize:7,cellPadding:2,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+      headStyles:{fillColor:PURPLE,textColor:WHITE,fontStyle:'bold',halign:'center'},
+      margin:{left:M,right:M},theme:'grid'
+    });
+    y=doc.lastAutoTable.finalY+4;
+  }
+
+  const tp=doc.internal.getNumberOfPages();
+  for(let i=1;i<=tp;i++){
+    doc.setPage(i);const pH=doc.internal.pageSize.getHeight();
+    doc.setFillColor(240,240,240);doc.rect(0,pH-8,W,8,'F');
+    doc.setTextColor(100,100,120);doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+    doc.text('THALAMUS FINANZAS — Contratistas — '+new Date().toLocaleDateString('es-PY'),M,pH-3.5);
+    doc.text('Página '+i+' de '+tp,W-M,pH-3.5,{align:'right'});
+  }
+  doc.save('Contratistas_'+today()+'.pdf');
+  toast('PDF de Contratistas exportado ✓','ok');
 }
