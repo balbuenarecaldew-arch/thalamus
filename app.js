@@ -3,7 +3,21 @@
 // ═══════════════════════════════════════
 window.switchTheme=function(css){
   const link=document.getElementById('themeCSS');
-  if(link) link.href=css;
+  if(!link) return;
+  const prev=link.href;
+  link.href=css;
+  // Test if CSS loads - if not, revert
+  const testLink=document.createElement('link');
+  testLink.rel='stylesheet';testLink.href=css;
+  testLink.onerror=function(){
+    link.href=prev.includes('/')? prev.split('/').pop() : 'oscuro.css';
+    const sel=document.getElementById('themeSelect');
+    if(sel) sel.value='oscuro.css';
+    testLink.remove();
+    toast('No se pudo cargar el tema "'+css+'" — verificá que el archivo existe','err');
+  };
+  testLink.onload=function(){testLink.remove();};
+  document.head.appendChild(testLink);
   localStorage.setItem('th_theme',css);
 };
 (function loadSavedTheme(){
@@ -1215,8 +1229,15 @@ function calcGestorAdeudadoObra(id){
     const manual=parseFloat(o.gestorMonto);
     if(!isNaN(manual)) return manual;
   }
-  if(!obraParticipaGestor(id)) return 0;
-  return calcCon(id)*(obraGes(id)/100);
+  // Explicit heri set with non-zero result
+  if(o?.heri!=null){
+    const amt=calcCon(id)*(parseFloat(o.heri)/100);
+    if(amt>0) return amt;
+  }
+  // If obra has payments but no explicit amount, corresponde = entregado (money was already paid)
+  const entregado=calcGestorEntregadoObra(id);
+  if(entregado>0) return entregado;
+  return 0;
 }
 function calcGestorAdeudado(){
   return Object.values(obras).reduce((s,o)=>s+calcGestorAdeudadoObra(o.id),0);
@@ -1622,8 +1643,13 @@ function calcAyudaAdeudadoObra(id){
     const manual=parseFloat(o.ayudaMonto);
     if(!isNaN(manual)) return manual;
   }
-  if(!obraParticipaAyuda(id)) return 0;
-  return calcCon(id)*(obraAy(id)/100);
+  if(o?.ayuda!=null){
+    const amt=calcCon(id)*(parseFloat(o.ayuda)/100);
+    if(amt>0) return amt;
+  }
+  const entregado=calcAyudaEntregadoObra(id);
+  if(entregado>0) return entregado;
+  return 0;
 }
 function calcAyudaAdeudado(){
   return Object.values(obras).reduce((s,o)=>s+calcAyudaAdeudadoObra(o.id),0);
