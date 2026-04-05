@@ -1173,12 +1173,20 @@ window.delRetiro=function(socio,idx){
 // ═══════════════════════════════════════
 // GESTOR — CONTROL DE PAGOS
 // ═══════════════════════════════════════
+function obraParticipaGestor(id){
+  const o=obras[id]; if(!o) return false;
+  if(o.gestorMonto!=null&&o.gestorMonto!=='') return true;
+  if(o.heri!=null) return true;
+  if(gestorPagos.some(p=>p.obraId===id)) return true;
+  return false;
+}
 function calcGestorAdeudadoObra(id){
   const o=obras[id];
   if(o&&o.gestorMonto!=null&&o.gestorMonto!==''){
     const manual=parseFloat(o.gestorMonto);
     if(!isNaN(manual)) return manual;
   }
+  if(!obraParticipaGestor(id)) return 0;
   return calcCon(id)*(obraGes(id)/100);
 }
 function calcGestorAdeudado(){
@@ -1230,7 +1238,7 @@ function renderGestor(){
     _salMap[o.id]={sal:ad-en, pct:ad>0?Math.min(100,en/ad*100):0, nPagos};
   });
   // Filtrar
-  if(filterVal==='actuales')      obraList=obraList.filter(o=>obraHe(o.id)!==0||(o.gestorMonto!=null&&o.gestorMonto!==''));
+  if(filterVal==='actuales')      obraList=obraList.filter(o=>obraParticipaGestor(o.id));
   if(filterVal==='pendientes')    obraList=obraList.filter(o=>_salMap[o.id].sal>0.5);
   if(filterVal==='saldadas')      obraList=obraList.filter(o=>_salMap[o.id].sal<=0.5);
   if(filterVal==='con-entregas')  obraList=obraList.filter(o=>_salMap[o.id].nPagos>0);
@@ -1250,6 +1258,22 @@ function renderGestor(){
     const sinAsignar=calcGestorSinAsignar();
     let html=obraList.map(o=>{
       const con=calcCon(o.id);
+      const participa=obraParticipaGestor(o.id);
+      if(!participa){
+        return`<div class="gestor-obra-card" style="opacity:.6;border-style:dashed">
+          <div class="gestor-obra-card-header">
+            <div class="gestor-obra-card-title" style="flex:1;min-width:0">
+              <span class="gestor-obra-card-num" style="flex-shrink:0;font-size:1rem;font-weight:800;letter-spacing:.02em">${o.num?'Nº'+o.num:''}</span>
+              <span style="white-space:normal;word-break:break-word">${o.nombre||'Sin nombre'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;margin-left:.4rem">
+              <span style="font-size:.6rem;color:var(--muted);font-style:italic">No incluida</span>
+              <button class="btn btn-xs" style="background:rgba(232,160,68,.15);color:var(--amber);border:1px solid rgba(232,160,68,.2);padding:3px 10px;font-size:.62rem;font-weight:600"
+                onclick="event.stopPropagation();activarObraGestor('${o.id}')">+ Incluir</button>
+            </div>
+          </div>
+        </div>`;
+      }
       const gesPct=obraGes(o.id);
       const autoCalc=con*(gesPct/100);
       const hasOverride=o.gestorMonto!=null&&o.gestorMonto!=='';
@@ -1513,15 +1537,24 @@ window.quickAddGestorObra=async function(obraId){
 window.limpiarGestorObra=function(obraId){
   const o=obras[obraId]; if(!o)return;
   const pagosAsignados=gestorPagos.filter(p=>p.obraId===obraId);
-  const msg='¿Limpiar datos del gestor para "'+o.nombre+'"?\n'
+  const msg='¿Quitar "'+o.nombre+'" del gestor?\n'
     +(pagosAsignados.length?'— Se eliminarán '+pagosAsignados.length+' entrega(s)\n':'')
-    +'— Se reseteará el monto manual (si existe)';
+    +'— Se quitará el % y monto asignado';
   requireAuth(msg,async()=>{
     gestorPagos=gestorPagos.filter(p=>p.obraId!==obraId);
     await fbSet('gestor/pagos',{lista:gestorPagos});
-    if(o.gestorMonto!=null){delete o.gestorMonto; await fbSet('obras/'+obraId,o);}
-    saveCache(); renderGestor(); toast('Datos del gestor limpiados para "'+o.nombre+'" ✓','ok');
+    if(o.gestorMonto!=null) delete o.gestorMonto;
+    if(o.heri!=null) delete o.heri;
+    await fbSet('obras/'+obraId,o);
+    saveCache(); renderGestor(); toast('"'+o.nombre+'" quitada del gestor ✓','ok');
   });
+};
+window.activarObraGestor=async function(obraId){
+  const o=obras[obraId]; if(!o)return;
+  o.heri=cfg.heri;
+  await fbSet('obras/'+obraId,o);
+  saveCache(); renderGestor();
+  toast('"'+o.nombre+'" incluida en gestor ('+cfg.heri+'%) ✓','ok');
 };
 
 window.resetTodosGestorAuto=function(){
@@ -1545,12 +1578,20 @@ window.borrarTodosGestor=function(){
 // ═══════════════════════════════════════
 // AYUDA SOCIAL MODULE
 // ═══════════════════════════════════════
+function obraParticipaAyuda(id){
+  const o=obras[id]; if(!o) return false;
+  if(o.ayudaMonto!=null&&o.ayudaMonto!=='') return true;
+  if(o.ayuda!=null) return true;
+  if(ayudaSocialPagos.some(p=>p.obraId===id)) return true;
+  return false;
+}
 function calcAyudaAdeudadoObra(id){
   const o=obras[id];
   if(o&&o.ayudaMonto!=null&&o.ayudaMonto!==''){
     const manual=parseFloat(o.ayudaMonto);
     if(!isNaN(manual)) return manual;
   }
+  if(!obraParticipaAyuda(id)) return 0;
   return calcCon(id)*(obraAy(id)/100);
 }
 function calcAyudaAdeudado(){
@@ -1600,7 +1641,7 @@ function renderAyudaSocial(){
     const nPagos=ayudaSocialPagos.filter(p=>p.obraId===o.id).length;
     _salMap[o.id]={sal:ad-en, pct:ad>0?Math.min(100,en/ad*100):0, nPagos};
   });
-  if(filterVal==='actuales')      obraList=obraList.filter(o=>obraAy(o.id)!==0||(o.ayudaMonto!=null&&o.ayudaMonto!==''));
+  if(filterVal==='actuales')      obraList=obraList.filter(o=>obraParticipaAyuda(o.id));
   if(filterVal==='pendientes')    obraList=obraList.filter(o=>_salMap[o.id].sal>0.5);
   if(filterVal==='saldadas')      obraList=obraList.filter(o=>_salMap[o.id].sal<=0.5);
   if(filterVal==='con-entregas')  obraList=obraList.filter(o=>_salMap[o.id].nPagos>0);
@@ -1620,6 +1661,22 @@ function renderAyudaSocial(){
     const sinAsignar=calcAyudaSinAsignar();
     let html=obraList.map(o=>{
       const con=calcCon(o.id);
+      const participa=obraParticipaAyuda(o.id);
+      if(!participa){
+        return`<div class="gestor-obra-card" style="opacity:.6;border-style:dashed">
+          <div class="gestor-obra-card-header">
+            <div class="gestor-obra-card-title" style="flex:1;min-width:0">
+              <span class="gestor-obra-card-num" style="flex-shrink:0;font-size:1rem;font-weight:800;letter-spacing:.02em">${o.num?'Nº'+o.num:''}</span>
+              <span style="white-space:normal;word-break:break-word">${o.nombre||'Sin nombre'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;margin-left:.4rem">
+              <span style="font-size:.6rem;color:var(--muted);font-style:italic">No incluida</span>
+              <button class="btn btn-xs" style="background:rgba(61,212,154,.15);color:var(--green);border:1px solid rgba(61,212,154,.2);padding:3px 10px;font-size:.62rem;font-weight:600"
+                onclick="event.stopPropagation();activarObraAyuda('${o.id}')">+ Incluir</button>
+            </div>
+          </div>
+        </div>`;
+      }
       const ayPct=obraAy(o.id);
       const autoCalc=con*(ayPct/100);
       const hasOverride=o.ayudaMonto!=null&&o.ayudaMonto!=='';
@@ -1850,15 +1907,24 @@ window.quickAddAyudaObra=async function(obraId){
 window.limpiarAyudaObra=function(obraId){
   const o=obras[obraId]; if(!o)return;
   const pagosAsignados=ayudaSocialPagos.filter(p=>p.obraId===obraId);
-  const msg='¿Limpiar datos de Ayuda Social para "'+o.nombre+'"?\n'
+  const msg='¿Quitar "'+o.nombre+'" de Ayuda Social?\n'
     +(pagosAsignados.length?'— Se eliminarán '+pagosAsignados.length+' entrega(s)\n':'')
-    +'— Se reseteará el monto manual (si existe)';
+    +'— Se quitará el % y monto asignado';
   requireAuth(msg,async()=>{
     ayudaSocialPagos=ayudaSocialPagos.filter(p=>p.obraId!==obraId);
     await fbSet('ayudaSocial/pagos',{lista:ayudaSocialPagos});
-    if(o.ayudaMonto!=null){delete o.ayudaMonto; await fbSet('obras/'+obraId,o);}
-    saveCache(); renderAyudaSocial(); toast('Datos de Ayuda Social limpiados para "'+o.nombre+'" ✓','ok');
+    if(o.ayudaMonto!=null) delete o.ayudaMonto;
+    if(o.ayuda!=null) delete o.ayuda;
+    await fbSet('obras/'+obraId,o);
+    saveCache(); renderAyudaSocial(); toast('"'+o.nombre+'" quitada de Ayuda Social ✓','ok');
   });
+};
+window.activarObraAyuda=async function(obraId){
+  const o=obras[obraId]; if(!o)return;
+  o.ayuda=cfg.ayuda;
+  await fbSet('obras/'+obraId,o);
+  saveCache(); renderAyudaSocial();
+  toast('"'+o.nombre+'" incluida en Ayuda Social ('+cfg.ayuda+'%) ✓','ok');
 };
 window.resetTodosAyudaAuto=function(){
   const conOverride=Object.values(obras).filter(o=>o.ayudaMonto!=null&&o.ayudaMonto!=="");
@@ -3790,7 +3856,7 @@ function _buildGestorPDF(){
   y=doc.lastAutoTable.finalY+6;
 
   // Tabla por obra
-  const obraList=Object.values(obras).filter(o=>obraHe(o.id)!==0||(o.gestorMonto!=null&&o.gestorMonto!=='')).sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0));
+  const obraList=Object.values(obras).filter(o=>obraParticipaGestor(o.id)).sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0));
   const body=obraList.map(o=>{
     const ad=calcGestorAdeudadoObra(o.id);
     const en=calcGestorEntregadoObra(o.id);
@@ -3878,7 +3944,7 @@ function _buildAyudaPDF(){
   });
   y=doc.lastAutoTable.finalY+6;
 
-  const obraList=Object.values(obras).filter(o=>obraAy(o.id)!==0||(o.ayudaMonto!=null&&o.ayudaMonto!=='')).sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0));
+  const obraList=Object.values(obras).filter(o=>obraParticipaAyuda(o.id)).sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0));
   const body=obraList.map(o=>{
     const ad=calcAyudaAdeudadoObra(o.id);
     const en=calcAyudaEntregadoObra(o.id);
