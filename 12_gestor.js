@@ -30,7 +30,9 @@ function calcGestorAdeudado(){
   return Object.values(obras).reduce((s,o)=>s+calcGestorAdeudadoObra(o.id),0);
 }
 function calcGestorEntregado(){
-  return gestorPagos.reduce((s,p)=>s+(parseFloat(p.monto)||0),0);
+  return gestorPagos
+    .filter(p=>!p.obraId||!obras[p.obraId]?.gestorExcluida)
+    .reduce((s,p)=>s+(parseFloat(p.monto)||0),0);
 }
 function calcGestorEntregadoObra(id){
   return gestorPagos.filter(p=>p.obraId===id).reduce((s,p)=>s+(parseFloat(p.monto)||0),0);
