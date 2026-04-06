@@ -6,7 +6,7 @@ function obraParticipaAyuda(id){
   if(o.ayudaMonto!=null&&o.ayudaMonto!==''){
     const m=parseFloat(o.ayudaMonto); if(!isNaN(m)&&m>0) return true;
   }
-  if(o.ayuda!=null&&calcCon(id)*(parseFloat(o.ayuda)/100)>0) return true;
+  if(o.ayuda!=null&&calcNetoObra(id)*(parseFloat(o.ayuda)/100)>0) return true;
   if(ayudaSocialPagos.some(p=>p.obraId===id)) return true;
   return false;
 }
@@ -17,7 +17,7 @@ function calcAyudaAdeudadoObra(id){
     if(!isNaN(manual)) return manual;
   }
   if(o?.ayuda!=null){
-    const amt=calcCon(id)*(parseFloat(o.ayuda)/100);
+    const amt=calcNetoObra(id)*(parseFloat(o.ayuda)/100);
     if(amt>0) return amt;
   }
   const entregado=calcAyudaEntregadoObra(id);
@@ -90,7 +90,7 @@ function renderAyudaSocial(){
     const totalObras=Object.keys(obras).length;
     const sinAsignar=calcAyudaSinAsignar();
     let html=obraList.map(o=>{
-      const con=calcCon(o.id);
+      const neto=calcNetoObra(o.id);
       const participa=obraParticipaAyuda(o.id);
       if(!participa){
         return`<div class="gestor-obra-card" style="opacity:.6;border-style:dashed">
@@ -108,7 +108,7 @@ function renderAyudaSocial(){
         </div>`;
       }
       const ayPct=obraAy(o.id);
-      const autoCalc=con*(ayPct/100);
+      const autoCalc=neto*(ayPct/100);
       const hasOverride=o.ayudaMonto!=null&&o.ayudaMonto!=='';
       const adeObra=calcAyudaAdeudadoObra(o.id);
       const entObra=calcAyudaEntregadoObra(o.id);
@@ -135,7 +135,7 @@ function renderAyudaSocial(){
       }
       const autoBtn=`<button class="gestor-corresponde-auto" 
         onclick="resetAyudaMontoObra('${o.id}')" 
-        title="${hasOverride?'Volver al cálculo automático':'Ya en automático: '+ayPct+'% de contrato'}"
+        title="${hasOverride?'Volver al cálculo automático':'Ya en automático: '+ayPct+'% de neto cobrado'}"
         style="${hasOverride?'':'opacity:.35;cursor:default;pointer-events:none'}">↺ Auto (${ayPct}%)</button>`;
       return`<div class="gestor-obra-card">
         <div class="gestor-obra-card-header">
@@ -152,7 +152,7 @@ function renderAyudaSocial(){
           <div class="gestor-obra-corresponde">
             <div>
               <div class="gestor-obra-corresponde-label" style="color:var(--green)">Corresponde (Ayuda Social)</div>
-              <div style="font-size:.5rem;color:var(--muted);margin-top:1px">${hasOverride?'⚠️ Monto manual':'Auto: '+ayPct+'% de '+fGs(con)}</div>
+              <div style="font-size:.5rem;color:var(--muted);margin-top:1px">${hasOverride?'⚠️ Monto manual':'Auto: '+ayPct+'% de '+fGs(neto)+' (neto cobrado)'}</div>
             </div>
             <div class="gestor-corresponde-edit">
               <input type="number" class="gestor-corresponde-input" value="${Math.round(adeObra)}" 
@@ -224,7 +224,6 @@ function renderAyudaSocial(){
     gs('ayudaObraGrid').innerHTML=msg;
   }
 
-  // Historial
   const list=[...ayudaSocialPagos].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
   const hcnt=gs('as-hist-count');
   if(hcnt) hcnt.textContent=list.length?'('+list.length+')':'';
@@ -305,7 +304,7 @@ window.asignarAyudaObra=function(id){
 window.updateAyudaMontoObra=async function(obraId,val){
   if(!obras[obraId])return;
   const num=parseFloat(val);
-  const autoCalc=calcCon(obraId)*(obraAy(obraId)/100);
+  const autoCalc=calcNetoObra(obraId)*(obraAy(obraId)/100);
   if(!isNaN(num)&&Math.abs(num-autoCalc)<1){
     delete obras[obraId].ayudaMonto;
   }else{
@@ -320,7 +319,7 @@ window.resetAyudaMontoObra=async function(obraId){
   delete obras[obraId].ayudaMonto;
   await fbSet('obras/'+obraId,obras[obraId]);
   saveCache(); renderAyudaSocial();
-  toast('Vuelto al cálculo automático ('+obraAy(obraId)+'%)','ok');
+  toast('Vuelto al cálculo automático ('+obraAy(obraId)+'% de neto cobrado)','ok');
 };
 window.quickAddAyudaObra=async function(obraId){
   if(obras[obraId]?.estado==='FINALIZADA'){toast('🔒 Obra FINALIZADA — no se puede asignar gastos','err');return}
@@ -372,4 +371,3 @@ window.borrarTodosAyuda=function(){
     saveCache(); renderAyudaSocial(); toast('Todas las entregas eliminadas ✓','ok');
   });
 };
-
