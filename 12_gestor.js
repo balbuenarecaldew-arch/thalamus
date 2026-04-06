@@ -6,7 +6,7 @@ function obraParticipaGestor(id){
   if(o.gestorMonto!=null&&o.gestorMonto!==''){
     const m=parseFloat(o.gestorMonto); if(!isNaN(m)&&m>0) return true;
   }
-  if(o.heri!=null&&calcNetoObra(id)*(parseFloat(o.heri)/100)>0) return true;
+  if(o.heri!=null&&parseFloat(o.heri)>0) return true;
   if(gestorPagos.some(p=>p.obraId===id)) return true;
   return false;
 }

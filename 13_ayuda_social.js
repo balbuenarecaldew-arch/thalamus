@@ -6,7 +6,7 @@ function obraParticipaAyuda(id){
   if(o.ayudaMonto!=null&&o.ayudaMonto!==''){
     const m=parseFloat(o.ayudaMonto); if(!isNaN(m)&&m>0) return true;
   }
-  if(o.ayuda!=null&&calcNetoObra(id)*(parseFloat(o.ayuda)/100)>0) return true;
+  if(o.ayuda!=null&&parseFloat(o.ayuda)>0) return true;
   if(ayudaSocialPagos.some(p=>p.obraId===id)) return true;
   return false;
 }
