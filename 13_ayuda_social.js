@@ -42,6 +42,12 @@ function populateAyudaObraSelect(selId){
 }
 
 function renderAyudaSocial(){
+  // Preservar scroll de la página y del grid antes de re-renderizar
+  const _page=gs('page-ayudaSocial');
+  const _grid=gs('ayudaObraGrid');
+  const _pageScroll=_page?_page.scrollTop:0;
+  const _gridScroll=_grid?_grid.scrollTop:0;
+
   populateAyudaObraSelect('as-obra');
   gs('as-fecha').value=gs('as-fecha').value||today();
 
@@ -210,6 +216,12 @@ function renderAyudaSocial(){
     </tr>`;
   }).join('');
   const tf=gs('as-tf'); if(tf) tf.textContent=fGs(entregado);
+
+  // Restaurar scroll después del re-render
+  requestAnimationFrame(()=>{
+    if(_page) _page.scrollTop=_pageScroll;
+    if(_grid) _grid.scrollTop=_gridScroll;
+  });
 }
 
 window.clrAyudaForm=function(){
