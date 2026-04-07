@@ -1,10 +1,22 @@
 // ═══════════════════════════════════════
 // NAVEGACIÓN — UNA SOLA FUNCIÓN
 // ═══════════════════════════════════════
+
+// Memoria de scroll por sección
+const _scrollPositions = {};
+
 function navTo(name){
   // Operador restrictions
   const restricted=['global','dashboard','resumen','utilidades','gestor','ayudaSocial','contratista','ai','config'];
   if(_currentRole==='operador'&&restricted.includes(name)){name='obras';}
+
+  // Guardar scroll de la página activa antes de salir
+  const activePage = document.querySelector('.page.active');
+  if(activePage){
+    const activeId = activePage.id?.replace('page-','');
+    if(activeId) _scrollPositions[activeId] = activePage.scrollTop;
+  }
+
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
@@ -24,6 +36,10 @@ function navTo(name){
   else if(name==='ayudaSocial') renderAyudaSocial();
   else if(name==='contratista') renderContratista();
   else if(name==='config'){ loadBackupList(); }
+
+  // Restaurar scroll de esta sección (después del render)
+  const newPage = gs('page-'+name);
+  if(newPage) newPage.scrollTop = _scrollPositions[name] ?? 0;
 }
 window.navTo=navTo;
 // Alias goPage para compatibilidad
