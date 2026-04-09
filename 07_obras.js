@@ -1,6 +1,19 @@
 // =======================================
 // OBRAS
 // =======================================
+const ESTADO_EJEC='EN EJECUCI\u00d3N';
+const ESTADO_FINAL='FINALIZADA';
+const ESTADO_PARAL='PARALIZADA';
+const ESTADO_LICIT='EN LICITACI\u00d3N';
+
+function normalizarEstadoObra(value){
+  const upper=String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  if(upper.includes('FINALIZ')) return ESTADO_FINAL;
+  if(upper.includes('PARALIZ')) return ESTADO_PARAL;
+  if(upper.includes('LICIT')) return ESTADO_LICIT;
+  return ESTADO_EJEC;
+}
+
 function populateSel(){
   const sel=gs('obraSelect');
   sel.innerHTML='<option value="">- Selecciona una obra -</option>';
@@ -39,13 +52,13 @@ function renderObrasGrid(){
     const r=calcRes(o.id);
     const obraIdArg=encArg(o.id);
     const obraNombre=esc(o.nombre||'Sin nombre');
-    const obraEstado=esc(o.estado||'EN EJECUCIÓN');
+    const obraEstado=esc(normalizarEstadoObra(o.estado));
     const obraNum=o.num?esc(o.num):'';
     return `<div class="obra-card ${o.id===cur?'act':''}" onclick="selectObra(decodeURIComponent('${obraIdArg}'))">
       <div class="oc-num">
         <span style="font-size:.62rem;color:var(--muted);margin-right:4px">${idx+1}.</span>
-        ${o.num?'<span style="font-size:1.1rem;font-weight:800;letter-spacing:.02em">N'+obraNum+'</span> ·':''}
-        ${obraEstado}${o.estado==='FINALIZADA'?' 🔒':''}
+        ${o.num?'<span style="font-size:1.1rem;font-weight:800;letter-spacing:.02em">N'+obraNum+'</span> | ':''}
+        ${obraEstado}${normalizarEstadoObra(o.estado)===ESTADO_FINAL?' | CERRADA':''}
       </div>
       <div class="oc-nombre">${obraNombre}</div>
       <div class="oc-stats">
@@ -109,15 +122,15 @@ window.openNuevaObra=function(){
   gs('o-fi').value=today();
   gs('o-mc').value='';
   gs('o-ad').value='0';
-  gs('o-es').value='EN EJECUCIÓN';
+  gs('o-es').value=ESTADO_EJEC;
   openM('mObra');
 };
 
 window.editObra=function(id){
   const o=obras[id];
   if(!o) return;
-  if(o.estado==='FINALIZADA'){
-    return requireAuth('La obra "'+o.nombre+'" esta FINALIZADA.\nIngresa tu contrasena para editarla.',()=>{
+  if(normalizarEstadoObra(o.estado)===ESTADO_FINAL){
+    return requireAuth('La obra "'+o.nombre+'" esta finalizada.\nIngresa tu clave para editarla.',()=>{
       _openEditObra(id);
     });
   }
@@ -134,7 +147,7 @@ function _openEditObra(id){
   gs('o-fi').value=o.fecha||'';
   gs('o-mc').value=o.contrato||0;
   gs('o-ad').value=o.adenda||0;
-  gs('o-es').value=o.estado||'EN EJECUCIÓN';
+  gs('o-es').value=normalizarEstadoObra(o.estado);
   openM('mObra');
 }
 
@@ -154,7 +167,7 @@ window.saveObra=async function(){
     fecha:v('o-fi'),
     contrato:parseFloat(gs('o-mc').value)||0,
     adenda:parseFloat(gs('o-ad').value)||0,
-    estado:v('o-es'),
+    estado:normalizarEstadoObra(gs('o-es').value),
     lastModified:Date.now()
   };
   if(prev.ayuda!=null) o.ayuda=prev.ayuda;
@@ -236,13 +249,14 @@ function renderDash(){
     gs('dsh-strip').style.display='none';
     return;
   }
-  const o=obras[cur], r=calcRes(cur);
+  const o=obras[cur];
+  const r=calcRes(cur);
   gs('dsh-title').innerHTML='Dashboard - '+(o.num?'<span style="font-size:1.2em;font-weight:800">N'+esc(o.num)+'</span> - ':'')+esc(o.nombre);
   gs('dsh-sub').textContent='Al '+new Date().toLocaleDateString('es-PY');
   gs('dsh-strip').style.display='flex';
   gs('dsh-nombre').textContent=o.nombre;
   gs('dsh-fecha').textContent=o.fecha||'-';
-  gs('dsh-estado').textContent=o.estado;
+  gs('dsh-estado').textContent=normalizarEstadoObra(o.estado);
   gs('dsh-contrato').textContent=fGs(r.con);
   gs('dsh-ay').textContent=obraAy(cur)+'%';
   gs('dsh-he').textContent=obraHe(cur)+'%';
@@ -268,13 +282,13 @@ function renderDash(){
 // =======================================
 function renderGlobal(){
   const list=Object.values(obras);
-  let totCon=0, totG=0, totBr=0, totRe=0, totNe=0, totGan=0, totAcob=0, enEj=0;
+  let totCon=0, totG=0, totBr=0, totRe=0, totNe=0, totGan=0, totAcob=0;
 
   const rows=list.map(o=>{
     const r=calcRes(o.id);
     const obraIdArg=encArg(o.id);
     const obraNombre=esc(o.nombre||'');
-    const obraEstado=esc(o.estado||'EN EJECUCIÓN');
+    const obraEstado=esc(normalizarEstadoObra(o.estado));
     totCon+=r.con;
     totG+=r.tg;
     totBr+=r.br;
@@ -286,7 +300,7 @@ function renderGlobal(){
     const acobC=r.scob>0?'color:var(--gold)':'color:var(--muted)';
     return `<tr>
       <td><span class="obra-link" onclick="selectObra(decodeURIComponent('${obraIdArg}'))">${obraNombre}</span></td>
-      <td><span class="tag ${o.estado==='FINALIZADA'?'tag-g':o.estado==='PARALIZADA'?'tag-r':'tag-y'}">${obraEstado}</span></td>
+      <td><span class="tag ${normalizarEstadoObra(o.estado)===ESTADO_FINAL?'tag-g':normalizarEstadoObra(o.estado)===ESTADO_PARAL?'tag-r':'tag-y'}">${obraEstado}</span></td>
       <td>${fGs(r.con)}</td>
       <td style="color:var(--acc2)">${fGs(r.br)}</td>
       <td style="${acobC}">${fGs(r.scob)}</td>
@@ -296,7 +310,8 @@ function renderGlobal(){
       <td>${fPct(r.pct)}</td>
     </tr>`;
   }).join('');
-  enEj=list.filter(o=>String(o.estado||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().includes('EN EJECUCION')).length;
+
+  const enEj=list.filter(o=>normalizarEstadoObra(o.estado)===ESTADO_EJEC).length;
 
   gs('globalTbody').innerHTML=rows||'<tr class="empty-row"><td colspan="9">Sin obras</td></tr>';
   gs('globalTfoot').innerHTML=`

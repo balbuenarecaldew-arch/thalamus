@@ -1,19 +1,27 @@
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// =======================================
 // CONFIG
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// =======================================
 window.saveCfgP=function(){
-  if(!requireSocio('Solo socios pueden cambiar la configuraciÃ³n'))return;
-  const _ay=parseFloat(gs('p-ay').value), _he=parseFloat(gs('p-he').value), _so=parseFloat(gs('p-so').value);
-  cfg={...cfg, ayuda:isNaN(_ay)?10:_ay, heri:isNaN(_he)?1:_he, socios:isNaN(_so)?50:_so};
+  if(!requireSocio('Solo socios pueden cambiar la configuracion')) return;
+  const _ay=parseFloat(gs('p-ay').value);
+  const _he=parseFloat(gs('p-he').value);
+  const _so=parseFloat(gs('p-so').value);
+  cfg={
+    ...cfg,
+    ayuda:isNaN(_ay)?10:_ay,
+    heri:isNaN(_he)?1:_he,
+    socios:isNaN(_so)?50:_so
+  };
   localStorage.setItem('ocCfg',JSON.stringify(cfg));
   saveCache();
-  toast('ParÃ¡metros guardados','ok');
+  toast('Parametros guardados','ok');
   if(gs('page-gestor')?.classList.contains('active')) renderGestor();
   if(gs('page-ayudaSocial')?.classList.contains('active')) renderAyudaSocial();
   if(gs('page-contratista')?.classList.contains('active')) renderContratista();
 };
+
 window.exportJSON=function(){
-  if(!requireSocio('Solo socios pueden exportar datos'))return;
+  if(!requireSocio('Solo socios pueden exportar datos')) return;
   const data=JSON.stringify({obras,gastos,certificados,retiros,gestorPagos,ayudaSocialPagos,contratistaPagos,cfg},null,2);
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
@@ -22,18 +30,33 @@ window.exportJSON=function(){
   toast('Exportado','ok');
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// BACKUP & RESTAURACIÃ“N
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// =======================================
+// BACKUP Y RESTORE
+// =======================================
 function buildBackupData(){
-  return{
-    _meta:{version:1,date:new Date().toISOString(),user:_currentUser,timestamp:Date.now()},
-    obras,gastos,certificados,retiros,gestorPagos,ayudaSocialPagos,contratistaPagos,cfg
+  return {
+    _meta:{
+      version:1,
+      date:new Date().toISOString(),
+      user:_currentUser,
+      timestamp:Date.now()
+    },
+    obras,
+    gastos,
+    certificados,
+    retiros,
+    gestorPagos,
+    ayudaSocialPagos,
+    contratistaPagos,
+    cfg
   };
 }
+
 function applyBackupData(data){
   const newObras=data.obras||{};
-  for(const [id,o] of Object.entries(newObras)){if(o&&!o.id)o.id=id;}
+  for(const [id,o] of Object.entries(newObras)){
+    if(o&&!o.id) o.id=id;
+  }
   obras=newObras;
   gastos=data.gastos||{};
   certificados=data.certificados||{};
@@ -52,6 +75,7 @@ function applyBackupData(data){
   navTo('obras');
   applyRole();
 }
+
 async function syncCurrentStateToStorage(){
   const startedRemote=!!window._fbOk;
   const existingFB=await fbGetAll('obras');
@@ -64,46 +88,57 @@ async function syncCurrentStateToStorage(){
       await fbDel('obras/'+oid);
     }
   }
+
   for(const [id,o] of Object.entries(obras)) await fbSet('obras/'+id,o);
+
   for(const [obraId,lista] of Object.entries(gastos)){
     const fbGastos=await fbGetAll('obras/'+obraId+'/gastos');
     for(const gid of Object.keys(fbGastos||{})){
       if(!(lista||[]).find(g=>g.id===gid)) await fbDel('obras/'+obraId+'/gastos/'+gid);
     }
-    for(const g of(lista||[])){if(g.id) await fbSet('obras/'+obraId+'/gastos/'+g.id,g);}
+    for(const g of (lista||[])){
+      if(g.id) await fbSet('obras/'+obraId+'/gastos/'+g.id,g);
+    }
   }
+
   for(const [obraId,lista] of Object.entries(certificados)){
     const fbCerts=await fbGetAll('obras/'+obraId+'/certificados');
     for(const cid of Object.keys(fbCerts||{})){
       if(!(lista||[]).find(c=>c.id===cid)) await fbDel('obras/'+obraId+'/certificados/'+cid);
     }
-    for(const c of(lista||[])){if(c.id) await fbSet('obras/'+obraId+'/certificados/'+c.id,c);}
+    for(const c of (lista||[])){
+      if(c.id) await fbSet('obras/'+obraId+'/certificados/'+c.id,c);
+    }
   }
+
   await fbSet('retiros/socios',retiros);
   await fbSet('gestor/pagos',{lista:gestorPagos});
   await fbSet('ayudaSocial/pagos',{lista:ayudaSocialPagos});
   await fbSet('contratista/pagos',{lista:contratistaPagos});
-  return {startedRemote, endedRemote:!!window._fbOk};
+  return {startedRemote,endedRemote:!!window._fbOk};
 }
+
 function summarizeBackup(data){
-  return{
+  return {
     obraCount:Object.keys(data.obras||{}).length,
     gastoCount:Object.values(data.gastos||{}).reduce((s,arr)=>s+(arr?.length||0),0),
     certCount:Object.values(data.certificados||{}).reduce((s,arr)=>s+(arr?.length||0),0)
   };
 }
+
 function getRestoreWarning(counts,data){
-  return'Â¿Restaurar este backup?\n\n'
-    +'ðŸ“ '+counts.obraCount+' obras\n'
-    +'ðŸ’¸ '+counts.gastoCount+' gastos\n'
-    +'ðŸ“„ '+counts.certCount+' certificados\n'
-    +(data._meta?'\nðŸ“… Fecha: '+new Date(data._meta.date).toLocaleString('es-PY'):'')
-    +(data._meta?.user?'\nðŸ‘¤ Usuario: '+data._meta.user:'')
-    +'\n\nâš ï¸ Esto REEMPLAZA todos los datos actuales.';
+  let msg='Restaurar este backup?\n\n';
+  msg+='Obras: '+counts.obraCount+'\n';
+  msg+='Gastos: '+counts.gastoCount+'\n';
+  msg+='Certificados: '+counts.certCount+'\n';
+  if(data._meta?.date) msg+='\nFecha: '+new Date(data._meta.date).toLocaleString('es-PY');
+  if(data._meta?.user) msg+='\nUsuario: '+data._meta.user;
+  msg+='\n\nEsto reemplaza todos los datos actuales.';
+  return msg;
 }
 
 window.downloadBackup=function(){
-  if(!requireSocio('Solo socios pueden descargar backups'))return;
+  if(!requireSocio('Solo socios pueden descargar backups')) return;
   const data=buildBackupData();
   const json=JSON.stringify(data,null,2);
   const a=document.createElement('a');
@@ -111,49 +146,59 @@ window.downloadBackup=function(){
   const fecha=today().replace(/-/g,'');
   a.download='backup_thalamus_'+fecha+'.json';
   a.click();
-  toast('Backup descargado âœ“','ok');
+  toast('Backup descargado','ok');
 };
 
 window.restoreBackup=async function(e){
-  if(!requireSocio('Solo socios pueden restaurar backups')){e.target.value='';return;}
-  const f=e.target.files[0]; if(!f)return;
+  if(!requireSocio('Solo socios pueden restaurar backups')){
+    e.target.value='';
+    return;
+  }
+  const f=e.target.files[0];
+  if(!f) return;
+
   try{
     const text=await f.text();
     const data=JSON.parse(text);
     if(!data.obras&&!data.gastos){
-      toast('Archivo invÃ¡lido: no contiene datos de Thalamus','err');
+      toast('Archivo invalido: no contiene datos de Thalamus','err');
       return;
     }
+
     const counts=summarizeBackup(data);
-    if(!confirm(getRestoreWarning(counts,data)))return;
-    const check=prompt('EscribÃ­ RESTAURAR para confirmar:');
+    if(!confirm(getRestoreWarning(counts,data))) return;
+
+    const check=prompt('Escribi RESTAURAR para confirmar:');
     if(!check||check.trim().toUpperCase()!=='RESTAURAR'){
-      toast('OperaciÃ³n cancelada','err');
+      toast('Operacion cancelada','err');
       return;
     }
 
     toast('Restaurando datos...','info');
     applyBackupData(data);
 
-    let syncMsg='âœ… Backup restaurado: '+counts.obraCount+' obras, '+counts.gastoCount+' gastos, '+counts.certCount+' certificados';
+    let syncMsg='Backup restaurado: '+counts.obraCount+' obras, '+counts.gastoCount+' gastos, '+counts.certCount+' certificados';
     try{
       const syncStatus=await syncCurrentStateToStorage();
       if(syncStatus.startedRemote&&!syncStatus.endedRemote){
-        syncMsg+=' (solo en modo local; Firebase no respondiÃ³)';
+        syncMsg+=' (solo en modo local; Firebase no respondio)';
       }
     }catch(fbErr){
       console.warn('Error sincronizando restore con Firebase:',fbErr);
-      syncMsg+=' (sincronizaciÃ³n remota incompleta)';
+      syncMsg+=' (sincronizacion remota incompleta)';
     }
     toast(syncMsg,'ok');
   }catch(err){
     console.error('Restore error:',err);
     toast('Error al restaurar: '+err.message,'err');
   }
+
   e.target.value='';
 };
 
-// â”€â”€ Auto-backup en Firebase â”€â”€
+// =======================================
+// AUTO BACKUP EN FIREBASE
+// =======================================
 async function autoBackup(){
   try{
     const data=buildBackupData();
@@ -161,12 +206,19 @@ async function autoBackup(){
     const items=backups.items||[];
     const todayStr=today();
     if(items.length&&items[0].date===todayStr) return;
+
     const backupId='bk_'+todayStr.replace(/-/g,'');
     await fbSet('backups/'+backupId,data);
-    items.unshift({id:backupId,date:todayStr,time:new Date().toLocaleString('es-PY'),user:_currentUser});
+    items.unshift({
+      id:backupId,
+      date:todayStr,
+      time:new Date().toLocaleString('es-PY'),
+      user:_currentUser
+    });
+
     if(items.length>5){
       for(const old of items.slice(5)){
-        try{await fbDel('backups/'+old.id);}catch(e){}
+        try{await fbDel('backups/'+old.id);}catch{}
       }
     }
     await fbSet('backups/list',{items:items.slice(0,5)});
@@ -177,26 +229,28 @@ async function autoBackup(){
 }
 
 window.loadBackupList=async function(){
-  if(!requireSocio('Solo socios pueden ver backups'))return;
+  if(!requireSocio('Solo socios pueden ver backups')) return;
   const el=gs('backupList');
-  if(!el)return;
+  if(!el) return;
   el.innerHTML='<div style="padding:.5rem;color:var(--muted);font-size:.7rem">Cargando...</div>';
+
   try{
     const backups=await fbGetDoc('backups/list')||{items:[]};
     const items=backups.items||[];
     if(!items.length){
-      el.innerHTML='<div style="padding:.5rem;color:var(--muted);font-size:.7rem">Sin backups automÃ¡ticos aÃºn</div>';
+      el.innerHTML='<div style="padding:.5rem;color:var(--muted);font-size:.7rem">Sin backups automaticos aun</div>';
       return;
     }
+
     el.innerHTML=items.map((b,i)=>`
       <div class="user-row">
-        <span style="font-size:.78rem;margin-right:4px">${i===0?'ðŸŸ¢':'âšª'}</span>
+        <span style="font-size:.78rem;margin-right:4px">${i===0?'REC':'-'}</span>
         <span class="u-name" style="flex:1;font-size:.72rem">
           ${esc(b.date)} <span style="color:var(--muted)">${esc(b.time||'')}</span>
         </span>
         <span style="font-size:.6rem;color:var(--dim)">${esc(b.user||'')}</span>
         <button class="btn-logout" style="margin-left:6px;border-color:var(--green);color:var(--green)" onclick="restoreFromFirebase('${sanitizeText(b.id,40)}')">Restaurar</button>
-        <button class="btn-logout" style="margin-left:4px" onclick="downloadFirebaseBackup('${sanitizeText(b.id,40)}','${sanitizeText(b.date,20)}')">â¬‡ï¸</button>
+        <button class="btn-logout" style="margin-left:4px" onclick="downloadFirebaseBackup('${sanitizeText(b.id,40)}','${sanitizeText(b.date,20)}')">Descargar</button>
       </div>
     `).join('');
   }catch(e){
@@ -205,43 +259,57 @@ window.loadBackupList=async function(){
 };
 
 window.downloadFirebaseBackup=async function(id,fecha){
-  if(!requireSocio('Solo socios pueden descargar backups'))return;
+  if(!requireSocio('Solo socios pueden descargar backups')) return;
   toast('Descargando backup...','info');
   try{
     const data=await fbGetDoc('backups/'+id);
-    if(!data){toast('Backup no encontrado','err');return;}
+    if(!data){
+      toast('Backup no encontrado','err');
+      return;
+    }
     const json=JSON.stringify(data,null,2);
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
     a.download='backup_thalamus_'+fecha.replace(/-/g,'')+'.json';
     a.click();
-    toast('Backup descargado âœ“','ok');
-  }catch(e){toast('Error: '+e.message,'err');}
+    toast('Backup descargado','ok');
+  }catch(e){
+    toast('Error: '+e.message,'err');
+  }
 };
 
 window.restoreFromFirebase=async function(id){
-  if(!requireSocio('Solo socios pueden restaurar backups'))return;
-  if(!confirm('Â¿Restaurar desde este backup?\n\nEsto REEMPLAZA todos los datos actuales.'))return;
-  const check=prompt('EscribÃ­ RESTAURAR para confirmar:');
-  if(!check||check.trim().toUpperCase()!=='RESTAURAR'){toast('Cancelado','err');return;}
+  if(!requireSocio('Solo socios pueden restaurar backups')) return;
+  if(!confirm('Restaurar desde este backup?\n\nEsto reemplaza todos los datos actuales.')) return;
+  const check=prompt('Escribi RESTAURAR para confirmar:');
+  if(!check||check.trim().toUpperCase()!=='RESTAURAR'){
+    toast('Cancelado','err');
+    return;
+  }
+
   toast('Descargando backup...','info');
   try{
     const data=await fbGetDoc('backups/'+id);
-    if(!data){toast('Backup no encontrado','err');return;}
+    if(!data){
+      toast('Backup no encontrado','err');
+      return;
+    }
 
     const counts=summarizeBackup(data);
     applyBackupData(data);
 
-    let syncMsg='âœ… Backup restaurado: '+counts.obraCount+' obras';
+    let syncMsg='Backup restaurado: '+counts.obraCount+' obras';
     try{
       const syncStatus=await syncCurrentStateToStorage();
       if(syncStatus.startedRemote&&!syncStatus.endedRemote){
-        syncMsg+=' (solo en modo local; Firebase no respondiÃ³)';
+        syncMsg+=' (solo en modo local; Firebase no respondio)';
       }
     }catch(fbErr){
       console.warn('Error sync restore:',fbErr);
-      syncMsg+=' (sincronizaciÃ³n remota incompleta)';
+      syncMsg+=' (sincronizacion remota incompleta)';
     }
     toast(syncMsg,'ok');
-  }catch(e){toast('Error: '+e.message,'err');}
+  }catch(e){
+    toast('Error: '+e.message,'err');
+  }
 };
