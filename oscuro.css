@@ -360,8 +360,11 @@ body::after {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .m-val {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.05rem; font-weight: 500; line-height: 1.2;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.22rem; font-weight: 800; line-height: 1.12;
+  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 1;
 }
 .m-val.y { color:var(--gold); }
 .m-val.r { color:var(--acc3); }
@@ -438,6 +441,25 @@ body::after {
 .btn-ai:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 4px 16px rgba(91,92,246,.4); }
 .btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--border); }
 .btn-ghost:hover { color:var(--txt); border-color:var(--border2); background:rgba(255,255,255,.03); }
+.undo-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  flex-shrink:0;
+}
+.undo-btn.has-undo {
+  color:var(--gold);
+  border-color:rgba(218,187,84,.25);
+  background:rgba(218,187,84,.08);
+}
+.undo-btn:disabled {
+  opacity:.45;
+  cursor:not-allowed;
+}
+.undo-btn .undo-icon {
+  font-size:.82rem;
+  line-height:1;
+}
 .btn-sm  { padding:.26rem .6rem; font-size:.66rem; }
 .btn-xs  { padding:.14rem .42rem; font-size:.6rem; }
 .row-btns { display:flex; gap:.45rem; flex-wrap:wrap; margin-top:.9rem; align-items:center; }
@@ -632,7 +654,33 @@ tbody tr:hover td { background:rgba(218,187,84,.025); color:var(--txt); }
   background:linear-gradient(90deg, transparent, rgba(218,187,84,.1), transparent);
 }
 .sf .sl { font-size:.5rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
-.sf .sv { font-size:.82rem; font-weight:700; font-family:'JetBrains Mono',monospace; margin-top:2px; }
+.sf .sv {
+  font-size:.96rem;
+  font-weight:800;
+  font-family:'Inter',sans-serif;
+  margin-top:2px;
+  letter-spacing:.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings:'tnum' 1,'lnum' 1,'zero' 1;
+}
+.gestor-obra-stat-val,
+.gestor-card-entrega-monto,
+.retiro-monto,
+.ai-monto,
+.gestor-corresponde-input,
+.cchip,
+.global-table td,
+table td,
+table tfoot td {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings:'tnum' 1,'lnum' 1,'zero' 1;
+}
+.btn.is-busy,
+.btn-logout.is-busy,
+.login-btn.is-busy {
+  opacity:.68;
+  cursor:wait;
+}
 
 /* ─── TOAST ──────────────────────────────────────── */
 .toast {
@@ -854,7 +902,7 @@ tbody tr:hover td { background:rgba(218,187,84,.025); color:var(--txt); }
   .bottom-nav { display:block; }
   .metrics { grid-template-columns:repeat(2,1fr) !important; gap:.5rem; }
   .metric { padding:.7rem .75rem; }
-  .m-val  { font-size:.88rem; }
+  .m-val  { font-size:1.04rem; }
   .m-label { font-size:.5rem; }
   .socios-grid { grid-template-columns:1fr !important; }
   .obras-grid  { grid-template-columns:1fr !important; }
@@ -871,6 +919,7 @@ tbody tr:hover td { background:rgba(218,187,84,.025); color:var(--txt); }
 
 @media (max-width:420px) {
   .metrics { grid-template-columns:1fr 1fr !important; }
-  .m-val { font-size:.82rem; }
+  .m-val { font-size:.98rem; }
   .obra-sel { max-width:120px; }
+  .undo-btn .undo-label { display:none; }
 }

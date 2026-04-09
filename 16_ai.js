@@ -239,3 +239,29 @@ setTimeout(()=>{
     window.initApp&&window.initApp();
   }
 },5000);
+
+function installDeferredSaveGuards(){
+  const guardedActions={
+    saveGestorPago:'La entrega del gestor ya se esta guardando',
+    saveEditGestor:'La entrega del gestor ya se esta actualizando',
+    quickAddGestorObra:'La entrega del gestor ya se esta guardando',
+    saveAyudaPago:'La entrega de ayuda social ya se esta guardando',
+    saveEditAyuda:'La entrega de ayuda social ya se esta actualizando',
+    quickAddAyudaObra:'La entrega de ayuda social ya se esta guardando',
+    saveContratistaPago:'La entrega del contratista ya se esta guardando',
+    saveEditContratista:'La entrega del contratista ya se esta actualizando',
+    quickAddContratistaObra:'La entrega del contratista ya se esta guardando'
+  };
+
+  Object.entries(guardedActions).forEach(([actionName,waitMsg])=>{
+    const original=window[actionName];
+    if(typeof original!=='function'||original._lockedProxy) return;
+    const wrapped=async function(...args){
+      return runLocked(actionName,()=>original.apply(this,args),waitMsg);
+    };
+    wrapped._lockedProxy=true;
+    window[actionName]=wrapped;
+  });
+}
+
+installDeferredSaveGuards();

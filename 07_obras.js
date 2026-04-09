@@ -152,41 +152,43 @@ function _openEditObra(id){
 }
 
 window.saveObra=async function(){
-  const nom=v('o-nom');
-  if(!nom){
-    toast('Ingresa el nombre','err');
-    return;
-  }
-  const eid=v('o-eid');
-  const id=eid||uid();
-  const prev=obras[id]||{};
-  const o={
-    id,
-    nombre:nom,
-    num:v('o-num'),
-    fecha:v('o-fi'),
-    contrato:parseFloat(gs('o-mc').value)||0,
-    adenda:parseFloat(gs('o-ad').value)||0,
-    estado:normalizarEstadoObra(gs('o-es').value),
-    lastModified:Date.now()
-  };
-  if(prev.ayuda!=null) o.ayuda=prev.ayuda;
-  if(prev.heri!=null) o.heri=prev.heri;
+  return runLocked('saveObra',async()=>{
+    const nom=v('o-nom');
+    if(!nom){
+      toast('Ingresa el nombre','err');
+      return;
+    }
+    const eid=v('o-eid');
+    const id=eid||uid();
+    const prev=obras[id]||{};
+    const o={
+      id,
+      nombre:nom,
+      num:v('o-num'),
+      fecha:v('o-fi'),
+      contrato:parseFloat(gs('o-mc').value)||0,
+      adenda:parseFloat(gs('o-ad').value)||0,
+      estado:normalizarEstadoObra(gs('o-es').value),
+      lastModified:Date.now()
+    };
+    if(prev.ayuda!=null) o.ayuda=prev.ayuda;
+    if(prev.heri!=null) o.heri=prev.heri;
 
-  obras[id]=o;
-  if(!gastos[id]) gastos[id]=[];
-  if(!certificados[id]) certificados[id]=[];
+    obras[id]=o;
+    if(!gastos[id]) gastos[id]=[];
+    if(!certificados[id]) certificados[id]=[];
 
-  await fbSet('obras/'+id,o);
-  closeM('mObra');
-  populateSel();
-  renderObrasGrid();
-  saveCache();
-  if(gs('page-gestor')?.classList.contains('active')) renderGestor();
-  if(gs('page-ayudaSocial')?.classList.contains('active')) renderAyudaSocial();
-  if(gs('page-contratista')?.classList.contains('active')) renderContratista();
-  if(!eid) selectObra(id);
-  toast('Obra guardada','ok');
+    await fbSet('obras/'+id,o);
+    closeM('mObra');
+    populateSel();
+    renderObrasGrid();
+    saveCache();
+    if(gs('page-gestor')?.classList.contains('active')) renderGestor();
+    if(gs('page-ayudaSocial')?.classList.contains('active')) renderAyudaSocial();
+    if(gs('page-contratista')?.classList.contains('active')) renderContratista();
+    if(!eid) selectObra(id);
+    toast('Obra guardada','ok');
+  },'La obra ya se esta guardando');
 };
 
 window.delObra=function(id){

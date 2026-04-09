@@ -106,50 +106,54 @@ function qEnter(e,id){
 window.qEnter=qEnter;
 
 window.saveAllRows=async function(){
-  if(_importing) return;
-  if(!cur){
-    toast('Sin obra activa','err');
-    return;
-  }
-  if(obras[cur]?.estado==='FINALIZADA'){
-    toast('Obra finalizada. Desbloqueala desde editar obra.','err');
-    return;
-  }
-  const toSave=qrows.filter(r=>r.concepto.trim());
-  if(!toSave.length){
-    toast('Ingresa al menos un concepto','err');
-    return;
-  }
-  if(!gastos[cur]) gastos[cur]=[];
-  _importing=true;
+  return runLocked('saveAllRows',async()=>{
+    if(_importing) return;
+    if(!cur){
+      toast('Sin obra activa','err');
+      return;
+    }
+    if(obras[cur]?.estado==='FINALIZADA'){
+      toast('Obra finalizada. Desbloqueala desde editar obra.','err');
+      return;
+    }
+    const toSave=qrows.filter(r=>r.concepto.trim());
+    if(!toSave.length){
+      toast('Ingresa al menos un concepto','err');
+      return;
+    }
+    if(!gastos[cur]) gastos[cur]=[];
+    _importing=true;
+    try{
+      for(const r of toSave){
+        const g={
+          id:uid(),
+          fecha:r.fecha,
+          concepto:sanitizeText(r.concepto,160),
+          cantidad:parseFloat(r.cantidad)||0,
+          monto:parseFloat(r.monto)||0,
+          montoCheque:parseFloat(r.montoCheque)||0,
+          devuelto:parseFloat(r.devuelto)||0,
+          saldoTotal:parseFloat(r.saldoTotal)||0,
+          saldoCheque:parseFloat(r.saldoCheque)||0,
+          tipo:sanitizeText(r.tipo,40)||'transferencia',
+          costoTotal:cRow(r)
+        };
+        gastos[cur].push(g);
+        await fbSet('obras/'+cur+'/gastos/'+g.id,g);
+      }
 
-  for(const r of toSave){
-    const g={
-      id:uid(),
-      fecha:r.fecha,
-      concepto:sanitizeText(r.concepto,160),
-      cantidad:parseFloat(r.cantidad)||0,
-      monto:parseFloat(r.monto)||0,
-      montoCheque:parseFloat(r.montoCheque)||0,
-      devuelto:parseFloat(r.devuelto)||0,
-      saldoTotal:parseFloat(r.saldoTotal)||0,
-      saldoCheque:parseFloat(r.saldoCheque)||0,
-      tipo:sanitizeText(r.tipo,40)||'transferencia',
-      costoTotal:cRow(r)
-    };
-    gastos[cur].push(g);
-    await fbSet('obras/'+cur+'/gastos/'+g.id,g);
-  }
-
-  qrows=[];
-  addRow();
-  updGStrip();
-  renderGSaved();
-  gs('saveMsg').textContent=toSave.length+' guardado(s)';
-  setTimeout(()=>{ gs('saveMsg').textContent=''; },4000);
-  _importing=false;
-  await touchObra();
-  toast(toSave.length+' gastos guardados','ok');
+      qrows=[];
+      addRow();
+      updGStrip();
+      renderGSaved();
+      gs('saveMsg').textContent=toSave.length+' guardado(s)';
+      setTimeout(()=>{ gs('saveMsg').textContent=''; },4000);
+      await touchObra();
+      toast(toSave.length+' gastos guardados','ok');
+    }finally{
+      _importing=false;
+    }
+  },'Los gastos ya se estan guardando');
 };
 
 function renderGSaved(){

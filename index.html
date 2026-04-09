@@ -54,6 +54,10 @@ select, .obra-sel { scrollbar-width: auto; }
       <option value="oscuro.css">🌑 Oscuro</option>
       <option value="tecnico.css">⚡ Tecnológico</option>
     </select>
+    <button class="btn btn-ghost btn-sm undo-btn" id="undoBtn" onclick="undoLastAction()" title="No hay cambios para deshacer" disabled>
+      <span class="undo-icon">↶</span>
+      <span class="undo-label">Deshacer</span>
+    </button>
     <button class="btn btn-ghost btn-sm socio-only" onclick="navTo('config')">⚙️</button>
     <button class="btn-logout" onclick="doLogout()">Salir</button>
   </div>
@@ -875,5 +879,6 @@ window.connectFB(FB).then(ok => {
 <script src="17_paste_excel.js"></script>
 <script src="18_export_excel.js"></script>
 <script src="19_export_pdf.js"></script>
+<script src="20_undo.js"></script>
 </body>
 </html>

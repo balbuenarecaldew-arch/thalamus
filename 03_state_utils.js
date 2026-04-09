@@ -115,3 +115,32 @@ async function requireAuth(msg,cb){
 }
 
 window.requireAuth=requireAuth;
+
+const _busyActions=new Set();
+
+function setActionButtonsBusy(actionName,busy){
+  try{
+    document.querySelectorAll(`button[onclick*="${actionName}("]`).forEach(btn=>{
+      btn.disabled=busy;
+      btn.classList.toggle('is-busy',busy);
+      btn.setAttribute('aria-busy',busy?'true':'false');
+    });
+  }catch{}
+}
+
+async function runLocked(actionName,fn,waitMsg='Espera a que termine el guardado'){
+  if(_busyActions.has(actionName)){
+    toast(waitMsg,'info');
+    return false;
+  }
+  _busyActions.add(actionName);
+  setActionButtonsBusy(actionName,true);
+  try{
+    return await fn();
+  }finally{
+    setActionButtonsBusy(actionName,false);
+    _busyActions.delete(actionName);
+  }
+}
+
+window.runLocked=runLocked;

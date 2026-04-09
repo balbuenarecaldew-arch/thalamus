@@ -16,37 +16,39 @@ window.clrCert=function(){
 };
 
 window.saveCert=async function(){
-  if(!cur){
-    toast('Selecciona una obra','err');
-    return;
-  }
-  if(obras[cur]?.estado==='FINALIZADA'){
-    toast('Obra finalizada. Desbloqueala desde editar obra.','err');
-    return;
-  }
+  return runLocked('saveCert',async()=>{
+    if(!cur){
+      toast('Selecciona una obra','err');
+      return;
+    }
+    if(obras[cur]?.estado==='FINALIZADA'){
+      toast('Obra finalizada. Desbloqueala desde editar obra.','err');
+      return;
+    }
 
-  const conc=sanitizeText(v('c-c'),160);
-  if(!conc){
-    toast('Ingresa el concepto','err');
-    return;
-  }
+    const conc=sanitizeText(v('c-c'),160);
+    if(!conc){
+      toast('Ingresa el concepto','err');
+      return;
+    }
 
-  if(!certificados[cur]) certificados[cur]=[];
-  const c={
-    id:uid(),
-    fecha:v('c-f'),
-    concepto:conc,
-    bruto:parseFloat(gs('c-b').value)||0,
-    neto:parseFloat(gs('c-n').value)||0
-  };
-  c.retencion=c.bruto-c.neto;
+    if(!certificados[cur]) certificados[cur]=[];
+    const c={
+      id:uid(),
+      fecha:v('c-f'),
+      concepto:conc,
+      bruto:parseFloat(gs('c-b').value)||0,
+      neto:parseFloat(gs('c-n').value)||0
+    };
+    c.retencion=c.bruto-c.neto;
 
-  certificados[cur].push(c);
-  await fbSet('obras/'+cur+'/certificados/'+c.id,c);
-  window.clrCert();
-  renderCerts();
-  await touchObra();
-  toast('Certificado registrado','ok');
+    certificados[cur].push(c);
+    await fbSet('obras/'+cur+'/certificados/'+c.id,c);
+    window.clrCert();
+    renderCerts();
+    await touchObra();
+    toast('Certificado registrado','ok');
+  },'El certificado ya se esta guardando');
 };
 
 window.delC=function(id){
@@ -112,28 +114,30 @@ window.editG=function(id,num){
 };
 
 window.saveEditG=async function(){
-  const id=gs('eg-id').value;
-  const g=(gastos[cur]||[]).find(row=>row.id===id);
-  if(!g){
-    toast('Gasto no encontrado','err');
-    return;
-  }
-  g.fecha=/^\d{4}-\d{2}-\d{2}$/.test(gs('eg-fecha').value||'')?gs('eg-fecha').value:'';
-  g.concepto=sanitizeText(gs('eg-concepto').value,160);
-  g.cantidad=parseFloat(gs('eg-cantidad').value)||0;
-  g.monto=parseFloat(gs('eg-monto').value)||0;
-  g.registro=sanitizeText(gs('eg-registro').value,80);
-  g.montoCheque=parseFloat(gs('eg-montoCheque').value)||0;
-  g.devuelto=parseFloat(gs('eg-devuelto').value)||0;
-  g.saldoTotal=parseFloat(gs('eg-saldoTotal').value)||0;
-  g.saldoCheque=parseFloat(gs('eg-saldoCheque').value)||0;
-  g.costoTotal=(g.monto||0)+(g.saldoTotal||0)+(g.saldoCheque||0);
-  await fbSet('obras/'+cur+'/gastos/'+id,g);
-  closeM('mEditG');
-  updGStrip();
-  renderGSaved();
-  await touchObra();
-  toast('Gasto actualizado','ok');
+  return runLocked('saveEditG',async()=>{
+    const id=gs('eg-id').value;
+    const g=(gastos[cur]||[]).find(row=>row.id===id);
+    if(!g){
+      toast('Gasto no encontrado','err');
+      return;
+    }
+    g.fecha=/^\d{4}-\d{2}-\d{2}$/.test(gs('eg-fecha').value||'')?gs('eg-fecha').value:'';
+    g.concepto=sanitizeText(gs('eg-concepto').value,160);
+    g.cantidad=parseFloat(gs('eg-cantidad').value)||0;
+    g.monto=parseFloat(gs('eg-monto').value)||0;
+    g.registro=sanitizeText(gs('eg-registro').value,80);
+    g.montoCheque=parseFloat(gs('eg-montoCheque').value)||0;
+    g.devuelto=parseFloat(gs('eg-devuelto').value)||0;
+    g.saldoTotal=parseFloat(gs('eg-saldoTotal').value)||0;
+    g.saldoCheque=parseFloat(gs('eg-saldoCheque').value)||0;
+    g.costoTotal=(g.monto||0)+(g.saldoTotal||0)+(g.saldoCheque||0);
+    await fbSet('obras/'+cur+'/gastos/'+id,g);
+    closeM('mEditG');
+    updGStrip();
+    renderGSaved();
+    await touchObra();
+    toast('Gasto actualizado','ok');
+  },'El gasto ya se esta actualizando');
 };
 
 // =======================================
@@ -165,22 +169,24 @@ window.editC=function(id,num){
 };
 
 window.saveEditC=async function(){
-  const id=gs('ec-id').value;
-  const c=(certificados[cur]||[]).find(row=>row.id===id);
-  if(!c){
-    toast('Certificado no encontrado','err');
-    return;
-  }
-  c.fecha=/^\d{4}-\d{2}-\d{2}$/.test(gs('ec-fecha').value||'')?gs('ec-fecha').value:'';
-  c.concepto=sanitizeText(gs('ec-concepto').value,160);
-  c.bruto=parseFloat(gs('ec-bruto').value)||0;
-  c.neto=parseFloat(gs('ec-neto').value)||0;
-  c.retencion=c.bruto-c.neto;
-  await fbSet('obras/'+cur+'/certificados/'+id,c);
-  closeM('mEditC');
-  renderCerts();
-  await touchObra();
-  toast('Certificado actualizado','ok');
+  return runLocked('saveEditC',async()=>{
+    const id=gs('ec-id').value;
+    const c=(certificados[cur]||[]).find(row=>row.id===id);
+    if(!c){
+      toast('Certificado no encontrado','err');
+      return;
+    }
+    c.fecha=/^\d{4}-\d{2}-\d{2}$/.test(gs('ec-fecha').value||'')?gs('ec-fecha').value:'';
+    c.concepto=sanitizeText(gs('ec-concepto').value,160);
+    c.bruto=parseFloat(gs('ec-bruto').value)||0;
+    c.neto=parseFloat(gs('ec-neto').value)||0;
+    c.retencion=c.bruto-c.neto;
+    await fbSet('obras/'+cur+'/certificados/'+id,c);
+    closeM('mEditC');
+    renderCerts();
+    await touchObra();
+    toast('Certificado actualizado','ok');
+  },'El certificado ya se esta actualizando');
 };
 
 function renderCerts(){

@@ -92,20 +92,22 @@ window.openRetiro=function(socio){
 };
 
 window.saveRetiro=async function(){
-  const socio=v('retiro-socio');
-  const monto=parseFloat(gs('ret-m').value)||0;
-  if(!monto){
-    toast('Ingresa el monto','err');
-    return;
-  }
-  const r={id:uid(),fecha:v('ret-f'),monto,concepto:v('ret-c')};
-  if(!retiros[socio]) retiros[socio]=[];
-  retiros[socio].push(r);
-  await fbSet('retiros/socios',retiros);
-  closeM('mRetiro');
-  renderUtilidades();
-  saveCache();
-  toast('Retiro registrado','ok');
+  return runLocked('saveRetiro',async()=>{
+    const socio=v('retiro-socio');
+    const monto=parseFloat(gs('ret-m').value)||0;
+    if(!monto){
+      toast('Ingresa el monto','err');
+      return;
+    }
+    const r={id:uid(),fecha:v('ret-f'),monto,concepto:v('ret-c')};
+    if(!retiros[socio]) retiros[socio]=[];
+    retiros[socio].push(r);
+    await fbSet('retiros/socios',retiros);
+    closeM('mRetiro');
+    renderUtilidades();
+    saveCache();
+    toast('Retiro registrado','ok');
+  },'El retiro ya se esta guardando');
 };
 
 window.delRetiro=function(socio,idx){
