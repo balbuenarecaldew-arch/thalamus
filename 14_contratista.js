@@ -20,7 +20,18 @@ function migrateContratistaData(){
         p.contratistaId=o.contratistas[0].id;
       }
     }
+    if(!p.obraId&&p.contratistaId){
+      const found=Object.values(obras).find(o=>(o?.contratistas||[]).some(c=>c.id===p.contratistaId));
+      if(found) p.obraId=found.id;
+    }
   });
+}
+function refreshContratistaDependents(){
+  const active=document.querySelector('.page.active')?.id?.replace('page-','');
+  if(active==='gastos') renderGastosPage();
+  else if(active==='resumen') renderResumen();
+  else if(active==='dashboard') renderDash();
+  else if(active==='global') renderGlobal();
 }
 function calcContratistaAdeudado(){
   return Object.values(obras).reduce((s,o)=>s+calcContratistaAdeudadoObra(o.id),0);
@@ -471,4 +482,3 @@ window.borrarTodosContratista=function(){
     saveCache(); renderContratista(); toast('Todas las entregas eliminadas ✓','ok');
   });
 };
-

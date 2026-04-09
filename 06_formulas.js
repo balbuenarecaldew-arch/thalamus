@@ -15,7 +15,20 @@ function gestorPagosForObra(id){return gestorPagos.filter(p=>p.obraId===id)}
 function gestorTotalForObra(id){return gestorPagosForObra(id).reduce((s,p)=>s+(parseFloat(p.monto)||0),0)}
 function ayudaSocialPagosForObra(id){return ayudaSocialPagos.filter(p=>p.obraId===id)}
 function ayudaSocialTotalForObra(id){return ayudaSocialPagosForObra(id).reduce((s,p)=>s+(parseFloat(p.monto)||0),0)}
-function contratistaPagosForObra(id){return contratistaPagos.filter(p=>p.obraId===id)}
+function findObraIdByContratistaId(contratistaId){
+  if(!contratistaId) return '';
+  const found=Object.values(obras).find(o=>(o?.contratistas||[]).some(c=>c.id===contratistaId));
+  return found?.id||'';
+}
+function getPagoContratistaObraId(p){
+  const direct=String(p?.obraId||'').trim();
+  if(direct) return direct;
+  return findObraIdByContratistaId(String(p?.contratistaId||'').trim());
+}
+function contratistaPagosForObra(id){
+  const safeId=String(id||'').trim();
+  return contratistaPagos.filter(p=>getPagoContratistaObraId(p)===safeId);
+}
 function contratistaTotalForObra(id){return contratistaPagosForObra(id).reduce((s,p)=>s+(parseFloat(p.monto)||0),0)}
 function getObraContratistas(id){const o=obras[id];if(!o)return[];if(o.contratistas&&o.contratistas.length)return o.contratistas;if(o.contratistaMonto!=null&&o.contratistaMonto!==''){return[{id:'_legacy',nombre:'Contratista',monto:parseFloat(o.contratistaMonto)||0}]}return[];}
 function calcContratistaAdeudadoObra(id){return getObraContratistas(id).reduce((s,c)=>s+(parseFloat(c.monto)||0),0);}
