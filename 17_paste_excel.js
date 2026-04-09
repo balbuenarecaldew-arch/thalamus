@@ -125,7 +125,7 @@ window.parsePaste=function(){
     else if(lines[0].indexOf(',')>=0 && !/^\d+,\d+$/.test(lines[0].trim())) sep=',';
   }
 
-  _pasteRows=lines.map(l=>l.split(sep).map(c=>c.trim()));
+  _pasteRows=lines.map(l=>l.split(sep).map(c=>sanitizeText(c.trim(),200)));
   _pasteCols=Math.max(..._pasteRows.map(r=>r.length));
 
   // Pad short rows
@@ -426,4 +426,3 @@ window.importPaste=async function(){
   touchObra();
   toast(`✅ ${count} ${_pasteMode==='gastos'?'gastos':'certificados'} importados`,'ok');
 };
-

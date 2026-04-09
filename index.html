@@ -830,7 +830,7 @@ window.connectFB = async function(cfg) {
   }
 };
 
-const FB = {
+const DEFAULT_FB = {
   apiKey:"AIzaSyAthZyjPhA06aSkkWZKX4juXc5VEYKBsj8",
   authDomain:"thalamus-finanzas.firebaseapp.com",
   projectId:"thalamus-finanzas",
@@ -838,11 +838,21 @@ const FB = {
   messagingSenderId:"1031678943036",
   appId:"1:1031678943036:web:eff89691bb53bcf7f68839"
 };
-localStorage.setItem('fbCfg', JSON.stringify(FB));
 const keys = ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
+let FB = DEFAULT_FB;
+try{
+  const savedCfg=JSON.parse(localStorage.getItem('fbCfg')||'null');
+  if(savedCfg&&keys.every(k=>savedCfg[k])) FB=savedCfg;
+  else localStorage.setItem('fbCfg', JSON.stringify(DEFAULT_FB));
+}catch(e){
+  localStorage.setItem('fbCfg', JSON.stringify(DEFAULT_FB));
+}
 const ids = ['cfg-ak','cfg-ad','cfg-pid','cfg-bk','cfg-ms','cfg-ai2'];
 ids.forEach((id,i) => { const el=document.getElementById(id); if(el) el.value=FB[keys[i]]||''; });
-window.connectFB(FB).then(() => { if(_currentUser) window.initApp && window.initApp(); });
+window.connectFB(FB).then(ok => {
+  if(ok) window._fbFallbackNotified = false;
+  if(_currentUser) window.initApp && window.initApp();
+});
 </script>
 
 <!-- APP -->

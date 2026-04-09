@@ -1,11 +1,12 @@
-// ═══════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // AUTH & ROLES
-// ═══════════════════════════════════════
-const ADMIN_USER = 'wuilian'; // ← único con control total
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+const ADMIN_USER = 'wuilian'; // â† Ãºnico con control total
 
 let _currentUser=null, _currentRole='socio';
 
 function isAdmin(){ return _currentUser === ADMIN_USER; }
+function isSocioRole(){ return _currentRole !== 'operador'; }
 
 async function hashPass(p){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p+'_thalamus2024'));
@@ -22,6 +23,25 @@ function generateSalt(len=16){
 function getUsers(){try{return JSON.parse(localStorage.getItem('th_users'))||{};}catch{return {};}}
 function saveUsersDB(u){localStorage.setItem('th_users',JSON.stringify(u));}
 
+async function verifyPasswordForUser(user,pw){
+  const users=getUsers();
+  const uData=users[user];
+  if(!uData||!pw)return false;
+  const computedHash=uData.salt
+    ? await hashPass(pw+uData.salt)
+    : await hashPass(pw);
+  return uData.hash===computedHash;
+}
+window.verifyPasswordForUser=verifyPasswordForUser;
+window.verifyCurrentPassword=function(pw){
+  return verifyPasswordForUser(_currentUser,pw);
+};
+window.requireSocio=function(msg='Sin permisos para esta acciÃ³n'){
+  if(isSocioRole()) return true;
+  toast(msg,'err');
+  return false;
+};
+
 (async function seedUsers(){
   const u=getUsers();
   if(Object.keys(u).length===0){
@@ -37,18 +57,13 @@ window.doLogin=async function(){
   const user=el('login-user').value.trim().toLowerCase();
   const pass=el('login-pass').value;
 
-  if(!user||!pass){el('login-err').textContent='Completá usuario y contraseña';return}
+  if(!user||!pass){el('login-err').textContent='CompletÃ¡ usuario y contraseÃ±a';return}
 
   const users=getUsers();
   if(!users[user]){el('login-err').textContent='Usuario no encontrado';return}
 
   const uData=users[user];
-
-  const computedHash=uData.salt
-    ? await hashPass(pass+uData.salt)
-    : await hashPass(pass);
-
-  if(uData.hash!==computedHash){el('login-err').textContent='Contraseña incorrecta';return}
+  if(!await verifyPasswordForUser(user,pass)){el('login-err').textContent='ContraseÃ±a incorrecta';return}
 
   if(!uData.salt){
     const newSalt=generateSalt();
@@ -59,7 +74,7 @@ window.doLogin=async function(){
   }
 
   _currentUser=user; _currentRole=uData.role||'socio';
-  sessionStorage.setItem('th_session',JSON.stringify({user,role:_currentRole}));
+  localStorage.setItem('th_last_user',user);
   el('loginOverlay').classList.add('hidden');
   applyRole();
   window.initApp&&window.initApp();
@@ -67,7 +82,6 @@ window.doLogin=async function(){
 
 window.doLogout=function(){
   _currentUser=null; _currentRole='socio';
-  sessionStorage.removeItem('th_session');
   location.reload();
 };
 
@@ -97,24 +111,22 @@ function renderUserList(){
   for(const[name,data]of Object.entries(users)){
     const self=name===_currentUser;
     const role=data.role||'socio';
+    const safeName=esc(name);
+    const encName=encArg(name);
     h+='<div class="user-row">';
-    h+='<span class="u-name">'+(self?'<b>'+name+'</b> (vos)':name)+'</span>';
-    h+='<span style="font-size:.64rem;color:var(--muted);font-family:\'JetBrains Mono\',monospace;">••••</span>';
+    h+='<span class="u-name">'+(self?'<b>'+safeName+'</b> (vos)':safeName)+'</span>';
+    h+='<span style="font-size:.64rem;color:var(--muted);font-family:\'JetBrains Mono\',monospace;">â€¢â€¢â€¢â€¢</span>';
     h+='<span class="u-role '+role+'">'+(role==='operador'?'Operador':'Socio')+'</span>';
 
-    // Solo el admin ve los controles sobre otros usuarios
     if(admin && !self){
-      // Botón cambiar rol
       const nextRole=role==='operador'?'socio':'operador';
-      const nextLabel=nextRole==='operador'?'→ Operador':'→ Socio';
+      const nextLabel=nextRole==='operador'?'â†’ Operador':'â†’ Socio';
       h+=' <button class="btn-logout" style="margin-left:6px;border-color:var(--accent);color:var(--accent)" '
-        +'onclick="adminSetRole(\''+name+'\',\''+nextRole+'\')">'+nextLabel+'</button>';
-      // Botón cambiar contraseña
+        +'onclick="adminSetRole(decodeURIComponent(\''+encName+'\'),\''+nextRole+'\')">'+nextLabel+'</button>';
       h+=' <button class="btn-logout" style="margin-left:4px;border-color:var(--gold);color:var(--gold)" '
-        +'onclick="adminResetPass(\''+name+'\')">🔑</button>';
-      // Botón eliminar
+        +'onclick="adminResetPass(decodeURIComponent(\''+encName+'\'))">ðŸ”‘</button>';
       h+=' <button class="btn-logout" style="margin-left:4px" '
-        +'onclick="adminDelUser(\''+name+'\')">✕</button>';
+        +'onclick="adminDelUser(decodeURIComponent(\''+encName+'\'))">âœ•</button>';
     }
 
     h+='</div>';
@@ -123,44 +135,49 @@ function renderUserList(){
   renderLoginHistory();
 }
 
-// ── Solo admin ──────────────────────────────
+// â”€â”€ Solo admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 window.adminAddUser=async function(){
   if(!isAdmin()){toast('Solo el administrador puede crear usuarios','err');return}
   const name=document.getElementById('adm-user').value.trim().toLowerCase();
   const pass=document.getElementById('adm-pass').value;
   const role=document.getElementById('adm-role').value;
-  if(!name||!pass){toast('Completá usuario y contraseña','err');return}
-  if(name.length<2){toast('Usuario: mínimo 2 caracteres','err');return}
-  if(pass.length<4){toast('Contraseña: mínimo 4 caracteres','err');return}
+  if(!name||!pass){toast('CompletÃ¡ usuario y contraseÃ±a','err');return}
+  if(name.length<2){toast('Usuario: mÃ­nimo 2 caracteres','err');return}
+  if(!/^[a-z0-9._-]+$/.test(name)){toast('Usuario: usÃ¡ solo letras, nÃºmeros, punto, guiÃ³n o _','err');return}
+  if(pass.length<4){toast('ContraseÃ±a: mÃ­nimo 4 caracteres','err');return}
   const users=getUsers();
   if(users[name]){toast('Ese usuario ya existe','err');return}
   const salt=generateSalt();
   users[name]={hash:await hashPass(pass+salt),salt,role};
   saveUsersDB(users);
-  document.getElementById('adm-user').value='';document.getElementById('adm-pass').value='';
+  document.getElementById('adm-user').value='';
+  document.getElementById('adm-pass').value='';
   renderUserList();
-  toast('Usuario "'+name+'" creado como '+role+' ✓','ok');
+  toast('Usuario "'+name+'" creado como '+role+' âœ“','ok');
 };
 
 window.adminDelUser=function(name){
   if(!isAdmin()){toast('Sin permisos','err');return}
-  requireAuth('⚠️ Eliminar usuario "'+name+'".',()=>{
-    const users=getUsers();delete users[name];saveUsersDB(users);
-    renderUserList();toast('Usuario eliminado','ok');
+  requireAuth('âš ï¸ Eliminar usuario "'+name+'".',()=>{
+    const users=getUsers();
+    delete users[name];
+    saveUsersDB(users);
+    renderUserList();
+    toast('Usuario eliminado','ok');
   });
 };
 
 window.adminResetPass=async function(name){
-  if(!isAdmin()){toast('Solo el administrador puede cambiar contraseñas','err');return}
-  const np=prompt('Nueva contraseña para "'+name+'" (mínimo 4):');
-  if(!np||np.length<4){toast('Contraseña muy corta','err');return}
+  if(!isAdmin()){toast('Solo el administrador puede cambiar contraseÃ±as','err');return}
+  const np=prompt('Nueva contraseÃ±a para "'+name+'" (mÃ­nimo 4):');
+  if(!np||np.length<4){toast('ContraseÃ±a muy corta','err');return}
   const users=getUsers();
   const salt=generateSalt();
   users[name].hash=await hashPass(np+salt);
   users[name].salt=salt;
   saveUsersDB(users);
-  toast('Contraseña de "'+name+'" actualizada ✓','ok');
+  toast('ContraseÃ±a de "'+name+'" actualizada âœ“','ok');
 };
 
 window.adminSetRole=function(name, newRole){
@@ -170,27 +187,15 @@ window.adminSetRole=function(name, newRole){
   users[name].role=newRole;
   saveUsersDB(users);
   renderUserList();
-  toast('"'+name+'" ahora es '+newRole+' ✓','ok');
+  toast('"'+name+'" ahora es '+newRole+' âœ“','ok');
 };
 
-// ── Sesión ──────────────────────────────────
-
-(function trySession(){
-  try{
-    const s=JSON.parse(sessionStorage.getItem('th_session'));
-    if(s&&s.user){
-      const users=getUsers();
-      if(users[s.user]){
-        _currentUser=s.user;_currentRole=users[s.user].role||'socio';
-        document.addEventListener('DOMContentLoaded',()=>{
-          document.getElementById('loginOverlay').classList.add('hidden');
-          applyRole();
-        });
-        return;
-      }
-    }
-  }catch{}
-})();
+// â”€â”€ Login convenience â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+document.addEventListener('DOMContentLoaded',()=>{
+  const lastUser=localStorage.getItem('th_last_user');
+  const userInput=document.getElementById('login-user');
+  if(lastUser&&userInput&&!userInput.value) userInput.value=lastUser;
+});
 
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
@@ -199,7 +204,7 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-// ── Login tracking ──────────────────────────
+// â”€â”€ Login tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function trackLogin(user){
   try{
@@ -233,13 +238,14 @@ async function renderLoginHistory(){
     const entries=log[name]||[];
     const last=entries[0];
     const isSelf=name===_currentUser;
-    const dot=last?'🟢':'⚪';
-    const ago=last?timeAgo(last.time):'Nunca se conectó';
+    const dot=last?'ðŸŸ¢':'âšª';
+    const ago=last?timeAgo(last.time):'Nunca se conectÃ³';
+    const safeName=esc(name);
     h+='<div class="user-row">';
     h+='<span style="font-size:.9rem;margin-right:2px">'+dot+'</span>';
-    h+='<span class="u-name" style="flex:1">'+(isSelf?'<b>'+name+'</b> (vos)':name)+'</span>';
+    h+='<span class="u-name" style="flex:1">'+(isSelf?'<b>'+safeName+'</b> (vos)':safeName)+'</span>';
     h+='<span style="font-size:.66rem;color:var(--dim)">'+ago+'</span>';
-    if(last)h+='<span style="font-size:.58rem;color:var(--muted);margin-left:6px">'+last.date+'</span>';
+    if(last)h+='<span style="font-size:.58rem;color:var(--muted);margin-left:6px">'+esc(last.date)+'</span>';
     h+='</div>';
   }
   el.innerHTML=h;
@@ -253,5 +259,70 @@ function timeAgo(ts){
   if(hrs<24)return'Hace '+hrs+'h';
   const days=Math.floor(hrs/24);
   if(days===1)return'Ayer';
-  return'Hace '+days+' días';
+  return'Hace '+days+' dÃ­as';
 }
+
+window.addEventListener('load',()=>{
+  const socioOnlyFns=[
+    'openNuevaObra','editObra','saveObra','delObra',
+    'saveRetiro','delRetiro',
+    'saveGestorPago','delGestorPago','saveEditGestor','updateGestorMontoObra','resetGestorMontoObra','quickAddGestorObra','limpiarGestorObra','activarObraGestor','resetTodosGestorAuto','borrarTodosGestor',
+    'saveAyudaPago','delAyudaPago','saveEditAyuda','updateAyudaMontoObra','resetAyudaMontoObra','quickAddAyudaObra','limpiarAyudaObra','resetTodosAyudaAuto','borrarTodosAyuda',
+    'addContratistaToObra','removeContratistaFromObra','updateContratistaNombre','updateContratistaMonto','saveContratistaPago','delContratistaPago','saveEditContratista','quickAddContratistaObra','limpiarContratistaObra','borrarTodosContratista',
+    'runAI'
+  ];
+  socioOnlyFns.forEach(name=>{
+    const original=window[name];
+    if(typeof original!=='function'||original._socioWrapped)return;
+    const wrapped=function(...args){
+      if(!requireSocio('Solo socios pueden usar esta funciÃ³n'))return;
+      return original.apply(this,args);
+    };
+    wrapped._socioWrapped=true;
+    window[name]=wrapped;
+  });
+
+  const preSanitizeDom={
+    saveEditGestor:()=>{const el=gs('egs-concepto'); if(el) el.value=sanitizeText(el.value,120);},
+    saveEditAyuda:()=>{const el=gs('eas-concepto'); if(el) el.value=sanitizeText(el.value,120);},
+    saveEditContratista:()=>{const el=gs('ect-concepto'); if(el) el.value=sanitizeText(el.value,120);},
+    quickAddGestorObra:(obraId)=>{const el=gs('gqa-c-'+obraId); if(el) el.value=sanitizeText(el.value,120);},
+    quickAddAyudaObra:(obraId)=>{const el=gs('aqa-c-'+obraId); if(el) el.value=sanitizeText(el.value,120);},
+    quickAddContratistaObra:(obraId,contratistaId)=>{const el=gs('cqa-c-'+obraId+'-'+contratistaId); if(el) el.value=sanitizeText(el.value,120);}
+  };
+  Object.entries(preSanitizeDom).forEach(([name,before])=>{
+    const original=window[name];
+    if(typeof original!=='function'||original._sanitizeWrapped)return;
+    const wrapped=function(...args){
+      before(...args);
+      return original.apply(this,args);
+    };
+    wrapped._sanitizeWrapped=true;
+    window[name]=wrapped;
+  });
+
+  if(typeof window.updateContratistaNombre==='function'){
+    const original=window.updateContratistaNombre;
+    if(!original._sanitizeWrapped){
+      const wrapped=function(obraId,cId,nombre){
+        return original.call(this,obraId,cId,sanitizeText(nombre,80)||'Contratista');
+      };
+      wrapped._sanitizeWrapped=true;
+      window.updateContratistaNombre=wrapped;
+    }
+  }
+
+  window.addContratistaToObra=async function(obraId){
+    if(!requireSocio('Solo socios pueden usar esta funciÃ³n'))return;
+    const o=obras[obraId]; if(!o)return;
+    if(!o.contratistas) o.contratistas=[];
+    const nombre=prompt('Nombre del contratista:');
+    const cleanName=sanitizeText(nombre,80);
+    if(!cleanName)return;
+    o.contratistas.push({id:uid(),nombre:cleanName,monto:0});
+    await fbSet('obras/'+obraId,o);
+    saveCache();
+    renderContratista();
+    toast('Contratista "'+cleanName+'" agregado âœ“','ok');
+  };
+});
