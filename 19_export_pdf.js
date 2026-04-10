@@ -699,10 +699,9 @@ function _buildContratistaResumenPDF(obraId,contratistaId){
   });
   y=doc.lastAutoTable.finalY+8;
 
-  const chipColor=saldo>0?RED:GREEN;
-  doc.setFillColor(...chipColor); doc.roundedRect(M,y,54,7,2,2,'F');
+  doc.setFillColor(...PURPLE); doc.roundedRect(M,y,70,7,2,2,'F');
   doc.setTextColor(...WHITE); doc.setFontSize(8); doc.setFont('helvetica','bold');
-  doc.text(saldo>0?'Saldo pendiente':'Saldo cubierto',M+27,y+4.7,{align:'center'});
+  doc.text('RESUMEN DE ENTREGAS',M+35,y+4.7,{align:'center'});
   y+=10;
 
   if(pagos.length){
