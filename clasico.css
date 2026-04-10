@@ -1,0 +1,620 @@
+@import url('oscuro.css');
+
+:root {
+  color-scheme: light;
+
+  --bg:       #ffffff;
+  --surf:     #ffffff;
+  --surf2:    #ffffff;
+  --surf3:    #ffffff;
+  --surf4:    #ffffff;
+  --glass:    rgba(255,255,255,.98);
+
+  --border:   rgba(90,97,107,.12);
+  --border2:  rgba(90,97,107,.22);
+  --border3:  rgba(90,97,107,.34);
+
+  --gold:     #a57a34;
+  --gold2:    #c59a56;
+  --gold-glow:rgba(165,122,52,.14);
+
+  --acc2:     #2f77b8;
+  --acc3:     #c05353;
+  --green:    #2f8e62;
+  --purple:   #7a63b5;
+  --amber:    #c4872c;
+
+  --txt:      #121722;
+  --dim:      #2d3643;
+  --muted:    #596577;
+
+  --shadow-card: 0 8px 24px rgba(30,40,55,.05), 0 2px 8px rgba(30,40,55,.03);
+  --shadow-glow: 0 0 0 1px rgba(90,97,107,.08), 0 10px 26px rgba(30,40,55,.04);
+}
+
+::selection { background: rgba(165,122,52,.18); color: var(--txt); }
+::-moz-selection { background: rgba(165,122,52,.18); color: var(--txt); }
+
+body {
+  background:#ffffff;
+  color: var(--txt);
+}
+
+body::before {
+  background:none;
+  opacity:0;
+  animation: none;
+}
+
+.login-overlay {
+  background:#f7f8fa;
+}
+
+.login-box {
+  background:#ffffff;
+  border: 1px solid var(--border2);
+  box-shadow: 0 18px 45px rgba(30,40,55,.08), var(--shadow-glow);
+}
+
+.login-box::before {
+  background: linear-gradient(90deg, transparent, rgba(165,122,52,.22), transparent);
+}
+
+.login-field label,
+.card-title,
+.config-summary,
+.m-label,
+th,
+.global-table th,
+.sf .sl {
+  color: #3e4958;
+}
+
+.login-field input,
+.paste-sel,
+.obra-sel,
+.gestor-corresponde-input,
+.fijos-input {
+  background: #ffffff;
+  border-color: var(--border2);
+  color: var(--txt);
+}
+
+.login-field input:focus,
+.paste-sel:focus,
+.obra-sel:focus,
+.gestor-corresponde-input:focus,
+.fijos-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(165,122,52,.12);
+}
+
+.login-btn,
+.btn-primary,
+.btn-new {
+  background: linear-gradient(135deg, #caa261 0%, #a57a34 100%);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(165,122,52,.16);
+}
+
+.login-btn:hover,
+.btn-primary:hover,
+.btn-new:hover {
+  background: linear-gradient(135deg, #d7b37a 0%, #b1863f 100%);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--txt);
+  border: 1px solid var(--border2);
+}
+
+.btn-secondary:hover,
+.btn-ghost:hover {
+  background: #f8fafc;
+  color: var(--txt);
+  border-color: var(--border3);
+}
+
+.btn-ghost {
+  background: #ffffff;
+  color: var(--dim);
+  border: 1px solid var(--border);
+}
+
+.btn-logout {
+  border-color: rgba(96,78,57,.16);
+  color: var(--dim);
+}
+
+.user-logged,
+.fb-badge,
+.page-sub,
+.prog-labels span:first-child,
+.nota,
+.global-table td,
+td {
+  color: #202734;
+}
+
+.user-logged .u-avatar {
+  background: #ffffff;
+  border-color: var(--border2);
+  color: var(--gold);
+}
+
+.topbar {
+  background:#ffffff;
+  border-bottom: 1px solid var(--border2);
+  box-shadow: 0 2px 12px rgba(30,40,55,.04);
+}
+
+.topbar::before {
+  background: linear-gradient(90deg, transparent, rgba(165,122,52,.24), transparent);
+}
+
+.sidebar {
+  background:#ffffff;
+  border-right: 1px solid var(--border2);
+  box-shadow: 4px 0 18px rgba(30,40,55,.03);
+}
+
+.nav-item:hover {
+  background: rgba(165,122,52,.08);
+}
+
+.nav-item.active {
+  color: var(--gold);
+  border-left-color: var(--gold);
+  background: rgba(165,122,52,.05);
+  text-shadow: none;
+}
+
+.nav-item.active::after {
+  background: var(--gold);
+  box-shadow: none;
+}
+
+.card,
+.metric,
+.modal,
+.ct-accordion,
+.ct-acc-body,
+.gestor-card-entrega,
+.global-table .total-row td,
+thead tr {
+  background:#ffffff;
+  border-color: var(--border2);
+  box-shadow: var(--shadow-card);
+}
+
+.metric::after {
+  background: linear-gradient(90deg, transparent, rgba(90,97,107,.10), transparent);
+}
+
+.metric:hover {
+  border-color: var(--border3);
+  box-shadow: 0 14px 30px rgba(30,40,55,.08);
+}
+
+.page-title {
+  background: linear-gradient(135deg, #4e3c26 0%, #8b6832 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: none;
+}
+
+.m-val,
+.sf .sv,
+.obra-link,
+.ct-acc-name,
+.gestor-card-entrega-concepto {
+  color: var(--txt);
+}
+
+.m-val,
+.sf .sv,
+.gestor-card-entrega-monto,
+.global-table td,
+table td,
+table tfoot td {
+  font-weight:800;
+  letter-spacing:0;
+}
+
+.m-val { font-size:1.28rem; }
+.sf .sv { font-size:1.02rem; }
+.m-val.y { color:#8a6120; }
+.m-val.r { color:#a33838; }
+.m-val.g { color:#216645; }
+.m-val.b { color:#215b9a; }
+.m-val.p { color:#5d4798; }
+
+.prog-bar {
+  background: rgba(90,97,107,.14);
+}
+
+.prog-fill {
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.strip {
+  background:#ffffff;
+  border-color: var(--border2);
+  box-shadow: var(--shadow-card);
+}
+
+.strip::before {
+  background: linear-gradient(90deg, transparent, rgba(90,97,107,.10), transparent);
+}
+
+.nota {
+  background:#ffffff;
+  color: var(--dim);
+  border-left-color: var(--gold);
+  border-top:1px solid var(--border);
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+.tbl-wrap,
+.global-table,
+table {
+  background: transparent;
+}
+
+th,
+.global-table th {
+  background: #ffffff;
+  color:#3e4958;
+  border-bottom-color: var(--border2);
+  border-top:1px solid var(--border);
+}
+
+td,
+.global-table td,
+#pastePreview td {
+  border-bottom-color: var(--border);
+  color: #1a2230;
+}
+
+.global-table tr:hover td,
+table tr:hover td {
+  background: rgba(33,41,52,.035);
+}
+
+.modal-bg {
+  background: rgba(30,40,55,.12);
+  backdrop-filter: blur(6px);
+}
+
+.modal {
+  background:#ffffff;
+  border: 1px solid var(--border2);
+}
+
+.ct-acc-header {
+  background:#ffffff;
+}
+
+.ct-acc-header:hover,
+.ct-acc-header.open {
+  background:#ffffff;
+}
+
+.ct-acc-header::before {
+  background: linear-gradient(90deg, transparent, rgba(90,97,107,.10), transparent);
+}
+
+.bottom-nav {
+  background:#ffffff;
+  border-top: 1px solid var(--border2);
+  box-shadow: 0 -4px 20px rgba(30,40,55,.04);
+}
+
+.bn-item { color: var(--muted); }
+.bn-item.active { color: var(--gold); }
+.bn-item.active::after { background: var(--gold); box-shadow: none; }
+
+.gestor-card-entrega,
+.ct-acc-body,
+.ct-accordion,
+.fijos-input,
+.paste-sel,
+.obra-sel,
+.global-table .total-row td,
+#pastePreview tr:nth-child(even) td {
+  background:#ffffff;
+}
+
+.global-table td,
+table td,
+table tfoot td,
+.gestor-card-entrega-monto,
+.retiro-monto,
+.ai-monto,
+.cchip,
+.gestor-corresponde-input,
+.fijos-input {
+  color: #151c28;
+}
+
+/* Overrides puntuales para componentes que en oscuro.css siguen muy oscuros */
+.obra-card,
+.qgrid,
+.qi,
+.ai-item,
+.retiro-item,
+.gestor-pago-item,
+.gestor-quick-input,
+.socio-card {
+  background:#ffffff;
+  border:1px solid var(--border2);
+  box-shadow: var(--shadow-card);
+}
+
+.obra-card::before,
+.qgrid::before,
+.ai-item::before,
+.retiro-item::before,
+.gestor-pago-item::before {
+  background: linear-gradient(90deg, transparent, rgba(90,97,107,.10), transparent);
+}
+
+.obra-card:hover,
+.qgrid:hover,
+.ai-item:hover,
+.retiro-item:hover,
+.gestor-pago-item:hover {
+  border-color: var(--border3);
+  box-shadow: 0 14px 30px rgba(30,40,55,.08);
+}
+
+.obra-card.act {
+  background: linear-gradient(180deg, rgba(197,154,86,.08) 0%, #ffffff 100%);
+  border-color: rgba(165,122,52,.32);
+  box-shadow: 0 10px 26px rgba(165,122,52,.06), var(--shadow-card);
+}
+
+.oc-nombre,
+.socio-nombre,
+.qi,
+.ai-con,
+.ai-monto,
+.retiro-monto,
+.gestor-pago-concepto,
+.gestor-pago-monto,
+.socio-stat-val,
+.gestor-quick-input {
+  color: #17202c;
+}
+
+.oc-stat,
+.socio-stat-label,
+.retiro-fecha,
+.gestor-pago-fecha,
+.gestor-quick-hint,
+.qi-lbl,
+.qi-right,
+.ai-date {
+  color: #556274;
+}
+
+.btn-danger {
+  background: #fff6f6;
+  color: #a33838;
+  border: 1px solid rgba(163,56,56,.28);
+}
+
+.btn-danger:hover {
+  background: #ffeaea;
+  border-color: rgba(163,56,56,.42);
+  color: #8d2b2b;
+}
+
+/* Legibilidad general del tema clasico */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body {
+  font-size: 15px;
+  line-height: 1.62;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+
+.page-sub,
+.config-summary,
+.nota,
+.socio-stat,
+.ai-meta,
+.gestor-pago-meta,
+.gestor-card-entrega-fecha,
+.retiro-fecha,
+.oc-stat,
+.qi-right {
+  font-size: .82rem;
+  line-height: 1.58;
+}
+
+.card-title,
+.m-label,
+th,
+.global-table th,
+.sf .sl,
+.login-field label,
+.qi-lbl,
+.gestor-obra-corresponde-label,
+.ct-acc-num,
+.oc-num {
+  font-size: .66rem;
+  letter-spacing: .07em;
+}
+
+.nav-item {
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.user-logged,
+.fb-badge,
+.btn-logout {
+  font-size: .78rem;
+}
+
+.btn,
+.btn-new,
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-danger,
+.btn-logout,
+.login-btn {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: .88rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.btn-sm { font-size: .78rem; }
+.btn-xs { font-size: .72rem; }
+
+.login-field input,
+.paste-sel,
+.obra-sel,
+.gestor-corresponde-input,
+.fijos-input,
+.fg input,
+.fg select,
+.fg textarea,
+.qi,
+.gestor-quick-input {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: .95rem;
+  line-height: 1.45;
+}
+
+.fg textarea {
+  min-height: 76px;
+}
+
+table,
+.global-table,
+#pastePreview {
+  font-size: .83rem;
+}
+
+td,
+.global-table td,
+#pastePreview td,
+table td,
+table tfoot td,
+.socio-stat-val,
+.ai-monto,
+.retiro-monto,
+.gestor-pago-monto,
+.gestor-card-entrega-monto,
+.gestor-corresponde-input,
+.fijos-input,
+.cchip {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: .86rem;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'zero' 1;
+}
+
+.oc-nombre,
+.ct-acc-name,
+.gestor-obra-card-title,
+.socio-nombre {
+  font-size: 1.05rem;
+  line-height: 1.32;
+}
+
+.m-val {
+  font-size: 1.42rem;
+  line-height: 1.15;
+}
+
+.sf .sv {
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.obra-link,
+.gestor-pago-concepto,
+.gestor-card-entrega-concepto,
+.ai-conc,
+.fijos-nombre {
+  font-size: .88rem;
+  font-weight: 600;
+}
+
+.modal-title {
+  font-size: 1.08rem;
+}
+
+/* Formularios claros y legibles */
+.fg label {
+  color: #455364;
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+
+.fg input,
+.fg select,
+.fg textarea {
+  background: #ffffff;
+  color: #141b27;
+  border: 1px solid var(--border2);
+  box-shadow: none;
+}
+
+.fg input:focus,
+.fg select:focus,
+.fg textarea:focus {
+  background: #ffffff;
+  color: #141b27;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(165,122,52,.12);
+}
+
+.fg input::placeholder,
+.fg textarea::placeholder,
+.gestor-quick-input::placeholder {
+  color: #738093;
+  opacity: 1;
+}
+
+.fg select,
+.obra-sel,
+.paste-sel {
+  color: #141b27;
+  background: #ffffff;
+}
+
+.fg select option,
+.obra-sel option,
+.paste-sel option {
+  background: #ffffff;
+  color: #141b27;
+}
+
+.fg input[type="date"],
+.fg select,
+.obra-sel,
+.paste-sel {
+  color-scheme: light;
+}
