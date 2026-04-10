@@ -48,18 +48,18 @@ select, .obra-sel { scrollbar-width: auto; }
     <button class="btn-new" onclick="openNuevaObra()">+ Nueva obra</button>
   </div>
   <div class="topbar-right" style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-    <div class="user-logged"><div class="u-avatar" id="topAvatar">?</div><span id="topUser" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></div>
-    <div class="fb-badge"><div class="fb-dot" id="fbDot"></div><span id="fbTxt">Conectando...</span></div>
-    <select id="themeSelect" class="paste-sel" style="font-size:.6rem;padding:2px 6px;max-width:110px;flex-shrink:0" onchange="switchTheme(this.value)" title="Cambiar tema visual">
+    <div class="user-logged topbar-user"><div class="u-avatar" id="topAvatar">?</div><span id="topUser" style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></div>
+    <div class="fb-badge topbar-firebase"><div class="fb-dot" id="fbDot"></div><span id="fbTxt">Conectando...</span></div>
+    <select id="themeSelect" class="paste-sel theme-select-sync topbar-theme" style="font-size:.6rem;padding:2px 6px;max-width:110px;flex-shrink:0" onchange="switchTheme(this.value)" title="Cambiar tema visual">
       <option value="oscuro.css">🌑 Oscuro</option>
       <option value="tecnico.css">⚡ Tecnológico</option>
     </select>
-    <button class="btn btn-ghost btn-sm undo-btn" id="undoBtn" onclick="undoLastAction()" title="No hay cambios para deshacer" disabled>
+    <button class="btn btn-ghost btn-sm undo-btn topbar-undo" id="undoBtn" onclick="undoLastAction()" title="No hay cambios para deshacer" disabled>
       <span class="undo-icon">↶</span>
       <span class="undo-label">Deshacer</span>
     </button>
-    <button class="btn btn-ghost btn-sm socio-only" onclick="navTo('config')">⚙️</button>
-    <button class="btn-logout" onclick="doLogout()">Salir</button>
+    <button class="btn btn-ghost btn-sm socio-only topbar-config-btn" onclick="navTo('config')" title="Configuración">⚙️</button>
+    <button class="btn-logout topbar-logout" onclick="doLogout()">Salir</button>
   </div>
 </div>
 
@@ -404,12 +404,6 @@ select, .obra-sel { scrollbar-width: auto; }
   <div class="row-btns" style="margin-top:0;margin-bottom:.5rem">
     <button class="btn btn-secondary btn-sm" onclick="exportAyudaPDF()">📄 Exportar PDF Ayuda Social</button>
   </div>
-  <div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
-    <div class="metric"><div class="m-label">Total Adeudado (Ayuda Social)</div><div class="m-val y" id="as-adeudado">₲ 0</div></div>
-    <div class="metric" style="border-top:2px solid var(--green)"><div class="m-label">Total Entregado</div><div class="m-val g" id="as-entregado">₲ 0</div></div>
-    <div class="metric green"><div class="m-label">Saldo Pendiente</div><div class="m-val g" id="as-saldo">₲ 0</div></div>
-    <div class="metric blue"><div class="m-label">Pagos Registrados</div><div class="m-val b" id="as-count">0</div></div>
-  </div>
   <div class="card">
     <div class="card-title">Registrar Entrega</div>
     <div class="nota">💡 Registrá cada entrega de Ayuda Social. Podés asignarla a una obra específica para que aparezca en sus gastos, o dejarla sin asignar.</div>
@@ -471,8 +465,9 @@ select, .obra-sel { scrollbar-width: auto; }
   <div class="page-title">Contratistas</div>
   <div class="page-sub">Control de pagos a contratistas — cada obra puede tener múltiples contratistas</div>
   <div class="row-btns" style="margin-top:0;margin-bottom:.5rem">
-    <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--purple),#6b4fb0);color:#fff;border:none" onclick="exportContratistaPDF()">📄 Exportar PDF Contratistas</button>
+    <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--purple),#6b4fb0);color:#fff;border:none" onclick="exportContratistaPDF()">📄 PDF general de contratistas</button>
   </div>
+  <div class="nota" style="margin-bottom:.7rem">Cada contratista tendrá además su propio botón de <b>PDF individual</b> dentro de la obra.</div>
   <div style="display:none"><span id="ct-adeudado"></span><span id="ct-entregado"></span><span id="ct-saldo"></span><span id="ct-count"></span></div>
   <div class="card">
     <div class="card-title">Registrar Entrega</div>
@@ -561,8 +556,27 @@ select, .obra-sel { scrollbar-width: auto; }
 <!-- CONFIG -->
 <div class="page" id="page-config">
   <div class="page-title">Configuración</div>
-  <div class="page-sub">Firebase y parámetros de planilla</div>
-  <div class="card" style="background:rgba(200,168,75,.04);border-color:rgba(200,168,75,.2)">
+  <div class="page-sub">Respaldo, usuarios y ajustes diarios</div>
+  <div class="card">
+    <div class="card-title">Apariencia y sesión</div>
+    <div class="form-grid" style="max-width:460px">
+      <div class="fg">
+        <label>Tema visual</label>
+        <select id="themeSelectConfig" class="paste-sel theme-select-sync" style="width:100%;min-height:40px" onchange="switchTheme(this.value)">
+          <option value="oscuro.css">Oscuro</option>
+          <option value="tecnico.css">Tecnológico</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Sesión</label>
+        <button class="btn btn-ghost" style="width:100%;min-height:40px" onclick="doLogout()">Cerrar sesión</button>
+      </div>
+    </div>
+    <div style="font-size:.68rem;color:var(--muted);margin-top:.6rem">El indicador de Firebase queda arriba en pequeño para no ocupar espacio en el panel.</div>
+  </div>
+  <details class="card config-details owner-only" id="cfgAdvancedFirebase">
+    <summary class="config-summary">Conexión avanzada a Firebase</summary>
+    <div class="config-details-body" style="background:rgba(200,168,75,.04);border-top:1px solid rgba(200,168,75,.12)">
     <div class="card-title">🔥 Firebase — thalamus-finanzas</div>
     <div style="font-size:.75rem;color:var(--dim);margin-bottom:.7rem">Config precargada. Editá solo si necesitás cambiar el proyecto.</div>
     <div class="form-grid" style="margin-bottom:.7rem">
@@ -574,7 +588,8 @@ select, .obra-sel { scrollbar-width: auto; }
       <div class="fg span2"><label>App ID</label><input type="text" id="cfg-ai2"></div>
     </div>
     <div class="row-btns"><button class="btn btn-primary" onclick="saveAndConnect()">🔥 Reconectar</button></div>
-  </div>
+    </div>
+  </details>
   <div class="card" style="background:rgba(42,212,240,.05);border-color:rgba(42,212,240,.18)">
     <div class="card-title">Modo prueba local</div>
     <div style="font-size:.74rem;color:var(--dim);margin-bottom:.55rem;line-height:1.6">
@@ -610,7 +625,9 @@ select, .obra-sel { scrollbar-width: auto; }
     <div id="backupList" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border);max-height:150px;overflow:auto"></div>
     <div class="row-btns" style="margin-top:.5rem"><button class="btn btn-ghost" onclick="loadBackupList()">🔄 Actualizar lista</button></div>
   </div>
-  <div class="card" style="background:rgba(200,168,75,.04);border-color:rgba(200,168,75,.15)">
+  <details class="card config-details owner-only" id="cfgAdvancedSecurity">
+    <summary class="config-summary">Seguridad y soporte técnico</summary>
+    <div class="config-details-body" style="background:rgba(200,168,75,.04);border-top:1px solid rgba(200,168,75,.12)">
     <div class="card-title">🔒 Seguridad de Firebase</div>
     <div style="font-size:.68rem;color:var(--dim);margin-bottom:.5rem;line-height:1.6">
       Tu Firestore puede estar en modo abierto. Para proteger tus datos, andá a la <b>consola de Firebase</b> → Firestore → Reglas, y pegá estas reglas:
@@ -627,17 +644,19 @@ service cloud.firestore {
   }
 }</div>
     <div style="font-size:.62rem;color:var(--muted)">💡 Estas reglas permiten lectura/escritura. Para máxima seguridad, habilitá Firebase Authentication y cambiá las reglas como indica el comentario.</div>
-  </div>
-  <div class="card">
+    </div>
+  </details>
+  <details class="card config-details owner-only" id="cfgAdvancedData">
+    <summary class="config-summary">Datos legacy y conexiones</summary>
+    <div class="config-details-body">
     <div class="card-title">Datos</div>
     <div class="row-btns"><button class="btn btn-secondary" onclick="exportJSON()">📤 Exportar JSON (legacy)</button></div>
-  </div>
-  <div class="card">
-    <div class="card-title">📡 Conexiones</div>
+    <div class="card-title" style="margin-top:1rem">📡 Conexiones</div>
     <div style="font-size:.68rem;color:var(--muted);margin-bottom:.5rem">Última conexión de cada usuario</div>
     <div id="loginHistory" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border)"></div>
-  </div>
-  <div class="card">
+    </div>
+  </details>
+  <div class="card owner-only">
     <div class="card-title">👥 Usuarios</div>
     <div style="font-size:.68rem;color:var(--muted);margin-bottom:.7rem">Usuarios que pueden acceder al sistema. Los <b>operadores</b> solo ven gastos y certificados.</div>
     <div id="userList" style="background:var(--surf);border-radius:var(--r-sm);border:1px solid var(--border);margin-bottom:.8rem"></div>
@@ -657,14 +676,10 @@ service cloud.firestore {
 <nav class="bottom-nav">
   <div class="bn-items">
     <div class="bn-item active" id="bn-obras" onclick="navTo('obras')"><span class="bn-icon">🏗️</span><span class="bn-label">Obras</span></div>
-    <div class="bn-item socio-only" id="bn-global" onclick="navTo('global')"><span class="bn-icon">🌐</span><span class="bn-label">Global</span></div>
     <div class="bn-item" id="bn-gastos" onclick="navTo('gastos')"><span class="bn-icon">💸</span><span class="bn-label">Gastos</span></div>
     <div class="bn-item" id="bn-certificados" onclick="navTo('certificados')"><span class="bn-icon">📄</span><span class="bn-label">Cobros</span></div>
-    <div class="bn-item socio-only" id="bn-utilidades" onclick="navTo('utilidades')"><span class="bn-icon">💰</span><span class="bn-label">Socios</span></div>
     <div class="bn-item socio-only" id="bn-gestor" onclick="navTo('gestor')"><span class="bn-icon">👷</span><span class="bn-label">Gestor</span></div>
-    <div class="bn-item socio-only" id="bn-ayudaSocial" onclick="navTo('ayudaSocial')"><span class="bn-icon">🏛️</span><span class="bn-label">A.Social</span></div>
     <div class="bn-item socio-only" id="bn-contratista" onclick="navTo('contratista')"><span class="bn-icon">👔</span><span class="bn-label">Contrat.</span></div>
-    <div class="bn-item socio-only" id="bn-config" onclick="navTo('config')"><span class="bn-icon">⚙️</span><span class="bn-label">Config</span></div>
   </div>
 </nav>
 
