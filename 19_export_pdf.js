@@ -14,6 +14,157 @@ function getUtilidadesData(){
   return{rows,totGan,totF,totW,retF,retW,saldoF:totF-retF,saldoW:totW-retW,retFList,retWList};
 }
 
+window.exportContratistaResumenExcel=function(obraId,contratistaId){
+  const obra=obras[obraId];
+  const contratista=(obra?.contratistas||[]).find(c=>c.id===contratistaId);
+  if(!obra||!contratista){
+    toast('No se encontro el contratista','err');
+    return;
+  }
+
+  const loadExcelJS=(cb)=>{
+    if(window.ExcelJS){cb();return;}
+    toast('Cargando libreria...','info');
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+    s.onload=cb;
+    s.onerror=()=>toast('Error cargando libreria','err');
+    document.head.appendChild(s);
+  };
+
+  loadExcelJS(async()=>{
+    try{
+      const pagos=contratistaPagos
+        .filter(p=>p.obraId===obraId&&p.contratistaId===contratistaId)
+        .sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+      const montoAsignado=parseFloat(contratista.monto)||0;
+      const totalEntregado=calcContratistaEntregadoContr(obraId,contratistaId);
+      const saldo=montoAsignado-totalEntregado;
+      const cobertura=montoAsignado>0?Math.min(1,totalEntregado/montoAsignado):0;
+
+      const wb=new ExcelJS.Workbook();
+      wb.creator='Thalamus Finanzas';
+      wb.created=new Date();
+
+      const fill=(c)=>({type:'pattern',pattern:'solid',fgColor:{argb:'FF'+c}});
+      const font=(bold,color='000000',size=10)=>({bold,color:{argb:'FF'+color},size,name:'Calibri'});
+      const border={
+        top:{style:'thin',color:{argb:'FFD9D9D9'}},
+        left:{style:'thin',color:{argb:'FFD9D9D9'}},
+        bottom:{style:'thin',color:{argb:'FFD9D9D9'}},
+        right:{style:'thin',color:{argb:'FFD9D9D9'}}
+      };
+
+      const ws=wb.addWorksheet('RESUMEN');
+      ws.columns=[{width:28},{width:42},{width:18}];
+
+      const setCell=(addr,val,opts={})=>{
+        const cell=ws.getCell(addr);
+        cell.value=val;
+        if(opts.bg) cell.fill=fill(opts.bg);
+        if(opts.bold!==undefined||opts.color||opts.size){
+          cell.font=font(!!opts.bold,opts.color||'000000',opts.size||10);
+        }
+        cell.alignment={
+          horizontal:opts.align||'left',
+          vertical:opts.valign||'middle'
+        };
+        if(opts.fmt) cell.numFmt=opts.fmt;
+        if(opts.border) cell.border=border;
+      };
+
+      ws.mergeCells('A1:C1');
+      setCell('A1','RESUMEN DE CONTRATISTA',{bold:true,color:'FFFFFF',bg:'6B4FB0',align:'center',size:14,border:true});
+      ws.getRow(1).height=24;
+
+      const obraNombre=(obra.num?('N'+obra.num+' - '):'')+(obra.nombre||obraId);
+      const resumenRows=[
+        ['Obra',obraNombre],
+        ['Contratista',contratista.nombre||'Contratista'],
+        ['Fecha exportacion',new Date().toLocaleDateString('es-PY')],
+        ['Monto asignado',montoAsignado],
+        ['Total entregado',totalEntregado],
+        ['Saldo pendiente',saldo],
+        ['Cobertura',cobertura],
+        ['Entregas registradas',pagos.length]
+      ];
+
+      let row=3;
+      resumenRows.forEach(([label,val])=>{
+        const isPercent=label==='Cobertura';
+        const isNumeric=typeof val==='number';
+        setCell('A'+row,label,{bold:true,bg:'EDE7F6',border:true});
+        setCell('B'+row,val,{bg:'F8F5FC',border:true,fmt:isPercent?'0.0%':(isNumeric?'#,##0':'')});
+        ws.mergeCells(`B${row}:C${row}`);
+        row++;
+      });
+
+      const pagosWs=wb.addWorksheet('ENTREGAS');
+      pagosWs.columns=[
+        {header:'Fecha',key:'fecha',width:14},
+        {header:'Concepto',key:'concepto',width:42},
+        {header:'Monto',key:'monto',width:18}
+      ];
+      pagosWs.getRow(1).height=20;
+      ['A1','B1','C1'].forEach(addr=>{
+        pagosWs.getCell(addr).fill=fill('6B4FB0');
+        pagosWs.getCell(addr).font=font(true,'FFFFFF',10);
+        pagosWs.getCell(addr).alignment={horizontal:'center',vertical:'middle'};
+        pagosWs.getCell(addr).border=border;
+      });
+
+      if(pagos.length){
+        pagos.forEach(p=>{
+          const r=pagosWs.addRow({
+            fecha:p.fecha||'',
+            concepto:p.concepto||'Entrega',
+            monto:parseFloat(p.monto)||0
+          });
+          r.getCell(1).border=border;
+          r.getCell(2).border=border;
+          r.getCell(3).border=border;
+          r.getCell(3).numFmt='#,##0';
+        });
+        const totalRow=pagosWs.addRow({fecha:'',concepto:'TOTAL ENTREGADO',monto:totalEntregado});
+        totalRow.font=font(true,'000000',10);
+        totalRow.getCell(1).border=border;
+        totalRow.getCell(2).border=border;
+        totalRow.getCell(3).border=border;
+        totalRow.getCell(2).fill=fill('EDE7F6');
+        totalRow.getCell(3).fill=fill('EDE7F6');
+        totalRow.getCell(3).numFmt='#,##0';
+      }else{
+        const emptyRow=pagosWs.addRow({fecha:'',concepto:'Sin entregas registradas',monto:''});
+        emptyRow.getCell(1).border=border;
+        emptyRow.getCell(2).border=border;
+        emptyRow.getCell(3).border=border;
+      }
+
+      const buffer=await wb.xlsx.writeBuffer();
+      const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      const url=URL.createObjectURL(blob);
+      const safe=(value,fallback)=>String(value||fallback)
+        .replace(/[\\/:*?"<>|]+/g,' ')
+        .replace(/\s+/g,' ')
+        .trim()
+        .replace(/\s/g,'_')
+        .replace(/[^a-zA-Z0-9_-]/g,'')||fallback;
+      const obraRef=safe((obra.num?('N'+obra.num+'_'):'')+(obra.nombre||obraId),'obra');
+      const contratistaRef=safe(contratista.nombre||'contratista','contratista');
+
+      const a=document.createElement('a');
+      a.href=url;
+      a.download='Contratista_'+obraRef+'_'+contratistaRef+'_'+today()+'.xlsx';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('Excel individual exportado ✓','ok');
+    }catch(err){
+      console.error(err);
+      toast('Error generando Excel: '+err.message,'err');
+    }
+  });
+};
+
 window.exportUtilidadesExcel=function(){
   const loadExcelJS=(cb)=>{
     if(window.ExcelJS){cb();return;}
@@ -394,6 +545,9 @@ function _buildAyudaPDF(){
 // PDF — CONTRATISTAS
 // ═══════════════════════════════════════
 window.exportContratistaPDF=function(){_loadPDFLib(_buildContratistaPDF);};
+window.exportContratistaResumenPDF=function(obraId,contratistaId){
+  _loadPDFLib(()=>_buildContratistaResumenPDF(obraId,contratistaId));
+};
 
 function _buildContratistaPDF(){
   const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
@@ -490,4 +644,99 @@ function _buildContratistaPDF(){
   }
   doc.save('Contratistas_'+today()+'.pdf');
   toast('PDF de Contratistas exportado ✓','ok');
+}
+
+function _buildContratistaResumenPDF(obraId,contratistaId){
+  const obra=obras[obraId];
+  const contratista=(obra?.contratistas||[]).find(c=>c.id===contratistaId);
+  if(!obra||!contratista){
+    toast('No se encontro el contratista','err');
+    return;
+  }
+
+  const jsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!jsPDF){toast('Error cargando PDF','err');return}
+
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth();
+  const M=10;
+  const PURPLE=[107,79,176],PURP_CL=[157,127,218],AZUL=[31,56,100],GRIS=[235,235,239],BLACK=[0,0,0],WHITE=[255,255,255],GREEN=[46,125,50],RED=[224,82,82];
+  const fNum=(x)=>Math.round(x||0).toLocaleString('es-PY');
+  const safeName=value=>String(value||'contratista').replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().replace(/\s/g,'_');
+  const montoAsignado=parseFloat(contratista.monto)||0;
+  const totalEntregado=calcContratistaEntregadoContr(obraId,contratistaId);
+  const saldo=montoAsignado-totalEntregado;
+  const pct=montoAsignado>0?Math.min(100,totalEntregado/montoAsignado*100):0;
+  const pagos=contratistaPagos
+    .filter(p=>p.obraId===obraId&&p.contratistaId===contratistaId)
+    .sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));
+
+  doc.setFillColor(...PURPLE); doc.rect(M,M,W-M*2,12,'F');
+  doc.setTextColor(...WHITE); doc.setFontSize(12); doc.setFont('helvetica','bold');
+  doc.text('RESUMEN DE CONTRATISTA',W/2,M+7.5,{align:'center'});
+  doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text(new Date().toLocaleDateString('es-PY'),W-M-2,M+7.5,{align:'right'});
+
+  let y=M+17;
+  doc.setFillColor(...AZUL); doc.roundedRect(M,y,W-M*2,18,3,3,'F');
+  doc.setTextColor(...WHITE); doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text((obra.num?'N'+obra.num+' - ':'')+(obra.nombre||'Obra'),M+3,y+5.5);
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+  doc.text('Contratista: '+(contratista.nombre||'Contratista'),M+3,y+11);
+  doc.text('Contrato obra: '+fNum(calcCon(obraId)),W-M-3,y+5.5,{align:'right'});
+  doc.text('Estado: '+(obra.estado||'EN EJECUCION'),W-M-3,y+11,{align:'right'});
+  y+=24;
+
+  doc.autoTable({
+    startY:y,
+    head:[['Asignado','Entregado','Pendiente','Cobertura']],
+    body:[[fNum(montoAsignado),fNum(totalEntregado),fNum(saldo),pct.toFixed(0)+'%']],
+    styles:{fontSize:9,cellPadding:3,textColor:BLACK,halign:'center'},
+    headStyles:{fillColor:PURP_CL,textColor:WHITE,fontStyle:'bold'},
+    bodyStyles:{fillColor:WHITE,fontStyle:'bold'},
+    margin:{left:M,right:M},
+    theme:'grid'
+  });
+  y=doc.lastAutoTable.finalY+8;
+
+  const chipColor=saldo>0?RED:GREEN;
+  doc.setFillColor(...chipColor); doc.roundedRect(M,y,54,7,2,2,'F');
+  doc.setTextColor(...WHITE); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text(saldo>0?'Saldo pendiente':'Saldo cubierto',M+27,y+4.7,{align:'center'});
+  y+=10;
+
+  if(pagos.length){
+    doc.autoTable({
+      startY:y,
+      head:[['Fecha','Concepto','Monto']],
+      body:pagos.map(p=>[p.fecha||'',p.concepto||'Entrega',fNum(p.monto)]),
+      foot:[['','Total entregado',fNum(totalEntregado)]],
+      columnStyles:{2:{halign:'right'}},
+      styles:{fontSize:7.5,cellPadding:2.4,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},
+      headStyles:{fillColor:PURPLE,textColor:WHITE,fontStyle:'bold',halign:'center'},
+      footStyles:{fillColor:GRIS,textColor:BLACK,fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[247,245,251]},
+      bodyStyles:{fillColor:WHITE},
+      margin:{left:M,right:M},
+      theme:'grid'
+    });
+  }else{
+    doc.setTextColor(120,120,130); doc.setFontSize(9); doc.setFont('helvetica','italic');
+    doc.text('Este contratista todavia no tiene entregas registradas.',M,y+4);
+  }
+
+  const tp=doc.internal.getNumberOfPages();
+  for(let i=1;i<=tp;i++){
+    doc.setPage(i);
+    const pH=doc.internal.pageSize.getHeight();
+    doc.setFillColor(240,240,240); doc.rect(0,pH-8,W,8,'F');
+    doc.setTextColor(100,100,120); doc.setFontSize(6.5); doc.setFont('helvetica','normal');
+    doc.text('THALAMUS FINANZAS - Contratista individual - '+new Date().toLocaleDateString('es-PY'),M,pH-3.5);
+    doc.text('Pagina '+i+' de '+tp,W-M,pH-3.5,{align:'right'});
+  }
+
+  const obraRef=(obra.num?'N'+obra.num+'_':'')+safeName(obra.nombre||obraId);
+  const contratistaRef=safeName(contratista.nombre||'contratista');
+  doc.save('Contratista_'+obraRef+'_'+contratistaRef+'_'+today()+'.pdf');
+  toast('PDF individual exportado ✓','ok');
 }
