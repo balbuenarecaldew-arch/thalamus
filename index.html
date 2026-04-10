@@ -471,6 +471,7 @@ select, .obra-sel { scrollbar-width: auto; }
     <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--purple),#6b4fb0);color:#fff;border:none" onclick="exportContratistaPDF()">📄 PDF general de contratistas</button>
   </div>
   <div class="nota" style="margin-bottom:.7rem">Cada contratista tendrá además su propio botón de <b>PDF individual</b> dentro de la obra.</div>
+  <div class="nota" style="margin-bottom:.45rem">Buscá dentro de cada contratista los botones <b>Excel ind.</b> y <b>PDF ind.</b>.</div>
   <div style="display:none"><span id="ct-adeudado"></span><span id="ct-entregado"></span><span id="ct-saldo"></span><span id="ct-count"></span></div>
   <div class="card">
     <div class="card-title">Registrar Entrega</div>
@@ -915,6 +916,7 @@ window.connectFB(FB).then(ok => {
 <script src="16_ai.js"></script>
 <script src="17_paste_excel.js"></script>
 <script src="18_export_excel.js"></script>
+<script src="22_contratista_excel.js"></script>
 <script src="19_export_pdf.js"></script>
 <script src="20_undo.js"></script>
 <script src="21_admin_tools.js"></script>

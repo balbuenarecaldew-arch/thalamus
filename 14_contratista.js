@@ -183,8 +183,14 @@ function renderContratista(){
                 onchange="updateContratistaNombre('${o.id}','${c.id}',this.value)"
                 placeholder="Nombre del contratista" title="Nombre del contratista">
             </div>
-            <button class="btn btn-danger btn-xs" style="padding:2px 7px;font-size:.52rem;flex-shrink:0" 
-              onclick="event.stopPropagation();removeContratistaFromObra('${o.id}','${c.id}')" title="Eliminar contratista">✕</button>
+            <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0">
+              <button class="btn btn-ghost btn-xs" style="padding:2px 8px;font-size:.52rem;color:var(--green);border-color:rgba(61,212,154,.24)"
+                onclick="event.stopPropagation();exportContratistaResumenExcel('${o.id}','${c.id}')" title="Exportar resumen Excel individual">Excel ind.</button>
+              <button class="btn btn-ghost btn-xs" style="padding:2px 8px;font-size:.52rem;color:var(--purple);border-color:rgba(157,127,218,.24)"
+                onclick="event.stopPropagation();exportContratistaResumenPDF('${o.id}','${c.id}')" title="Exportar resumen PDF individual">PDF ind.</button>
+              <button class="btn btn-danger btn-xs" style="padding:2px 7px;font-size:.52rem"
+                onclick="event.stopPropagation();removeContratistaFromObra('${o.id}','${c.id}')" title="Eliminar contratista">✕</button>
+            </div>
           </div>
           <div class="gestor-obra-corresponde" style="background:rgba(157,127,218,.06);border-color:rgba(157,127,218,.12);margin:0 0 .4rem 0">
             <div>
