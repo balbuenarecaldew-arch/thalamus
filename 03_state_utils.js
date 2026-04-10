@@ -10,6 +10,7 @@ let cur=null, qrows=[], pendAI=[], _importing=false;
 // =======================================
 const gs=id=>document.getElementById(id);
 const v=id=>sanitizeText(gs(id)?.value?.trim()||'',500);
+const LOCAL_ONLY_KEY='th_local_only';
 
 function fGs(x){
   if(!x||isNaN(x)) x=0;
@@ -118,6 +119,112 @@ window.requireAuth=requireAuth;
 
 const _busyActions=new Set();
 
+function isLocalOnlyMode(){
+  try{
+    return localStorage.getItem(LOCAL_ONLY_KEY)==='1';
+  }catch{
+    return false;
+  }
+}
+
+function updateFirebaseBadge(text,isOk=false){
+  const dot=gs('fbDot');
+  const txt=gs('fbTxt');
+  if(dot) dot.classList.toggle('ok',!!isOk);
+  if(txt) txt.textContent=text;
+}
+
+function updateLocalModeUi(){
+  const active=isLocalOnlyMode();
+  const status=gs('localModeTxt');
+  const onBtn=gs('localModeOnBtn');
+  const offBtn=gs('localModeOffBtn');
+  if(status){
+    status.textContent=active
+      ? 'ACTIVO: esta copia no toca Firebase. Todo queda solo en este navegador.'
+      : 'Inactivo: esta copia usa la base real de Firebase.';
+    status.style.color=active?'var(--acc3)':'var(--green)';
+  }
+  if(onBtn) onBtn.disabled=active;
+  if(offBtn) offBtn.disabled=!active;
+}
+
+window.isLocalOnlyMode=isLocalOnlyMode;
+window.updateFirebaseBadge=updateFirebaseBadge;
+window.updateLocalModeUi=updateLocalModeUi;
+
+window.setLocalOnlyMode=async function(enabled){
+  const active=!!enabled;
+  try{
+    if(active) localStorage.setItem(LOCAL_ONLY_KEY,'1');
+    else localStorage.removeItem(LOCAL_ONLY_KEY);
+  }catch{}
+
+  if(active){
+    window._db=null;
+    window._fbOk=false;
+    try{
+      if(window._FBM?.getApps&&window._FBM?.deleteApp){
+        for(const app of window._FBM.getApps()){
+          try{ await window._FBM.deleteApp(app); }catch{}
+        }
+      }
+    }catch{}
+    try{
+      if(typeof saveCache==='function') saveCache();
+    }catch{}
+    updateFirebaseBadge('Prueba local',false);
+    updateLocalModeUi();
+    toast('Modo prueba local activado. Esta copia ya no toca Firebase.','ok');
+    return true;
+  }
+
+  updateLocalModeUi();
+  toast('Modo prueba local desactivado. Reconectando Firebase...','info');
+  if(typeof window.saveAndConnect==='function'){
+    return !!(await window.saveAndConnect());
+  }
+  return false;
+};
+
+window.clearLocalAppDataCache=function(){
+  const keysToRemove=[];
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(!key) continue;
+      if(key.startsWith('oc/')||key==='th_cache'||key==='th_audit_local'){
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key=>localStorage.removeItem(key));
+  }catch{}
+};
+
+window.discardLocalTestChangesAndReconnect=async function(){
+  const active=isLocalOnlyMode();
+  if(!active){
+    if(confirm('Esto va a borrar el cache local de la app en este navegador y volver a cargar desde Firebase.\n\nTus usuarios locales y configuraciones del navegador no se borran.')){
+      window.clearLocalAppDataCache();
+      toast('Cache local descartado. Recargando datos reales...','info');
+      if(typeof window.initApp==='function'&&_currentUser){
+        await window.initApp();
+      }
+    }
+    return true;
+  }
+
+  if(!confirm('Descartar todas las pruebas locales y volver a la base real de Firebase?\n\nSe van a borrar solo los datos locales de esta copia de prueba.')) return false;
+  window.clearLocalAppDataCache();
+  try{ localStorage.removeItem(LOCAL_ONLY_KEY); }catch{}
+  updateLocalModeUi();
+  toast('Pruebas locales descartadas. Reconectando Firebase...','info');
+  if(typeof window.saveAndConnect==='function'){
+    return !!(await window.saveAndConnect());
+  }
+  return false;
+};
+
 function setActionButtonsBusy(actionName,busy){
   try{
     document.querySelectorAll(`button[onclick*="${actionName}("]`).forEach(btn=>{
@@ -144,3 +251,4 @@ async function runLocked(actionName,fn,waitMsg='Espera a que termine el guardado
 }
 
 window.runLocked=runLocked;
+updateLocalModeUi();

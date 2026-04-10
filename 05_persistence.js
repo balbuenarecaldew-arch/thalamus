@@ -4,10 +4,7 @@
 function handleFirebaseFallback(action){
   window._fbOk=false;
   window._db=null;
-  const dot=document.getElementById('fbDot');
-  const txt=document.getElementById('fbTxt');
-  if(dot) dot.classList.remove('ok');
-  if(txt) txt.textContent='Modo local';
+  if(window.updateFirebaseBadge) window.updateFirebaseBadge('Modo local',false);
   if(!window._fbFallbackNotified){
     window._fbFallbackNotified=true;
     toast('Firebase no responde. La app siguio en modo local en este navegador.','err');
@@ -17,6 +14,10 @@ function handleFirebaseFallback(action){
 window.handleFirebaseFallback=handleFirebaseFallback;
 
 async function fbSet(path,data){
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()){
+    localStorage.setItem('oc/'+path,JSON.stringify(data));
+    return;
+  }
   if(window._fbOk&&window._db){
     try{
       const p=path.split('/');
@@ -32,6 +33,10 @@ async function fbSet(path,data){
 }
 
 async function fbDel(path){
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()){
+    localStorage.removeItem('oc/'+path);
+    return;
+  }
   if(window._fbOk&&window._db){
     try{
       const p=path.split('/');
@@ -47,6 +52,19 @@ async function fbDel(path){
 }
 
 async function fbGetAll(col){
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()){
+    const res={};
+    const prefix='oc/'+col+'/';
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith(prefix)){
+        try{
+          res[k.slice(prefix.length)]=JSON.parse(localStorage.getItem(k));
+        }catch{}
+      }
+    }
+    return res;
+  }
   if(window._fbOk&&window._db){
     try{
       const snap=await window._FBM.getDocs(window._FBM.collection(window._db,...col.split('/')));
@@ -72,6 +90,13 @@ async function fbGetAll(col){
 }
 
 async function fbGetDoc(path){
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()){
+    try{
+      return JSON.parse(localStorage.getItem('oc/'+path));
+    }catch{
+      return null;
+    }
+  }
   if(window._fbOk&&window._db){
     try{
       const p=path.split('/');
@@ -330,6 +355,10 @@ window.initApp=async function(){
 };
 
 window.saveAndConnect=async function(){
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()){
+    toast('Desactiva el modo prueba local para reconectar Firebase','info');
+    return false;
+  }
   const c={
     apiKey:v('cfg-ak'),
     authDomain:v('cfg-ad'),
@@ -348,7 +377,9 @@ window.saveAndConnect=async function(){
     window._fbFallbackNotified=false;
     await window.initApp();
     toast('Firebase reconectado','ok');
+    if(window.updateLocalModeUi) window.updateLocalModeUi();
   }else{
     toast('No se pudo conectar','err');
   }
+  return ok;
 };
