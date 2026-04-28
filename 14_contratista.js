@@ -217,6 +217,7 @@ function renderContratista(){
           </div>
           <div class="gestor-card-list">${cEntregasHtml}</div>
           <div class="gestor-quick-add" style="background:rgba(157,127,218,.04);border-color:rgba(157,127,218,.2)">
+            <input type="date" class="gestor-quick-input" id="cqa-f-${o.id}-${c.id}" value="${today()}" style="width:128px" onclick="event.stopPropagation()">
             <input type="number" class="gestor-quick-input" id="cqa-m-${o.id}-${c.id}" placeholder="Monto" style="width:90px" onclick="event.stopPropagation()">
             <input type="text" class="gestor-quick-input" id="cqa-c-${o.id}-${c.id}" placeholder="Concepto..." style="flex:1;min-width:0"
               onclick="event.stopPropagation()"
@@ -454,12 +455,13 @@ window.updateContratistaMontoObra=async function(obraId,val){
 };
 window.quickAddContratistaObra=async function(obraId,contratistaId){
   if(obras[obraId]?.estado==='FINALIZADA'){toast('🔒 Obra FINALIZADA — no se puede asignar gastos','err');return}
+  const fEl=gs('cqa-f-'+obraId+'-'+contratistaId);
   const mEl=gs('cqa-m-'+obraId+'-'+contratistaId);
   const cEl=gs('cqa-c-'+obraId+'-'+contratistaId);
   const monto=parseFloat(mEl?.value)||0;
   if(!monto){toast('Ingresá el monto','err');return}
   const cName=obras[obraId]?.contratistas?.find(c=>c.id===contratistaId)?.nombre||'contratista';
-  const p={id:uid(),fecha:today(),monto,concepto:cEl?.value?.trim()||'Pago a '+cName,obraId,contratistaId};
+  const p={id:uid(),fecha:fEl?.value||today(),monto,concepto:cEl?.value?.trim()||'Pago a '+cName,obraId,contratistaId};
   contratistaPagos.push(p);
   await fbSet('contratista/pagos',{lista:contratistaPagos});
   saveCache(); renderContratista();

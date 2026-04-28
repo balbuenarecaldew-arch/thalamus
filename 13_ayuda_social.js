@@ -55,10 +55,10 @@ function renderAyudaSocial(){
   const sortVal=(gs('ayudaSort')?.value)||'num-asc';
   const filterVal=(gs('ayudaFilter')?.value)||'todas';
 
-  // Todas las obras siempre visibles — sin filtro de participación
+  // Filtros claros por estado de obra.
   let obraList=Object.values(obras);
-  if(filterVal==='con-entregas') obraList=obraList.filter(o=>ayudaSocialPagos.some(p=>p.obraId===o.id));
-  if(filterVal==='sin-entregas') obraList=obraList.filter(o=>!ayudaSocialPagos.some(p=>p.obraId===o.id));
+  if(filterVal==='ejecucion') obraList=obraList.filter(o=>normalizarEstadoObra(o.estado)==='EN EJECUCIÓN');
+  if(filterVal==='finalizadas') obraList=obraList.filter(o=>normalizarEstadoObra(o.estado)==='FINALIZADA');
 
   obraList.sort((a,b)=>{
     if(sortVal==='num-asc')    return (parseInt(a.num)||0)-(parseInt(b.num)||0);

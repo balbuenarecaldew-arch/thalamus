@@ -121,6 +121,11 @@ function applyRole(){
     else node.classList.remove('role-restricted');
   });
 
+  document.querySelectorAll('.owner-only').forEach(node=>{
+    if(!isAdmin()) node.classList.add('role-restricted');
+    else node.classList.remove('role-restricted');
+  });
+
   const newBtn=document.querySelector('.btn-new');
   if(newBtn){
     if(isOp) newBtn.classList.add('role-restricted');

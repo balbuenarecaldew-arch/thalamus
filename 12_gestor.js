@@ -1,6 +1,45 @@
 // ═══════════════════════════════════════
 // GESTOR — CONTROL DE PAGOS
 // ═══════════════════════════════════════
+const GESTOR_UI_KEY='th_gestor_ui';
+let _gestorUiLoaded=false;
+
+function loadGestorUiPrefs(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(GESTOR_UI_KEY)||'{}');
+    return raw&&typeof raw==='object'?raw:{};
+  }catch{
+    return {};
+  }
+}
+
+function saveGestorUiPrefs(){
+  const filterSel=gs('gestorFilter');
+  const sortSel=gs('gestorSort');
+  if(!filterSel||!sortSel) return;
+  try{
+    localStorage.setItem(GESTOR_UI_KEY,JSON.stringify({
+      filter:filterSel.value||'todas',
+      sort:sortSel.value||'num-asc'
+    }));
+  }catch{}
+}
+
+function ensureGestorUiPrefs(){
+  if(_gestorUiLoaded) return;
+  const filterSel=gs('gestorFilter');
+  const sortSel=gs('gestorSort');
+  if(!filterSel||!sortSel) return;
+  const prefs=loadGestorUiPrefs();
+  if(prefs.filter&&Array.from(filterSel.options).some(opt=>opt.value===prefs.filter)){
+    filterSel.value=prefs.filter;
+  }
+  if(prefs.sort&&Array.from(sortSel.options).some(opt=>opt.value===prefs.sort)){
+    sortSel.value=prefs.sort;
+  }
+  _gestorUiLoaded=true;
+}
+
 function obraParticipaGestor(id){
   const o=obras[id]; if(!o) return false;
   if(o.gestorMonto!=null&&o.gestorMonto!==''){
@@ -51,6 +90,7 @@ function populateGestorObraSelect(selId){
 }
 
 function renderGestor(){
+  ensureGestorUiPrefs();
   populateGestorObraSelect('gp-obra');
   gs('gp-fecha').value=gs('gp-fecha').value||today();
   const adeudado=calcGestorAdeudado();
@@ -63,6 +103,7 @@ function renderGestor(){
   gs('ges-count').textContent=gestorPagos.length;
   const sortVal=(gs('gestorSort')?.value)||'num-asc';
   const filterVal=(gs('gestorFilter')?.value)||'todas';
+  saveGestorUiPrefs();
   let obraList=Object.values(obras);
   const _salMap={};
   obraList.forEach(o=>{
@@ -145,7 +186,7 @@ function renderGestor(){
           </div>
           <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;margin-left:.4rem">
             <button class="btn btn-ghost btn-xs" style="padding:2px 7px;font-size:.58rem;flex-shrink:0" onclick="event.stopPropagation();editObra('${o.id}')" title="Editar obra">✏️</button>
-            <button class="btn btn-danger btn-xs" style="padding:2px 7px;font-size:.58rem;flex-shrink:0" onclick="event.stopPropagation();limpiarGestorObra('${o.id}')" title="Limpiar datos del gestor para esta obra">🧹</button>
+            <button class="btn btn-danger btn-xs" style="padding:2px 7px;font-size:.58rem;flex-shrink:0" onclick="event.stopPropagation();limpiarGestorObra('${o.id}')" title="Excluir esta obra del listado de Gestor y del PDF">Excluir</button>
           </div>
         </div>
         <div class="gestor-obra-card-body">
@@ -360,16 +401,16 @@ window.quickAddGestorObra=async function(obraId){
 window.limpiarGestorObra=function(obraId){
   const o=obras[obraId]; if(!o)return;
   const pagosAsignados=gestorPagos.filter(p=>p.obraId===obraId);
-  const msg='¿Quitar "'+o.nombre+'" del gestor?\n'
+  const msg='¿Excluir "'+o.nombre+'" del gestor y del PDF?\n'
     +(pagosAsignados.length?'— Se eliminarán '+pagosAsignados.length+' entrega(s)\n':'')
-    +'— Se quitará el % y monto asignado';
+    +'— Se quitará el % y monto asignado para que no figure en el listado';
   requireAuth(msg,async()=>{
     gestorPagos=gestorPagos.filter(p=>p.obraId!==obraId);
     await fbSet('gestor/pagos',{lista:gestorPagos});
     if(o.gestorMonto!=null) delete o.gestorMonto;
     if(o.heri!=null) delete o.heri;
     await fbSet('obras/'+obraId,o);
-    saveCache(); renderGestor(); toast('"'+o.nombre+'" quitada del gestor ✓','ok');
+    saveCache(); renderGestor(); toast('"'+o.nombre+'" excluida del gestor ✓','ok');
   });
 };
 window.activarObraGestor=async function(obraId){

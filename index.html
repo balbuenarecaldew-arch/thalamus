@@ -380,7 +380,6 @@ select, .obra-sel { scrollbar-width: auto; }
           <option value="pendiente-asc">Menor pendiente</option>
           <option value="cubierto-desc">Más cubierto</option>
           <option value="cubierto-asc">Menos cubierto</option>
-          <option value="clasico.css">Clasico</option>
         </select>
       </div>
     </div>
@@ -430,20 +429,13 @@ select, .obra-sel { scrollbar-width: auto; }
       <div class="title-actions" style="display:flex;gap:.4rem;align-items:center">
         <select id="ayudaFilter" class="paste-sel" style="font-size:.65rem;padding:3px 8px" onchange="renderAyudaSocial()">
           <option value="todas">Todas las obras</option>
-          <option value="actuales">Actuales (% activo)</option>
-          <option value="pendientes">Con saldo pendiente</option>
-          <option value="saldadas">Saldadas / sin deuda</option>
-          <option value="con-entregas">Con entregas registradas</option>
-          <option value="sin-entregas">Sin entregas aún</option>
+          <option value="ejecucion">En ejecución</option>
+          <option value="finalizadas">Finalizadas</option>
         </select>
         <select id="ayudaSort" class="paste-sel" style="font-size:.65rem;padding:3px 8px" onchange="renderAyudaSocial()">
           <option value="num-asc">Nº Obra ↑</option>
           <option value="num-desc">Nº Obra ↓</option>
           <option value="nombre-asc">Nombre A-Z</option>
-          <option value="pendiente-desc">Mayor pendiente</option>
-          <option value="pendiente-asc">Menor pendiente</option>
-          <option value="cubierto-desc">Más cubierto</option>
-          <option value="cubierto-asc">Menos cubierto</option>
         </select>
       </div>
     </div>
@@ -906,14 +898,14 @@ window.connectFB(FB).then(ok => {
 <script src="04_nav_sidebar.js"></script>
 <script src="05_persistence.js"></script>
 <script src="06_formulas.js"></script>
-<script src="07_obras.js"></script>
+<script src="07_obras.js?v=20260427a"></script>
 <script src="08_gastos.js"></script>
 <script src="09_certificados.js"></script>
 <script src="10_resumen.js"></script>
 <script src="11_utilidades.js"></script>
-<script src="12_gestor.js"></script>
-<script src="13_ayuda_social.js"></script>
-<script src="14_contratista.js?v=20260410c"></script>
+<script src="12_gestor.js?v=20260427a"></script>
+<script src="13_ayuda_social.js?v=20260427a"></script>
+<script src="14_contratista.js?v=20260427a"></script>
 <script src="15_config_backup.js"></script>
 <script src="16_ai.js"></script>
 <script src="17_paste_excel.js"></script>

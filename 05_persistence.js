@@ -1,10 +1,56 @@
 // =======================================
 // PERSISTENCE
 // =======================================
+const PENDING_SYNC_KEY='th_pending_sync_ops';
+
+function loadPendingSyncOps(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(PENDING_SYNC_KEY)||'[]');
+    return Array.isArray(raw)?raw:[];
+  }catch{
+    return [];
+  }
+}
+
+function savePendingSyncOps(list){
+  try{
+    if(list&&list.length) localStorage.setItem(PENDING_SYNC_KEY,JSON.stringify(list));
+    else localStorage.removeItem(PENDING_SYNC_KEY);
+  }catch{}
+}
+
+function updatePendingSyncBadge(){
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()) return;
+  const pending=loadPendingSyncOps();
+  if(window._fbOk&&window._db){
+    if(window.updateFirebaseBadge) window.updateFirebaseBadge(pending.length?'Sync pendiente':'Firebase OK',!!(!pending.length));
+  }else{
+    if(window.updateFirebaseBadge) window.updateFirebaseBadge(pending.length?'Modo local (pendiente)':'Modo local',false);
+  }
+}
+
+function queuePendingSync(type,path,data){
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()) return;
+  const next=loadPendingSyncOps().filter(op=>op.path!==path);
+  next.push({
+    type,
+    path,
+    data:type==='set'?data:null,
+    ts:Date.now()
+  });
+  savePendingSyncOps(next);
+  updatePendingSyncBadge();
+}
+
+function clearPendingSyncPath(path){
+  const next=loadPendingSyncOps().filter(op=>op.path!==path);
+  savePendingSyncOps(next);
+}
+
 function handleFirebaseFallback(action){
   window._fbOk=false;
   window._db=null;
-  if(window.updateFirebaseBadge) window.updateFirebaseBadge('Modo local',false);
+  updatePendingSyncBadge();
   if(!window._fbFallbackNotified){
     window._fbFallbackNotified=true;
     toast('Firebase no responde. La app siguio en modo local en este navegador.','err');
@@ -12,6 +58,41 @@ function handleFirebaseFallback(action){
   console.warn('Firebase fallback after trying to '+action);
 }
 window.handleFirebaseFallback=handleFirebaseFallback;
+
+async function flushPendingSyncQueue(opts={}){
+  const {silent=false}=opts;
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()) return false;
+  if(!(window._fbOk&&window._db&&window._FBM)) return false;
+
+  const pending=loadPendingSyncOps().sort((a,b)=>(a.ts||0)-(b.ts||0));
+  if(!pending.length){
+    if(window.updateFirebaseBadge) window.updateFirebaseBadge('Firebase OK',true);
+    return true;
+  }
+
+  for(let i=0;i<pending.length;i++){
+    const op=pending[i];
+    try{
+      const p=String(op.path||'').split('/');
+      if(op.type==='del'){
+        await window._FBM.deleteDoc(window._FBM.doc(window._db,...p));
+      }else{
+        await window._FBM.setDoc(window._FBM.doc(window._db,...p),op.data);
+      }
+    }catch(e){
+      console.warn('flushPendingSyncQueue error:',e);
+      savePendingSyncOps(pending.slice(i));
+      handleFirebaseFallback('sincronizar cambios pendientes');
+      return false;
+    }
+  }
+
+  savePendingSyncOps([]);
+  if(window.updateFirebaseBadge) window.updateFirebaseBadge('Firebase OK',true);
+  if(!silent) toast('Cambios locales sincronizados con Firebase','ok');
+  return true;
+}
+window.flushPendingSyncQueue=flushPendingSyncQueue;
 
 async function fbSet(path,data){
   if(window.isLocalOnlyMode&&window.isLocalOnlyMode()){
@@ -23,6 +104,7 @@ async function fbSet(path,data){
       const p=path.split('/');
       await window._FBM.setDoc(window._FBM.doc(window._db,...p),data);
       localStorage.setItem('oc/'+path,JSON.stringify(data));
+      clearPendingSyncPath(path);
       return;
     }catch(e){
       console.warn('fbSet error:',e);
@@ -30,6 +112,7 @@ async function fbSet(path,data){
     }
   }
   localStorage.setItem('oc/'+path,JSON.stringify(data));
+  queuePendingSync('set',path,data);
 }
 
 async function fbDel(path){
@@ -42,6 +125,7 @@ async function fbDel(path){
       const p=path.split('/');
       await window._FBM.deleteDoc(window._FBM.doc(window._db,...p));
       localStorage.removeItem('oc/'+path);
+      clearPendingSyncPath(path);
       return;
     }catch(e){
       console.warn('fbDel error:',e);
@@ -49,6 +133,7 @@ async function fbDel(path){
     }
   }
   localStorage.removeItem('oc/'+path);
+  queuePendingSync('del',path,null);
 }
 
 async function fbGetAll(col){
@@ -296,6 +381,7 @@ window.initApp=async function(){
   }
 
   try{
+    await flushPendingSyncQueue({silent:true});
     const raw=await fbGetAll('obras');
     const newObras={};
     for(const [id,d] of Object.entries(raw||{})){
@@ -375,6 +461,7 @@ window.saveAndConnect=async function(){
   const ok=await window.connectFB(c);
   if(ok){
     window._fbFallbackNotified=false;
+    await flushPendingSyncQueue({silent:false});
     await window.initApp();
     toast('Firebase reconectado','ok');
     if(window.updateLocalModeUi) window.updateLocalModeUi();
@@ -383,3 +470,20 @@ window.saveAndConnect=async function(){
   }
   return ok;
 };
+
+window.addEventListener('online',async()=>{
+  if(window.isLocalOnlyMode&&window.isLocalOnlyMode()) return;
+  if(window._fbOk&&window._db) return;
+  try{
+    const cfg=JSON.parse(localStorage.getItem('fbCfg')||'null');
+    if(!cfg||!window.connectFB) return;
+    const ok=await window.connectFB(cfg);
+    if(!ok) return;
+    window._fbFallbackNotified=false;
+    await flushPendingSyncQueue({silent:false});
+    if(_currentUser&&window.initApp) await window.initApp();
+    toast('Conexion restablecida. Revisando cambios pendientes...','ok');
+  }catch(e){
+    console.warn('Auto reconnect error:',e);
+  }
+});

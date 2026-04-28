@@ -256,7 +256,7 @@ function renderDash(){
   gs('dsh-title').innerHTML='Dashboard - '+(o.num?'<span style="font-size:1.2em;font-weight:800">N'+esc(o.num)+'</span> - ':'')+esc(o.nombre);
   gs('dsh-sub').textContent='Al '+new Date().toLocaleDateString('es-PY');
   gs('dsh-strip').style.display='flex';
-  gs('dsh-nombre').textContent=o.nombre;
+  gs('dsh-nombre').textContent=(o.num?'N'+o.num+' - ':'')+o.nombre;
   gs('dsh-fecha').textContent=o.fecha||'-';
   gs('dsh-estado').textContent=normalizarEstadoObra(o.estado);
   gs('dsh-contrato').textContent=fGs(r.con);
@@ -290,6 +290,7 @@ function renderGlobal(){
     const r=calcRes(o.id);
     const obraIdArg=encArg(o.id);
     const obraNombre=esc(o.nombre||'');
+    const obraNumero=o.num?esc(o.num):'';
     const obraEstado=esc(normalizarEstadoObra(o.estado));
     totCon+=r.con;
     totG+=r.tg;
@@ -301,7 +302,7 @@ function renderGlobal(){
     const ganC=r.gan>=0?'color:var(--green)':'color:var(--acc3)';
     const acobC=r.scob>0?'color:var(--gold)':'color:var(--muted)';
     return `<tr>
-      <td><span class="obra-link" onclick="selectObra(decodeURIComponent('${obraIdArg}'))">${obraNombre}</span></td>
+      <td><span class="obra-link" onclick="selectObra(decodeURIComponent('${obraIdArg}'))">${obraNumero?'<b>N'+obraNumero+'</b> - ':''}${obraNombre}</span></td>
       <td><span class="tag ${normalizarEstadoObra(o.estado)===ESTADO_FINAL?'tag-g':normalizarEstadoObra(o.estado)===ESTADO_PARAL?'tag-r':'tag-y'}">${obraEstado}</span></td>
       <td>${fGs(r.con)}</td>
       <td style="color:var(--acc2)">${fGs(r.br)}</td>
