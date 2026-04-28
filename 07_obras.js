@@ -123,6 +123,8 @@ window.openNuevaObra=function(){
   gs('o-mc').value='';
   gs('o-ad').value='0';
   gs('o-es').value=ESTADO_EJEC;
+  setObraPctField('o-ay',cfg.ayuda,null);
+  setObraPctField('o-he',cfg.heri,null);
   openM('mObra');
 };
 
@@ -148,7 +150,43 @@ function _openEditObra(id){
   gs('o-mc').value=o.contrato||0;
   gs('o-ad').value=o.adenda||0;
   gs('o-es').value=normalizarEstadoObra(o.estado);
+  setObraPctField('o-ay',obraAy(id),o.ayuda);
+  setObraPctField('o-he',obraHe(id),o.heri);
   openM('mObra');
+}
+
+function setObraPctField(fieldId,value,manualValue){
+  const el=gs(fieldId);
+  if(!el) return;
+  const shown=Number.isFinite(parseFloat(value))?parseFloat(value):0;
+  el.value=shown;
+  el.dataset.initial=String(shown);
+  el.dataset.manual=manualValue!=null?'1':'0';
+}
+
+function applyObraPctField(o,prev,fieldId,prop,defaultValue){
+  const el=gs(fieldId);
+  if(!el){
+    if(prev[prop]!=null) o[prop]=prev[prop];
+    return;
+  }
+  const raw=String(el.value??'').trim();
+  const initial=parseFloat(el.dataset.initial);
+  const current=raw===''?NaN:parseFloat(raw);
+  const wasManual=el.dataset.manual==='1';
+  const changed=raw!==''&&Number.isFinite(current)&&(!Number.isFinite(initial)||current!==initial);
+
+  if(changed){
+    o[prop]=current;
+    return;
+  }
+  if(wasManual&&prev[prop]!=null){
+    o[prop]=prev[prop];
+    return;
+  }
+  if(!prev.id&&raw!==''&&Number.isFinite(current)&&current!==parseFloat(defaultValue)){
+    o[prop]=current;
+  }
 }
 
 window.saveObra=async function(){
@@ -171,8 +209,8 @@ window.saveObra=async function(){
       estado:normalizarEstadoObra(gs('o-es').value),
       lastModified:Date.now()
     };
-    if(prev.ayuda!=null) o.ayuda=prev.ayuda;
-    if(prev.heri!=null) o.heri=prev.heri;
+    applyObraPctField(o,prev,'o-ay','ayuda',cfg.ayuda);
+    applyObraPctField(o,prev,'o-he','heri',cfg.heri);
 
     obras[id]=o;
     if(!gastos[id]) gastos[id]=[];
