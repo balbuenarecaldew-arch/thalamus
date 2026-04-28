@@ -747,11 +747,21 @@ service cloud.firestore {
           <tbody id="pastePreviewBody"></tbody>
         </table>
       </div>
+      <div id="pasteProgressBox" style="display:none;margin:.7rem 0;padding:.65rem;border:1px solid rgba(61,212,154,.28);border-radius:12px;background:rgba(61,212,154,.08)">
+        <div style="display:flex;justify-content:space-between;gap:.7rem;align-items:center;margin-bottom:.45rem;font-size:.72rem;color:var(--txt)">
+          <b id="pasteProgressTitle">Importando datos...</b>
+          <span id="pasteProgressText" style="color:var(--muted);font-family:'JetBrains Mono',monospace">0%</span>
+        </div>
+        <div style="height:10px;border-radius:999px;background:var(--bg);border:1px solid var(--border);overflow:hidden">
+          <div id="pasteProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--acc));transition:width .18s ease"></div>
+        </div>
+        <div id="pasteProgressDetail" style="font-size:.66rem;color:var(--muted);margin-top:.45rem">Preparando importación...</div>
+      </div>
       <div class="row-btns">
-        <button class="btn btn-primary" onclick="importPaste()">📥 Importar <span id="pasteImportCount">0</span> filas</button>
-        <button class="btn btn-ghost" onclick="backToPasteStep1()">← Volver</button>
-        <button class="btn btn-ghost" onclick="closeM('mPaste')">Cancelar</button>
-        <button class="btn btn-xs btn-danger" onclick="resetLearnedMappings()" title="Olvidar mapeos aprendidos">🧠 Resetear memoria</button>
+        <button class="btn btn-primary" id="pasteImportBtn" onclick="importPaste()">📥 Importar <span id="pasteImportCount">0</span> filas</button>
+        <button class="btn btn-ghost" id="pasteBackBtn" onclick="backToPasteStep1()">← Volver</button>
+        <button class="btn btn-ghost" id="pasteCancelBtn" onclick="closeM('mPaste')">Cancelar</button>
+        <button class="btn btn-xs btn-danger" id="pasteResetMemoryBtn" onclick="resetLearnedMappings()" title="Olvidar mapeos aprendidos">🧠 Resetear memoria</button>
       </div>
     </div>
   </div>
@@ -908,7 +918,7 @@ window.connectFB(FB).then(ok => {
 <script src="14_contratista.js?v=20260427a"></script>
 <script src="15_config_backup.js"></script>
 <script src="16_ai.js"></script>
-<script src="17_paste_excel.js"></script>
+<script src="17_paste_excel.js?v=20260428a"></script>
 <script src="18_export_excel.js"></script>
 <script src="19_export_pdf.js?v=20260410c"></script>
 <script src="20_undo.js"></script>

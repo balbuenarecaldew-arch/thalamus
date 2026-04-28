@@ -102,6 +102,8 @@ function guessField(colVals, fields, colIdx){
 window.openPaste=function(mode){
   if(!cur||!obras[cur]){toast('Seleccioná una obra primero','err');return}
   _pasteMode=mode;
+  setPasteImporting(false);
+  updatePasteProgress(0,0,0,'Preparando importación...');
   gs('mPasteTitle').textContent='📋 Pegar desde Excel — '+(mode==='gastos'?'Gastos':'Certificados');
   gs('pasteArea').value='';
   gs('pasteStep1').style.display='';
@@ -148,6 +150,8 @@ window.parsePaste=function(){
   gs('pasteRowCount').textContent=_pasteRows.length;
   gs('pasteColCount').textContent=_pasteCols;
   gs('pasteImportCount').textContent=_pasteRows.length;
+  setPasteImporting(false);
+  updatePasteProgress(0,0,_pasteRows.length,'Listo para importar.');
 
   // Build column mapping dropdowns
   const mapRow=gs('pasteMapRow');
@@ -299,11 +303,13 @@ function renderPastePreview(){
 }
 
 window.backToPasteStep1=function(){
+  if(_importing){toast('Esperá a que termine la importación','info');return}
   gs('pasteStep1').style.display='';
   gs('pasteStep2').style.display='none';
 };
 
 window.resetLearnedMappings=function(){
+  if(_importing){toast('Esperá a que termine la importación','info');return}
   localStorage.removeItem('paste_learned_gastos');
   localStorage.removeItem('paste_learned_certificados');
   toast('Memoria de mapeos reseteada. Pegá de nuevo para re-detectar.','ok');
@@ -344,10 +350,54 @@ function parseNum(v){
   return parseFloat(s)||0;
 }
 
+function setPasteImporting(active,label){
+  const btn=gs('pasteImportBtn');
+  const back=gs('pasteBackBtn');
+  const cancel=gs('pasteCancelBtn');
+  const reset=gs('pasteResetMemoryBtn');
+  const box=gs('pasteProgressBox');
+
+  [back,cancel,reset].forEach(el=>{if(el) el.disabled=!!active});
+  document.querySelectorAll('#pasteMapRow select').forEach(el=>{el.disabled=!!active});
+
+  if(btn){
+    btn.disabled=!!active;
+    if(active){
+      btn.dataset.originalHtml=btn.dataset.originalHtml||btn.innerHTML;
+      btn.innerHTML=label||'⏳ Importando...';
+      btn.style.opacity='.72';
+      btn.style.cursor='wait';
+    }else{
+      if(btn.dataset.originalHtml) btn.innerHTML=btn.dataset.originalHtml;
+      delete btn.dataset.originalHtml;
+      btn.style.opacity='';
+      btn.style.cursor='';
+    }
+  }
+  if(box) box.style.display=active?'block':'none';
+}
+
+function updatePasteProgress(done,saved,total,detail){
+  const safeTotal=Math.max(parseInt(total)||0,1);
+  const pct=Math.min(100,Math.round((done/safeTotal)*100));
+  const bar=gs('pasteProgressBar');
+  const text=gs('pasteProgressText');
+  const detailEl=gs('pasteProgressDetail');
+  const title=gs('pasteProgressTitle');
+
+  if(bar) bar.style.width=pct+'%';
+  if(text) text.textContent=pct+'%';
+  if(title) title.textContent='Importando '+(_pasteMode==='gastos'?'gastos':'certificados')+'...';
+  if(detailEl) detailEl.textContent=detail||('Procesadas '+done+' de '+total+' filas. Guardadas: '+saved+'.');
+}
+
+function waitFrame(){
+  return new Promise(resolve=>setTimeout(resolve,0));
+}
+
 window.importPaste=async function(){
   if(_importing)return;
   if(!cur||!obras[cur]){toast('Seleccioná una obra','err');return}
-  _importing=true;
 
   const mapping=[];
   for(let c=0;c<_pasteCols;c++){
@@ -360,69 +410,102 @@ window.importPaste=async function(){
   if(!hasField){toast('Asigná al menos una columna','err');return}
 
   let count=0;
-  if(_pasteMode==='gastos'){
-    for(const row of _pasteRows){
-      const g={fecha:'',concepto:'',cantidad:'',monto:0,registro:'',montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,costoTotal:0};
-      row.forEach((val,i)=>{
-        const field=mapping[i];
-        if(field==='ignorar')return;
-        if(['monto','montoCheque','devuelto','saldoTotal','saldoCheque'].includes(field)){
-          g[field]=parseNum(val);
-        }else{
-          g[field]=val;
-        }
-      });
-      g.costoTotal=(g.monto||0)+(g.saldoTotal||0)+(g.saldoCheque||0);
-      if(!g.concepto&&!g.monto&&!g.montoCheque)continue; // skip empty
-      const gid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;
-      g.id=gid;
-      if(!gastos[cur])gastos[cur]=[];
-      gastos[cur].push({...g});
-      await fbSet('obras/'+cur+'/gastos/'+gid,g);
-      count++;
-    }
-    renderGastosPage();
-  }else{
-    for(const row of _pasteRows){
-      const c={fecha:'',concepto:'',bruto:0,neto:0,retencion:0};
-      row.forEach((val,i)=>{
-        const field=mapping[i];
-        if(field==='ignorar')return;
-        if(['bruto','neto'].includes(field)){
-          c[field]=parseNum(val);
-        }else{
-          c[field]=val;
-        }
-      });
-      c.retencion=(c.bruto||0)-(c.neto||0);
-      if(!c.concepto&&!c.bruto&&!c.neto)continue;
-      const cid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;
-      c.id=cid;
-      if(!certificados[cur])certificados[cur]=[];
-      certificados[cur].push({...c});
-      await fbSet('obras/'+cur+'/certificados/'+cid,c);
-      count++;
-    }
-    renderCerts();
-  }
+  let processed=0;
+  const total=_pasteRows.length;
+  const modeLabel=_pasteMode==='gastos'?'gastos':'certificados';
+  let importOk=false;
 
-  closeM('mPaste');
+  _importing=true;
+  setPasteImporting(true,'⏳ Importando '+total+' filas...');
+  updatePasteProgress(0,0,total,'Iniciando carga. No cierres esta ventana.');
 
-  // Learn from the user's column mapping choices
-  if(_pasteDetectedHeaders.length){
-    const learned=getLearnedMappings(_pasteMode);
-    mapping.forEach((field,i)=>{
-      if(field!=='ignorar' && _pasteDetectedHeaders[i]){
-        const hdr=_pasteDetectedHeaders[i].toLowerCase().trim();
-        if(hdr) learned[hdr]=field;
+  try{
+    if(_pasteMode==='gastos'){
+      for(const row of _pasteRows){
+        processed++;
+        const g={fecha:'',concepto:'',cantidad:'',monto:0,registro:'',montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,costoTotal:0};
+        row.forEach((val,i)=>{
+          const field=mapping[i];
+          if(field==='ignorar')return;
+          if(['monto','montoCheque','devuelto','saldoTotal','saldoCheque'].includes(field)){
+            g[field]=parseNum(val);
+          }else{
+            g[field]=val;
+          }
+        });
+        g.costoTotal=(g.monto||0)+(g.saldoTotal||0)+(g.saldoCheque||0);
+        if(!g.concepto&&!g.monto&&!g.montoCheque){
+          updatePasteProgress(processed,count,total,'Fila '+processed+' vacía omitida. Guardadas: '+count+'.');
+          continue;
+        }
+        const gid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;
+        g.id=gid;
+        if(!gastos[cur])gastos[cur]=[];
+        gastos[cur].push({...g});
+        await fbSet('obras/'+cur+'/gastos/'+gid,g);
+        count++;
+        updatePasteProgress(processed,count,total,'Procesadas '+processed+' de '+total+' filas. Gastos guardados: '+count+'.');
+        if(processed%10===0) await waitFrame();
       }
-    });
-    saveLearnedMappings(_pasteMode, learned);
-  }
+      renderGastosPage();
+    }else{
+      for(const row of _pasteRows){
+        processed++;
+        const c={fecha:'',concepto:'',bruto:0,neto:0,retencion:0};
+        row.forEach((val,i)=>{
+          const field=mapping[i];
+          if(field==='ignorar')return;
+          if(['bruto','neto'].includes(field)){
+            c[field]=parseNum(val);
+          }else{
+            c[field]=val;
+          }
+        });
+        c.retencion=(c.bruto||0)-(c.neto||0);
+        if(!c.concepto&&!c.bruto&&!c.neto){
+          updatePasteProgress(processed,count,total,'Fila '+processed+' vacía omitida. Guardadas: '+count+'.');
+          continue;
+        }
+        const cid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;
+        c.id=cid;
+        if(!certificados[cur])certificados[cur]=[];
+        certificados[cur].push({...c});
+        await fbSet('obras/'+cur+'/certificados/'+cid,c);
+        count++;
+        updatePasteProgress(processed,count,total,'Procesadas '+processed+' de '+total+' filas. Certificados guardados: '+count+'.');
+        if(processed%10===0) await waitFrame();
+      }
+      renderCerts();
+    }
 
-  _pasteRows=[];
-  _pasteDetectedHeaders=[];
-  _importing=false;
-  touchObra();
-  toast(`✅ ${count} ${_pasteMode==='gastos'?'gastos':'certificados'} importados`,'ok');
+    updatePasteProgress(total,count,total,'Carga terminada. Guardadas: '+count+' filas.');
+    importOk=true;
+    await waitFrame();
+    closeM('mPaste');
+
+    // Learn from the user's column mapping choices
+    if(_pasteDetectedHeaders.length){
+      const learned=getLearnedMappings(_pasteMode);
+      mapping.forEach((field,i)=>{
+        if(field!=='ignorar' && _pasteDetectedHeaders[i]){
+          const hdr=_pasteDetectedHeaders[i].toLowerCase().trim();
+          if(hdr) learned[hdr]=field;
+        }
+      });
+      saveLearnedMappings(_pasteMode, learned);
+    }
+
+    _pasteRows=[];
+    _pasteDetectedHeaders=[];
+    touchObra();
+    toast(`✅ ${count} ${modeLabel} importados`,'ok');
+  }catch(err){
+    console.error('Import paste error:',err);
+    updatePasteProgress(processed,count,total,'Se detuvo la carga por un error. Guardadas antes del corte: '+count+'.');
+    toast('No se pudo terminar la importación. Revisá la consola.','err');
+  }finally{
+    _importing=false;
+    setPasteImporting(false);
+    if(!importOk&&gs('pasteProgressBox')) gs('pasteProgressBox').style.display='block';
+  }
 };
