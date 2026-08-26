@@ -201,11 +201,12 @@ window.importAll=async function(){
     }else{
       const c={
         id:uid(),
-        fecha:it.fecha||today(),
+        fecha:(typeof certFechaToISO==='function'&&certFechaToISO(it.fecha))||it.fecha||today(),
         concepto:it.concepto||'',
         bruto:it.monto||0,
         neto:it.monto||0,
-        retencion:0
+        retencion:0,
+        createdAt:Date.now()+nc
       };
       certificados[cur].push(c);
       await fbSet('obras/'+cur+'/certificados/'+c.id,c);

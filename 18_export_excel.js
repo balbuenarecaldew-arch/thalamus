@@ -134,7 +134,7 @@ window.exportExcel = function(){
       for(let i=0;i<cCount;i++){
         const rn=cStart+i, c=cl[i]||null, row=''+rn;
         ws.getRow(rn).height=15.75;
-        setCell('B'+row,c?.fecha||'',{bg:VERDE_CL});
+        setCell('B'+row,c?(typeof formatCertFecha==='function'?formatCertFecha(c.fecha):(c.fecha||'')):'',{bg:VERDE_CL});
         setCell('C'+row,c?.concepto||'',{bg:VERDE_CL});
         setCell('E'+row,parseFloat(c?.bruto)||0,{bg:VERDE_CL,align:'right',fmt:FMT_NUM});
         setCell('H'+row,parseFloat(c?.neto)||0,{bg:VERDE_CL,align:'right',fmt:FMT_NUM});
@@ -299,7 +299,7 @@ function _buildPDF(){
   const ct=calcCertsT(cur);
   doc.autoTable({startY:y,
     head:[['Nº','Fecha','Concepto / Certificado','Total Pagado (Bruto)','Retención Real','Neto Cobrado']],
-    body:cl.map((c,i)=>[(i+1).toString(),c.fecha||'',c.concepto||'',fNum(c.bruto),fNum(c.retencion),fNum(c.neto)]),
+    body:cl.map((c,i)=>[(i+1).toString(),typeof formatCertFecha==='function'?formatCertFecha(c.fecha):(c.fecha||''),c.concepto||'',fNum(c.bruto),fNum(c.retencion),fNum(c.neto)]),
     foot:[['','','TOTAL PAGOS RECIBIDOS',fNum(ct.br),fNum(ct.re),fNum(ct.ne)]],
     columnStyles:{0:{cellWidth:8,halign:'center'},1:{cellWidth:22},2:{cellWidth:70},3:{cellWidth:35,halign:'right'},4:{cellWidth:30,halign:'right'},5:{cellWidth:35,halign:'right'}},
     styles:{fontSize:7,cellPadding:2,textColor:BLACK,lineColor:[180,180,180],lineWidth:0.2},

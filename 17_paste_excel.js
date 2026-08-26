@@ -395,6 +395,7 @@ window.importPaste=async function(){
           c[field]=val;
         }
       });
+      c.fecha=(typeof certFechaToISO==='function'&&certFechaToISO(c.fecha))||c.fecha;
       c.retencion=(c.bruto||0)-(c.neto||0);
       if(!c.concepto&&!c.bruto&&!c.neto)continue;
       const cid=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+count;

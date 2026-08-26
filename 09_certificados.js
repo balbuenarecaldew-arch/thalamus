@@ -15,16 +15,46 @@ window.clrCert=function(){
   gs('c-rc').textContent='Gs 0';
 };
 
-function certDateSortKey(fecha){
+function certDateParts(fecha){
   const s=String(fecha||'').trim();
-  if(!s) return '9999-12-31';
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
-  if(m){
-    const y=m[3].length===2?'20'+m[3]:m[3];
-    return y.padStart(4,'0')+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  if(!s) return null;
+  let y,m,d;
+  const iso=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+  if(iso){
+    y=iso[1]; m=iso[2]; d=iso[3];
   }
-  return '9999-12-31 '+s;
+  const local=!iso&&s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+  if(local){
+    d=local[1]; m=local[2]; y=local[3].length===2?'20'+local[3]:local[3];
+  }
+  const serial=!iso&&!local&&/^\d{5}(\.\d+)?$/.test(s)?Math.floor(Number(s)):NaN;
+  if(Number.isFinite(serial)){
+    const date=new Date(Date.UTC(1899,11,30)+(serial*86400000));
+    y=String(date.getUTCFullYear());
+    m=String(date.getUTCMonth()+1);
+    d=String(date.getUTCDate());
+  }
+  const yn=parseInt(y,10), mn=parseInt(m,10), dn=parseInt(d,10);
+  if(!yn||!mn||!dn||mn<1||mn>12||dn<1||dn>31) return null;
+  return{y:String(yn).padStart(4,'0'),m:String(mn).padStart(2,'0'),d:String(dn).padStart(2,'0')};
+}
+
+function certFechaToISO(fecha){
+  const p=certDateParts(fecha);
+  return p?p.y+'-'+p.m+'-'+p.d:'';
+}
+
+function formatCertFecha(fecha){
+  const p=certDateParts(fecha);
+  if(!p) return String(fecha||'-');
+  return p.d+'/'+p.m+'/'+p.y;
+}
+
+function certDateSortKey(fecha){
+  const iso=certFechaToISO(fecha);
+  if(iso) return iso;
+  const s=String(fecha||'').trim();
+  return s?'9999-12-31 '+s:'9999-12-31';
 }
 
 function certLoadSortKey(c,index){
@@ -49,6 +79,8 @@ function getCertificadosOrdenados(obraId){
     })
     .map(x=>x.c);
 }
+window.certFechaToISO=certFechaToISO;
+window.formatCertFecha=formatCertFecha;
 window.getCertificadosOrdenados=getCertificadosOrdenados;
 
 window.saveCert=async function(){
@@ -71,7 +103,7 @@ window.saveCert=async function(){
     if(!certificados[cur]) certificados[cur]=[];
     const c={
       id:uid(),
-      fecha:v('c-f'),
+      fecha:certFechaToISO(v('c-f'))||v('c-f'),
       concepto:conc,
       bruto:parseFloat(gs('c-b').value)||0,
       neto:parseFloat(gs('c-n').value)||0,
@@ -192,7 +224,7 @@ window.editC=function(id,num){
   }
   gs('ec-id').value=id;
   gs('editCNum').textContent='#'+num;
-  gs('ec-fecha').value=c.fecha||'';
+  gs('ec-fecha').value=certFechaToISO(c.fecha)||'';
   gs('ec-concepto').value=c.concepto||'';
   gs('ec-bruto').value=c.bruto||0;
   gs('ec-neto').value=c.neto||0;
@@ -213,7 +245,7 @@ window.saveEditC=async function(){
       toast('Certificado no encontrado','err');
       return;
     }
-    c.fecha=/^\d{4}-\d{2}-\d{2}$/.test(gs('ec-fecha').value||'')?gs('ec-fecha').value:'';
+    c.fecha=certFechaToISO(gs('ec-fecha').value)||'';
     c.concepto=sanitizeText(gs('ec-concepto').value,160);
     c.bruto=parseFloat(gs('ec-bruto').value)||0;
     c.neto=parseFloat(gs('ec-neto').value)||0;
@@ -242,7 +274,7 @@ function renderCerts(){
   gs('csr').textContent=fGs(re);
   gs('csne').textContent=fGs(ne);
 
-  const list=certificados[cur]||[];
+  const list=getCertificadosOrdenados(cur);
   const tbody=gs('ctbody');
   const cnt=gs('cSavedCount');
   if(cnt) cnt.textContent=list.length?'('+list.length+')':'';
@@ -257,7 +289,7 @@ function renderCerts(){
     const certIdArg=encArg(c.id);
     return `<tr>
       <td style="color:var(--muted);font-size:.68rem;text-align:center;font-weight:600">${i+1}</td>
-      <td>${esc(c.fecha||'-')}</td>
+      <td>${esc(formatCertFecha(c.fecha))}</td>
       <td style="font-family:'Syne',sans-serif;color:var(--txt)">${esc(c.concepto)}</td>
       <td style="color:var(--acc2)">${fGs(c.bruto)}</td>
       <td style="color:var(--green)">${fGs(c.neto)}</td>

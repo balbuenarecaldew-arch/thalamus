@@ -104,7 +104,7 @@ function renderResumen(){
   if(ctbody){
     ctbody.innerHTML=cl.length
       ? cl.map(c=>`<tr>
-          <td>${esc(c.fecha||'-')}</td>
+          <td>${esc(typeof formatCertFecha==='function'?formatCertFecha(c.fecha):(c.fecha||'-'))}</td>
           <td style="font-family:'Syne',sans-serif;color:var(--txt)">${esc(c.concepto)}</td>
           <td style="color:var(--acc2)">${fGs(c.bruto)}</td>
           <td style="color:var(--green)">${fGs(c.neto)}</td>
