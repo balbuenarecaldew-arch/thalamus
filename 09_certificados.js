@@ -15,6 +15,42 @@ window.clrCert=function(){
   gs('c-rc').textContent='Gs 0';
 };
 
+function certDateSortKey(fecha){
+  const s=String(fecha||'').trim();
+  if(!s) return '9999-12-31';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+  if(m){
+    const y=m[3].length===2?'20'+m[3]:m[3];
+    return y.padStart(4,'0')+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+  }
+  return '9999-12-31 '+s;
+}
+
+function certLoadSortKey(c,index){
+  const explicit=Number(c?.createdAt??c?.ordenCarga??c?.loadOrder);
+  if(Number.isFinite(explicit)) return explicit;
+  const id=String(c?.id||'');
+  const fromId=id.length>=8?parseInt(id.slice(0,8),36):NaN;
+  return Number.isFinite(fromId)?fromId:(Number.MAX_SAFE_INTEGER+index);
+}
+
+function getCertificadosOrdenados(obraId){
+  return [...(certificados[obraId]||[])]
+    .map((c,index)=>({c,index}))
+    .sort((a,b)=>{
+      const fechaA=certDateSortKey(a.c.fecha);
+      const fechaB=certDateSortKey(b.c.fecha);
+      if(fechaA!==fechaB) return fechaA.localeCompare(fechaB);
+      const cargaA=certLoadSortKey(a.c,a.index);
+      const cargaB=certLoadSortKey(b.c,b.index);
+      if(cargaA!==cargaB) return cargaA-cargaB;
+      return a.index-b.index;
+    })
+    .map(x=>x.c);
+}
+window.getCertificadosOrdenados=getCertificadosOrdenados;
+
 window.saveCert=async function(){
   return runLocked('saveCert',async()=>{
     if(!cur){
@@ -38,7 +74,8 @@ window.saveCert=async function(){
       fecha:v('c-f'),
       concepto:conc,
       bruto:parseFloat(gs('c-b').value)||0,
-      neto:parseFloat(gs('c-n').value)||0
+      neto:parseFloat(gs('c-n').value)||0,
+      createdAt:Date.now()
     };
     c.retencion=c.bruto-c.neto;
 
@@ -64,7 +101,7 @@ window.delC=function(id){
 
 window.borrarTodosCerts=function(){
   if(!cur||!obras[cur]) return;
-  const list=certificados[cur]||[];
+  const list=getCertificadosOrdenados(cur);
   if(!list.length){
     toast('No hay certificados para borrar','info');
     return;

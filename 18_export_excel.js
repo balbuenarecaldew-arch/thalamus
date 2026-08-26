@@ -21,7 +21,7 @@ window.exportExcel = function(){
       const _apExcel=ayudaSocialPagosForObra(cur).map(p=>({fecha:p.fecha,concepto:'🏛️ A.SOCIAL: '+(p.concepto||'Ayuda Social'),cantidad:0,monto:parseFloat(p.monto)||0,montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,costoTotal:parseFloat(p.monto)||0,tipo:'ayuda_social'}));
       const _ctExcel=contratistaPagosForObra(cur).map(p=>({fecha:p.fecha,concepto:'👔 CONTRAT.: '+(p.concepto||'Pago Contratista'),cantidad:0,monto:parseFloat(p.monto)||0,montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,costoTotal:parseFloat(p.monto)||0,tipo:'contratista'}));
       const gl=[..._apExcel,..._gpExcel,..._ctExcel,...(gastos[cur]||[])];
-      const cl=certificados[cur]||[];
+      const cl=typeof getCertificadosOrdenados==='function'?getCertificadosOrdenados(cur):(certificados[cur]||[]);
 
       const wb=new ExcelJS.Workbook();
       wb.creator='Thalamus Finanzas';
@@ -229,7 +229,7 @@ function _buildPDF(){
   const _apPdf=ayudaSocialPagosForObra(cur).map(p=>({fecha:p.fecha,concepto:'🏛️ A.SOCIAL: '+(p.concepto||'Ayuda Social'),cantidad:0,monto:parseFloat(p.monto)||0,montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,costoTotal:parseFloat(p.monto)||0}));
   const _ctPdf=contratistaPagosForObra(cur).map(p=>({fecha:p.fecha,concepto:'👔 CONTRAT.: '+(p.concepto||'Pago Contratista'),cantidad:0,monto:parseFloat(p.monto)||0,montoCheque:0,devuelto:0,saldoTotal:0,saldoCheque:0,costoTotal:parseFloat(p.monto)||0}));
   const gl=[..._apPdf,..._gpPdf,..._ctPdf,...(gastos[cur]||[])];
-  const cl=certificados[cur]||[];
+  const cl=typeof getCertificadosOrdenados==='function'?getCertificadosOrdenados(cur):(certificados[cur]||[]);
 
   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   const W=doc.internal.pageSize.getWidth();
@@ -349,4 +349,3 @@ function _buildPDF(){
   const fn='Planilla_'+(o.num?'N'+o.num+'_':'')+o.nombre.replace(/[^a-zA-Z0-9]/g,'_')+'_'+today()+'.pdf';
   doc.save(fn);toast('PDF exportado ✓','ok');
 }
-

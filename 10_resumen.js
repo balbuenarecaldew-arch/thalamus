@@ -99,7 +99,7 @@ function renderResumen(){
     if(tf3) tf3.textContent=fGs(gl.reduce((s,g)=>s+(parseFloat(g.costoTotal)||0),0)+gestorResTotal+ayudaResTotal+contratistaResTotal);
   }
 
-  const cl=certificados[cur]||[];
+  const cl=typeof getCertificadosOrdenados==='function'?getCertificadosOrdenados(cur):(certificados[cur]||[]);
   const ctbody=gs('res-ctbody');
   if(ctbody){
     ctbody.innerHTML=cl.length
